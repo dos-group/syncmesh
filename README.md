@@ -1,1 +1,7 @@
-# demo
+# syncmesh
+
+## Prerequisites
+
+- minikube
+- kubectl
+- helm
