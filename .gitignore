@@ -1,0 +1,6 @@
+credentials.json
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+*.tfstate
+*.backup
+.terraform
