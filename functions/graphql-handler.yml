@@ -7,4 +7,6 @@ functions:
     lang: golang-http
     handler: ./graphql-handler
     image: graphql-handler:latest
+    build_args:
+      GO111MODULE: on
 

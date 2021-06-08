@@ -10,6 +10,7 @@
 
 - `minikube_node_setup.sh`: sets up an openfaas instance in the minikube cluster and also mongodb in the same namespace
 - `get_openfaas_password.sh`: fetches saves, and outputs the openfaas gateway password
+- `functions_deployer.sh`: deploys functions
 
 ## Forwarding
 
