@@ -16,3 +16,12 @@ template/
 
 # IDE-related
 .idea/
+
+
+# terraform-related
+credentials.json
+.terraform.lock.hcl
+.terraform.tfstate.lock.info
+*.tfstate
+*.backup
+.terraform
