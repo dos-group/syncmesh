@@ -22,5 +22,3 @@ helm install bitnami/mongodb openfaas-db \
   --namespace openfaas-fn \
   --set persistence.enabled=false
 
-kubectl port-forward svc/gateway -n openfaas 8080:8080
-
