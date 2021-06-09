@@ -6,7 +6,8 @@ functions:
   graphql-handler:
     lang: golang-http
     handler: ./graphql-handler
-    image: graphql-handler:latest
+    image: justdeko/graphql-handler:latest
     build_args:
       GO111MODULE: on
+    write_debug: true
 

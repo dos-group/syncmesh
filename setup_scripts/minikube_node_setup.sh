@@ -18,7 +18,8 @@ export OPENFAAS_URL=$ARG1
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
 # install bitnami mongodb
-helm install bitnami/mongodb openfaas-db \
+helm install openfaas-db bitnami/mongodb \
   --namespace openfaas-fn \
+  --set auth.enabled=false \
   --set persistence.enabled=false
 
