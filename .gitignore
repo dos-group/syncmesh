@@ -1,3 +1,6 @@
+# Specific to OpenFaas
+template/
+
 # Binaries
 *.exe
 *.exe~
@@ -12,7 +15,8 @@
 *.out
 
 # IDE-related
-.idea
+.idea/
+
 
 # terraform-related
 credentials.json
@@ -21,3 +25,6 @@ credentials.json
 *.tfstate
 *.backup
 .terraform
+
+# environment
+*.env
