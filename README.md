@@ -30,6 +30,12 @@ terraform init
 terraform plan --out tfplan
 terraform apply tfplan
 
+# Find one of the IPs and connect to the instance:
+ssh -L 8080:ip:8080 username@ip
+
+# Find out the password
+sudo cat /var/lib/faasd/secrets/basic-auth-password
+
 # Destroy
 terraform destroy
 ```

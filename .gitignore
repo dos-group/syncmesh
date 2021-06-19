@@ -28,3 +28,6 @@ credentials.json
 
 # environment
 *.env
+
+demo/
+data/
