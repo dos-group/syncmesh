@@ -13,20 +13,14 @@ import (
 var db mongoDB
 
 type SyncMeshRequest struct {
-	Query      string `json:"query"`
-	Database   string `json:"database"`
-	Collection string `json:"collection"`
+	Query         string   `json:"query"`
+	Database      string   `json:"database"`
+	Collection    string   `json:"collection"`
+	Type          string   `json:"request_type"`
+	ExternalNodes []string `json:"external_nodes"`
 }
 
 // Handle a function invocation
-/**
-Example request (picking JSON in OpenFaaS is important):
-{
-"query": "{getAllUsers{name}}",
-"database": "demo",
-"collection": "users"
-}
-*/
 func Handle(req handler.Request) (handler.Response, error) {
 	var err error
 
@@ -39,6 +33,8 @@ func Handle(req handler.Request) (handler.Response, error) {
 			StatusCode: http.StatusInternalServerError,
 		}, err
 	}
+
+	externalData := handleSyncMeshRequest(request)
 
 	log.Printf("Request: %v", request)
 

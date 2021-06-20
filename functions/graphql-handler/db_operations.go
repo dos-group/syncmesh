@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-func (db mongoDB) getUsers() (interface{}, error) {
-	var users []UserModel
+func (db mongoDB) getSensors() (interface{}, error) {
+	var sensors []SensorModel
 	var err error
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	cur, err := db.users.Find(ctx, bson.D{}, options.Find())
+	cur, err := db.collection.Find(ctx, bson.D{}, options.Find())
 	if err != nil {
 		return nil, err
 	}
 	for cur.Next(ctx) {
-		var user UserModel
-		err = cur.Decode(&user)
+		var sensor SensorModel
+		err = cur.Decode(&sensor)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		sensors = append(sensors, sensor)
 	}
 	if err = cur.Err(); err != nil {
 		return nil, err
@@ -32,11 +32,11 @@ func (db mongoDB) getUsers() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return users, nil
+	return sensors, nil
 }
 
-func (db mongoDB) getUser(_id string) (interface{}, error) {
-	var user UserModel
+func (db mongoDB) getSensor(_id string) (interface{}, error) {
+	var sensor SensorModel
 	var err error
 
 	id, err := primitive.ObjectIDFromHex(_id)
@@ -45,41 +45,9 @@ func (db mongoDB) getUser(_id string) (interface{}, error) {
 	}
 	q := bson.M{"_id": id}
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	err = db.users.FindOne(ctx, q).Decode(&user)
+	err = db.collection.FindOne(ctx, q).Decode(&sensor)
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
-}
-
-func (db mongoDB) addUser(name string, surname string) (interface{}, error) {
-	var err error
-	var user UserModel
-
-	user.ID = primitive.NewObjectID()
-	user.Name = name
-	user.Surname = surname
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	_, err = db.users.InsertOne(ctx, user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (db mongoDB) deleteUser(_id string) (interface{}, error) {
-	var err error
-	var user UserModel
-
-	id, err := primitive.ObjectIDFromHex(_id)
-	if err != nil {
-		return nil, err
-	}
-	q := bson.M{"_id": id}
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	err = db.users.FindOneAndDelete(ctx, q).Decode(&user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return sensor, nil
 }

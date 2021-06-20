@@ -47,12 +47,16 @@ to perform a query on the deployed function, you need to send a JSON request of 
 "query": "{getAllUsers{name}}",
 "database": "demo",
 "collection": "users"
+"request_type": "aggregate"
+"external_nodes": ["some_ip_1", "some_ip_2", "some_ip_3"]
 }
 ```
 It has the following parameters:
 - "query": Contains the GraphQL query
 - "database": Specifies the mongoDB database to query on
 - "collection": Specifies the mongoDB collection to query on
+- "request_type": Specifies the SyncMesh request type. Currently, "aggregate" and "collect" are supported.
+- "external": list of all addressable external SyncMesh nodes for data collection/aggregation
 
 ## Libraries and packages used
 - OpenFaaS

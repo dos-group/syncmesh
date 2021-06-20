@@ -11,8 +11,8 @@ import (
 )
 
 type mongoDB struct {
-	session *mongo.Client
-	users   *mongo.Collection
+	session    *mongo.Client
+	collection *mongo.Collection
 }
 
 // connect to the database
@@ -40,8 +40,8 @@ func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	log.Println("Connected to MongoDB")
 	// return a session and the collection of the mongodb instance
 	return mongoDB{
-		session: client,
-		users:   client.Database(db).Collection(collection),
+		session:    client,
+		collection: client.Database(db).Collection(collection),
 	}
 }
 
