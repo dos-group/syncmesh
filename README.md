@@ -39,3 +39,23 @@ sudo cat /var/lib/faasd/secrets/basic-auth-password
 # Destroy
 terraform destroy
 ```
+
+## How to use
+to perform a query on the deployed function, you need to send a JSON request of a type similar to this:
+```
+{
+"query": "{getAllUsers{name}}",
+"database": "demo",
+"collection": "users"
+}
+```
+It has the following parameters:
+- "query": Contains the GraphQL query
+- "database": Specifies the mongoDB database to query on
+- "collection": Specifies the mongoDB collection to query on
+
+## Libraries and packages used
+- OpenFaaS
+- Graphql-Go
+- MongoDB
+- Go Mongo Driver
