@@ -9,20 +9,28 @@ import (
 )
 
 //handleSyncMeshRequest by instantiating one of the request types
-func handleSyncMeshRequest(request SyncMeshRequest, buffer *bytes.Buffer) *bytes.Buffer {
+func handleSyncMeshRequest(request SyncMeshRequest, ownResponse string) *bytes.Buffer {
+	b := new(bytes.Buffer)
 	switch request.Type {
 	case "aggregate":
-		startAggregating(request, buffer)
+		startAggregating(request, ownResponse, b)
 	case "collect":
-		startCollecting(request, buffer)
+		startCollecting(request, ownResponse, b)
 	}
-	return buffer
+	return b
+}
+
+type SensorResponse struct {
+	sensors []SensorModel
+}
+
+type GraphQLResponse struct {
+	data SensorResponse
 }
 
 //startCollecting the data from external nodes
-func startCollecting(request SyncMeshRequest, buffer *bytes.Buffer) {
-	combinedResponse := ""
-
+func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
+	combinedResponse := ownResponse
 	//start iterating through all external nodes
 	for _, address := range request.ExternalNodes {
 		//prepare SyncMesh Request body for the external request
@@ -52,10 +60,16 @@ func startCollecting(request SyncMeshRequest, buffer *bytes.Buffer) {
 			log.Println(err)
 			continue
 		}
-		out := map[string]interface{}{}
+		// convert response to response struct
+		out := GraphQLResponse{}
 		err = json.Unmarshal(body, &out)
-		//TODO: merge query response arrays here
-		outputJSON, _ := json.Marshal(out)
+		// convert the combined response to response struct
+		combined := GraphQLResponse{}
+		err = json.Unmarshal([]byte(combinedResponse), &combined)
+
+		// merge combined and external node responses
+		combined.data.sensors = append(combined.data.sensors, out.data.sensors...)
+		outputJSON, _ := json.Marshal(combined)
 		combinedResponse = string(outputJSON)
 		if err != nil {
 			log.Println(err)
@@ -68,13 +82,13 @@ func startCollecting(request SyncMeshRequest, buffer *bytes.Buffer) {
 			continue
 		}
 	}
-	err := json.NewEncoder(buffer).Encode(combinedResponse)
+	err := json.NewEncoder(b).Encode(combinedResponse)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 //startAggregating the data from external nodes
-func startAggregating(request SyncMeshRequest, buffer *bytes.Buffer) {
+func startAggregating(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
 
 }

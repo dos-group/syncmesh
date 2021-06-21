@@ -54,7 +54,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	// if external nodes specified, attempt to fetch external data
 	if len(request.ExternalNodes) > 0 {
-		b = handleSyncMeshRequest(request, b)
+		b = handleSyncMeshRequest(request, b.String())
 	}
 
 	// return the query result

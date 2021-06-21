@@ -44,13 +44,31 @@ terraform destroy
 to perform a query on the deployed function, you need to send a JSON request of a type similar to this:
 ```
 {
-"query": "{getAllUsers{name}}",
+"query": "{sensors{humidity}}",
 "database": "demo",
-"collection": "users"
-"request_type": "aggregate"
+"collection": "sensors",
+"request_type": "collect",
 "external_nodes": ["some_ip_1", "some_ip_2", "some_ip_3"]
 }
 ```
+The sample return would look like this:
+```
+{
+  "data": {
+    "sensors": [
+      {
+        "humidity": 20.2302
+      },
+      {
+        "humidity": 1982.2321
+      }
+    ]
+  }
+}
+
+```
+While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type. 
+
 It has the following parameters:
 - "query": Contains the GraphQL query
 - "database": Specifies the mongoDB database to query on
