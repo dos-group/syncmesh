@@ -17,7 +17,7 @@ type SyncMeshRequest struct {
 	Database      string   `json:"database"`
 	Collection    string   `json:"collection"`
 	Type          string   `json:"request_type"`
-	ExternalNodes []string `json:"external_nodes"`
+	ExternalNodes []string `json:"external_nodes,omitempty"`
 }
 
 // Handle a function invocation
@@ -33,16 +33,13 @@ func Handle(req handler.Request) (handler.Response, error) {
 			StatusCode: http.StatusInternalServerError,
 		}, err
 	}
-
-	externalData := handleSyncMeshRequest(request)
-
 	log.Printf("Request: %v", request)
 
 	// connect to mongodb
 	db = connectDB(req.Context(), request.Database, request.Collection)
 	defer db.closeDB()
 
-	// execute graphql query
+	// execute graphql query on own node
 	result := executeQuery(request.Query, initSchema())
 
 	// encode the query result from bson to a bytes buffer
@@ -53,6 +50,11 @@ func Handle(req handler.Request) (handler.Response, error) {
 			Body:       []byte("Something went wrong"),
 			StatusCode: http.StatusInternalServerError,
 		}, err
+	}
+
+	// if external nodes specified, attempt to fetch external data
+	if len(request.ExternalNodes) > 0 {
+		b = handleSyncMeshRequest(request, b)
 	}
 
 	// return the query result
