@@ -21,11 +21,11 @@ func handleSyncMeshRequest(request SyncMeshRequest, ownResponse string) *bytes.B
 }
 
 type SensorResponse struct {
-	sensors []SensorModel
+	Sensors []SensorModelNoId `json:"sensors"`
 }
 
 type GraphQLResponse struct {
-	data SensorResponse
+	Data SensorResponse `json:"data"`
 }
 
 //startCollecting the data from external nodes
@@ -68,7 +68,7 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 		err = json.Unmarshal([]byte(combinedResponse), &combined)
 
 		// merge combined and external node responses
-		combined.data.sensors = append(combined.data.sensors, out.data.sensors...)
+		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)
 		outputJSON, _ := json.Marshal(combined)
 		combinedResponse = string(outputJSON)
 		if err != nil {
