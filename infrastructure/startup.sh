@@ -36,3 +36,10 @@ sudo systemctl daemon-reload
 sudo systemctl start mongod
 sudo systemctl status mongod
 sudo systemctl enable mongod
+
+
+mkdir /service
+cd /service
+git clone https://github.com/DSPJ2021/syncmesh.git
+
+
