@@ -3,10 +3,10 @@ provider:
   name: openfaas
   gateway: http://127.0.0.1:8080
 functions:
-  graphql-handler:
+  syncmesh-fn:
     lang: golang-http
-    handler: ./graphql-handler
-    image: justdeko/graphql-handler:latest
+    handler: ./syncmesh-fn
+    image: justdeko/syncmesh-fn:latest
     build_args:
       GO111MODULE: on
     write_debug: true
