@@ -92,7 +92,7 @@ func startAggregating(request SyncMeshRequest, ownResponse string, b *bytes.Buff
 	}
 	finalAverages := calculateAverages(averagesList)
 	outputJSON, _ := json.Marshal(finalAverages)
-	err = json.NewEncoder(b).Encode(outputJSON)
+	err = json.NewEncoder(b).Encode(string(outputJSON))
 	if err != nil {
 		log.Fatal(err)
 	}

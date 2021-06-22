@@ -58,7 +58,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 			log.Fatal(err)
 		}
 		averages := calculateSensorAverages(out.Data.Sensors)
-		b := new(bytes.Buffer)
+		b.Reset()
 		err = json.NewEncoder(b).Encode(averages)
 		if err != nil {
 			return catchResponseError(err)
