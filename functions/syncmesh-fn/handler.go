@@ -46,10 +46,23 @@ func Handle(req handler.Request) (handler.Response, error) {
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(result)
 	if err != nil {
-		return handler.Response{
-			Body:       []byte("Something went wrong"),
-			StatusCode: http.StatusInternalServerError,
-		}, err
+		return catchResponseError(err)
+	}
+
+	// if the request type is aggregate, calculate the averages from the data
+	if request.Type == "aggregate" {
+		// convert response to response struct
+		out := GraphQLResponse{}
+		err = json.Unmarshal([]byte(b.String()), &out)
+		if err != nil {
+			log.Fatal(err)
+		}
+		averages := calculateSensorAverages(out.Data.Sensors)
+		b := new(bytes.Buffer)
+		err = json.NewEncoder(b).Encode(averages)
+		if err != nil {
+			return catchResponseError(err)
+		}
 	}
 
 	// if external nodes specified, attempt to fetch external data
@@ -64,6 +77,22 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}, err
 }
 
+func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
+	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
+	size := float64(len(sensors))
+	// sum all values
+	for _, item := range sensors {
+		final.AverageHumidity += item.Humidity
+		final.AverageTemperature += item.Temperature
+		final.AveragePressure += item.Pressure
+	}
+	// calculate the averages
+	final.AverageHumidity /= size
+	final.AverageTemperature /= size
+	final.AveragePressure /= size
+	return final
+}
+
 func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
@@ -73,4 +102,11 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 		fmt.Printf("Unexpected errors: %v", result.Errors)
 	}
 	return result
+}
+
+func catchResponseError(err error) (handler.Response, error) {
+	return handler.Response{
+		Body:       []byte("Something went wrong encoding the result"),
+		StatusCode: http.StatusInternalServerError,
+	}, err
 }
