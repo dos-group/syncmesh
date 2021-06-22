@@ -10,6 +10,6 @@ functions:
     build_args:
       GO111MODULE: on
     write_debug: true
-    env:
+    environment:
       mongo_url: openfaas-db-mongodb
 
