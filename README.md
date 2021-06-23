@@ -33,11 +33,25 @@ terraform apply tfplan
 # Find one of the IPs and connect to the instance:
 ssh -L 8080:ip:8080 username@ip
 
-# Find out the password
-sudo cat /var/lib/faasd/secrets/basic-auth-password
+# See Startup Script Log
+sudo journalctl -u google-startup-scripts.service | grep startup-script
 
 # Destroy
 terraform destroy
+```
+
+
+## Working on Nodes 
+
+```bash
+# Find out the password or login
+sudo cat /var/lib/faasd/secrets/basic-auth-password
+sudo cat /var/lib/faasd/secrets/basic-auth-password | faas-cli login -s
+
+# get logs to 
+sudo journalctl -f | grep mongo
+
+
 ```
 
 ## How to use
@@ -81,3 +95,7 @@ It has the following parameters:
 - Graphql-Go
 - MongoDB
 - Go Mongo Driver
+
+## Good Reads
+
+https://willschenk.com/articles/2021/setting_up_services_with_faasd/
