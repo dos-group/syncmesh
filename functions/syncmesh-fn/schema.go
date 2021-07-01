@@ -25,6 +25,17 @@ func initSchema() graphql.Schema {
 						}},
 					Resolve: getSensor,
 				},
+				"sensorsInTimeRange": &graphql.Field{
+					Type: graphql.NewList(SensorType),
+					Args: graphql.FieldConfigArgument{
+						"start_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						},
+						"end_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						}},
+					Resolve: getSensorsInTimeRange,
+				},
 			},
 		}),
 		Types: []graphql.Type{graphql.ID},

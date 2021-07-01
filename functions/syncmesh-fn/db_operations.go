@@ -35,6 +35,38 @@ func (db mongoDB) getSensors() (interface{}, error) {
 	return sensors, nil
 }
 
+func (db mongoDB) getSensorsInTimeRange(startTime primitive.DateTime, endTime primitive.DateTime) (interface{}, error) {
+	var sensors []SensorModel
+	var err error
+
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	cur, err := db.collection.Find(ctx, bson.M{
+		"sale_date": bson.M{
+			"$gt": startTime,
+			"$lt": endTime,
+		},
+	}, options.Find())
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(ctx) {
+		var sensor SensorModel
+		err = cur.Decode(&sensor)
+		if err != nil {
+			return nil, err
+		}
+		sensors = append(sensors, sensor)
+	}
+	if err = cur.Err(); err != nil {
+		return nil, err
+	}
+	err = cur.Close(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return sensors, nil
+}
+
 func (db mongoDB) getSensor(_id string) (interface{}, error) {
 	var sensor SensorModel
 	var err error
