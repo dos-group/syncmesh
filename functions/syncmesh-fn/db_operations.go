@@ -8,12 +8,12 @@ import (
 	"time"
 )
 
-func (db mongoDB) getSensors() (interface{}, error) {
+func (db mongoDB) getSensors(limit int64) (interface{}, error) {
 	var sensors []SensorModel
 	var err error
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	cur, err := db.collection.Find(ctx, bson.D{}, options.Find())
+	cur, err := db.collection.Find(ctx, bson.D{}, options.Find().SetLimit(limit))
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (db mongoDB) getSensors() (interface{}, error) {
 	return sensors, nil
 }
 
-func (db mongoDB) getSensorsInTimeRange(startTime primitive.DateTime, endTime primitive.DateTime) (interface{}, error) {
+func (db mongoDB) getSensorsInTimeRange(startTime primitive.DateTime, endTime primitive.DateTime, limit int64) (interface{}, error) {
 	var sensors []SensorModel
 	var err error
 
@@ -45,7 +45,7 @@ func (db mongoDB) getSensorsInTimeRange(startTime primitive.DateTime, endTime pr
 			"$gt": startTime,
 			"$lt": endTime,
 		},
-	}, options.Find())
+	}, options.Find().SetLimit(limit))
 	if err != nil {
 		return nil, err
 	}
