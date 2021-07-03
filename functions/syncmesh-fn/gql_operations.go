@@ -2,7 +2,7 @@ package function
 
 import (
 	"github.com/graphql-go/graphql"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
 func getSensors(p graphql.ResolveParams) (interface{}, error) {
@@ -37,8 +37,8 @@ func getSensorsInTimeRange(p graphql.ResolveParams) (interface{}, error) {
 	if limit == nil {
 		limit = 0
 	}
-	startDate := p.Args["start_date"].(primitive.DateTime)
-	endDate := p.Args["end_date"].(primitive.DateTime)
+	startDate := p.Args["start_time"].(time.Time)
+	endDate := p.Args["end_time"].(time.Time)
 	results, err = db.getSensorsInTimeRange(startDate, endDate, limit.(int))
 	if err != nil {
 		return nil, err

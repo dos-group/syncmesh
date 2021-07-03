@@ -35,15 +35,15 @@ func (db mongoDB) getSensors(limit int) (interface{}, error) {
 	return sensors, nil
 }
 
-func (db mongoDB) getSensorsInTimeRange(startTime primitive.DateTime, endTime primitive.DateTime, limit int) (interface{}, error) {
+func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, limit int) (interface{}, error) {
 	var sensors []SensorModel
 	var err error
 
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	cur, err := db.collection.Find(ctx, bson.M{
-		"sale_date": bson.M{
-			"$gt": startTime,
-			"$lt": endTime,
+		"timestamp": bson.M{
+			"$gte": startTime,
+			"$lte": endTime,
 		},
 	}, options.Find().SetLimit(int64(limit)))
 	if err != nil {
