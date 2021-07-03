@@ -81,6 +81,16 @@ The sample return would look like this:
 }
 
 ```
+Another query for example, the ID:
+```
+{
+"query": "{sensor(_id: \"60e0615f39dc2d7833bdb9c9\"){temperature}}",
+"database": "demo",
+"collection": "sensors",
+"request_type": "collect"
+}
+```
+
 While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type. 
 
 It has the following parameters:

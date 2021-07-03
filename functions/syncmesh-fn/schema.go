@@ -13,8 +13,11 @@ func initSchema() graphql.Schema {
 			Name: "Query",
 			Fields: graphql.Fields{
 				"sensors": &graphql.Field{
-					Type:    graphql.NewList(SensorType),
-					Args:    graphql.FieldConfigArgument{},
+					Type: graphql.NewList(SensorType),
+					Args: graphql.FieldConfigArgument{
+						"limit": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.Int),
+						}},
 					Resolve: getSensors,
 				},
 				"sensor": &graphql.Field{
@@ -33,6 +36,8 @@ func initSchema() graphql.Schema {
 						},
 						"end_time": &graphql.ArgumentConfig{
 							Type: graphql.NewNonNull(graphql.DateTime),
+						}, "limit": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.Int),
 						}},
 					Resolve: getSensorsInTimeRange,
 				},

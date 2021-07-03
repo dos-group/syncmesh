@@ -12,7 +12,7 @@ func getSensors(p graphql.ResolveParams) (interface{}, error) {
 	if limit == nil {
 		limit = 0
 	}
-	results, err = db.getSensors(limit.(int64))
+	results, err = db.getSensors(limit.(int))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func getSensorsInTimeRange(p graphql.ResolveParams) (interface{}, error) {
 	}
 	startDate := p.Args["start_date"].(primitive.DateTime)
 	endDate := p.Args["end_date"].(primitive.DateTime)
-	results, err = db.getSensorsInTimeRange(startDate, endDate, limit.(int64))
+	results, err = db.getSensorsInTimeRange(startDate, endDate, limit.(int))
 	if err != nil {
 		return nil, err
 	}
