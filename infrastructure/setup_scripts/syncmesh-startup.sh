@@ -11,7 +11,7 @@ cd faasd
 
 sudo ./hack/install.sh
 
-
+# Add Mongo to faasd installation
 sudo mkdir -p /var/lib/faasd/mongo_data
 sudo chown -R 1000:1000 /var/lib/faasd/mongo_data
 
@@ -40,6 +40,12 @@ wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add 
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
 sudo apt-get update
 sudo apt-get install -y mongodb-org
+
+# Install Python for data distribution
+sudo apt-get install -y python3.6
+
+# Get Data
+wget https://github.com/DSPJ2021/syncmesh/raw/baseline/baseline/2017-07_bme280sof.csv.zip
 
 
 sleep 30

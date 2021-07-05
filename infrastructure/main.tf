@@ -10,7 +10,7 @@ terraform {
 provider "google" {
   credentials = file("credentials.json")
 
-  project = "dspj-315716"
+  project = var.project
   region  = "us-central1"
   zone    = "us-central1-c"
 }
@@ -26,7 +26,7 @@ resource "google_compute_subnetwork" "subnet_with_logging" {
   ip_cidr_range = "10.2.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.vpc_network.id
-  
+
 
 
   log_config {
@@ -46,8 +46,8 @@ resource "google_compute_network" "vpc_network" {
 
 
 data "google_compute_image" "container_optimized_image" {
-# Use a container optimized image
-# See a list of all images : https://console.cloud.google.com/compute/images
+  # Use a container optimized image
+  # See a list of all images : https://console.cloud.google.com/compute/images
   family  = "ubuntu-2004-lts"
   project = "ubuntu-os-cloud"
 }
@@ -58,7 +58,7 @@ resource "google_compute_instance" "vm_instance" {
   name         = "syncmesh-instance-${count.index}"
   machine_type = "f1-micro"
 
-  tags         = ["demo-vm-instance"]
+  tags = ["demo-vm-instance"]
   metadata = {
     ssh-keys = join("\n", [for key in var.ssh_keys : "${key.user}:${key.keymaterial}"])
   }
@@ -75,16 +75,41 @@ resource "google_compute_instance" "vm_instance" {
     access_config {
     }
   }
-  metadata_startup_script = file("${path.module}/startup.sh")
+  metadata_startup_script = file("${path.module}/setup_scripts/syncmesh-startup.sh")
+}
+
+resource "google_compute_instance" "client" {
+  name         = "client-instance"
+  machine_type = "f1-micro"
+
+  tags = ["demo-vm-instance"]
+  metadata = {
+    ssh-keys = join("\n", [for key in var.ssh_keys : "${key.user}:${key.keymaterial}"])
+  }
+
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.container_optimized_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_with_logging.name
+    access_config {
+    }
+  }
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.vm_instance })
 }
 
 
+
 resource "google_compute_firewall" "ssh-rule" {
-  name = "demo-ssh"
+  name    = "demo-ssh"
   network = google_compute_network.vpc_network.name
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22"]
   }
 
   allow {
@@ -92,50 +117,51 @@ resource "google_compute_firewall" "ssh-rule" {
     ports    = ["8080"]
   }
 
-  target_tags = ["demo-vm-instance"]
+  target_tags   = ["demo-vm-instance"]
   source_ranges = ["0.0.0.0/0"]
 }
 
 
+
+
 # Monitoring 
 
-# resource "google_logging_metric" "logging_metric" {
-#   name   = "my-(custom)/metric"
-#   filter = <<EOF
-# logName:("projects/dspj-315716/logs/compute.googleapis.com%2Fvpc_flows") AND resource.labels.subnetwork_id:(7828323923088513478)
-# jsonPayload.connection.src_ip="10.2.0.2"
-# jsonPayload.connection.dest_ip="10.2.0.4"
-# EOF
+locals {
+  servers = concat(google_compute_instance.vm_instance[*].network_interface.0.network_ip, [google_compute_instance.client.network_interface.0.network_ip])
+}
 
-#   metric_descriptor {
-#     metric_kind = "DELTA"
-#     value_type  = "DISTRIBUTION"
-#     unit        = "1"
-#     labels {
-#       key         = "mass"
-#       value_type  = "STRING"
-#       description = "amount of matter"
-#     }
-#     labels {
-#       key         = "sku"
-#       value_type  = "INT64"
-#       description = "Identifying number for item"
-#     }
-#     display_name = "My metric"
-#   }
-#   value_extractor = "EXTRACT(jsonPayload.request)"
-#   label_extractors = {
-#     "mass" = "EXTRACT(jsonPayload.request)"
-#     "sku"  = "EXTRACT(jsonPayload.id)"
-#   }
-#   bucket_options {
-#     linear_buckets {
-#       num_finite_buckets = 3
-#       width              = 1
-#       offset             = 1
-#     }
-#   }
-# }
+locals {
+  server_combinations = setproduct(local.servers, local.servers)
+}
+
+resource "google_logging_metric" "logging_metric" {
+  for_each = {
+    for combination in local.server_combinations :
+    sha1("${combination[0]}-${combination[1]}") => combination
+  }
+  name   = "syncmesh-${each.value[0]}-${each.value[1]}"
+  filter = <<EOF
+logName:("projects/${var.project}/logs/compute.googleapis.com%2Fvpc_flows")
+jsonPayload.connection.src_ip="${each.value[0]}"
+jsonPayload.connection.dest_ip="${each.value[1]}"
+EOF
+
+  metric_descriptor {
+    metric_kind  = "DELTA"
+    value_type   = "DISTRIBUTION"
+    unit         = "By"
+    display_name = "Bytes between ${each.value[0]}-${each.value[1]}"
+  }
+  value_extractor = "EXTRACT(jsonPayload.bytes_sent)"
+
+  bucket_options {
+    linear_buckets {
+      num_finite_buckets = 3
+      width              = 1
+      offset             = 1
+    }
+  }
+}
 
 # resource "google_monitoring_dashboard" "dashboard" {
 #   dashboard_json = <<EOF
@@ -162,7 +188,7 @@ resource "google_compute_firewall" "ssh-rule" {
 #                   "timeSeriesFilter": {
 #                     "aggregation": {
 #                       "alignmentPeriod": "60s",
-#                       "crossSeriesReducer": "REDUCE_MEAN",
+#                       "crossSeriesReducer": "REDUCE_NONE",
 #                       "perSeriesAligner": "ALIGN_SUM"
 #                     },
 #                     "filter": "metric.type=\"logging.googleapis.com/user/Traffic_between_1_and_2\""

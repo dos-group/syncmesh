@@ -34,28 +34,29 @@ terraform apply tfplan
 ssh -L 8080:ip:8080 username@ip
 
 # See Startup Script Log
-sudo journalctl -u google-startup-scripts.service | grep startup-script
+sudo journalctl -u google-startup-scripts.service -t | grep startup-script
 
 # Destroy
 terraform destroy
 ```
 
-
-## Working on Nodes 
+## Working on Nodes
 
 ```bash
 # Find out the password or login
 sudo cat /var/lib/faasd/secrets/basic-auth-password
 sudo cat /var/lib/faasd/secrets/basic-auth-password | faas-cli login -s
 
-# get logs to 
+# get logs to
 sudo journalctl -f | grep mongo
 
 
 ```
 
 ## How to use
+
 to perform a query on the deployed function, you need to send a JSON request of a type similar to this:
+
 ```
 {
 "query": "{sensors{humidity}}",
@@ -65,7 +66,9 @@ to perform a query on the deployed function, you need to send a JSON request of 
 "external_nodes": ["some_ip_1", "some_ip_2", "some_ip_3"]
 }
 ```
+
 The sample return would look like this:
+
 ```
 {
   "data": {
@@ -81,7 +84,9 @@ The sample return would look like this:
 }
 
 ```
+
 A query fetching a document with a specific ID:
+
 ```
 {
 "query": "{sensor(_id: \"60e0615f39dc2d7833bdb9c9\"){temperature}}",
@@ -92,6 +97,7 @@ A query fetching a document with a specific ID:
 ```
 
 An example query for a specific time range:
+
 ```
 {
 "query": "{sensorsInTimeRange(limit: 10, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){temperature humidity timestamp}}",
@@ -101,9 +107,10 @@ An example query for a specific time range:
 }
 ```
 
-While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type. 
+While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type.
 
 It has the following parameters:
+
 - "query": Contains the GraphQL query
 - "database": Specifies the mongoDB database to query on
 - "collection": Specifies the mongoDB collection to query on
@@ -111,6 +118,7 @@ It has the following parameters:
 - "external": list of all addressable external SyncMesh nodes for data collection/aggregation
 
 ## Libraries and packages used
+
 - OpenFaaS
 - Graphql-Go
 - MongoDB
