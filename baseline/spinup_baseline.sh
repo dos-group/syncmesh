@@ -1,33 +1,40 @@
 #!/bin/bash
 
-usernam=kreutz
+username=kreutz
 CSV=2017-07_bme280sof.csv
+sensor_list=("34.141.25.222" "34.141.25.222" "34.141.25.222") #TODO: extend for all nodes of certain tag
+n="${#sensor_list[@]}"
 
-CSV_list=("xaa" "xab" "xac")
-
-#enter external ips of our sensor nodes
-sensor_list=("35.225.152.156" "34.70.48.221" "34.72.45.142")
-
-#Split csv in 3 ~equal-sized parts
-LENGTHCSV=$(wc -l < $CSV)
-declare -i n
-n=$LENGTHCSV/3
-split -l $n $CSV
-
-#rm -f $1
-
-#add headline to splitted files (change later to account for multiple nodes)
-sed -i 1i",sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity" xab
-sed -i 1i",sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity" xac
-
-#gcloud compute instances list | awk '{print $1}' > instances.txt
-#ls *.csv > csvList.txt
+#CSV, n:=#splits
+split_csv() {
+	cp $CSV data
+	cd data
+	LENGTHCSV=$(wc -l < $1)
+	n=$(($LENGTHCSV/$2))
+	split -l $n --additional-suffix=.csv $1
+	rm $CSV
+	cd ..
+}
 
 
+split_csv $CSV $n
+
+
+declare -a CSV_list
+for i in data/*.csv; do
+    CSV_list=("${CSV_list[@]}" "$i")
+done
+
+echo $CSV_list
 
 #Transfer each *.csv to one of the sensor-nodes and rename
 for i in "${!CSV_list[@]}"; do
-	scp ${CSV_list[i]} $username@${sensor_list[i]}:~/data.csv
-	scp transfer_master.sh $username@${sensor_list[i]}:~/
-	scp calc_avg.py $username@${sensor_list[i]}:~/
+	sed -i 1i",sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity" ${CSV_list[i]}
+	scp ${CSV_list[i]} ${sensor_list[i]}:~/data.csv
 done
+
+#rm -f $1
+
+
+#gcloud compute instances list | awk '{print $1}' > instances.txt
+#ls *.csv > csvList.txt
