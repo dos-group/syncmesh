@@ -75,7 +75,31 @@ resource "google_compute_instance" "vm_instance" {
     access_config {
     }
   }
-  metadata_startup_script = file("${path.module}/startup.sh")
+  metadata_startup_script = file("${path.module}/syncmesh-startup.sh")
+}
+
+resource "google_compute_instance" "client" {
+  name         = "client-instance"
+  machine_type = "f1-micro"
+
+  tags         = ["demo-vm-instance"]
+  metadata = {
+    ssh-keys = join("\n", [for key in var.ssh_keys : "${key.user}:${key.keymaterial}"])
+  }
+
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.container_optimized_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_with_logging.name
+    access_config {
+    }
+  }
+  metadata_startup_script = file("${path.module}/client-startup.sh")
 }
 
 
