@@ -81,6 +81,26 @@ The sample return would look like this:
 }
 
 ```
+A query fetching a document with a specific ID:
+```
+{
+"query": "{sensor(_id: \"60e0615f39dc2d7833bdb9c9\"){temperature}}",
+"database": "demo",
+"collection": "sensors",
+"request_type": "collect"
+}
+```
+
+An example query for a specific time range:
+```
+{
+"query": "{sensorsInTimeRange(limit: 10, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){temperature humidity timestamp}}",
+"database": "demo",
+"collection": "sensors",
+"request_type": "collect"
+}
+```
+
 While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type. 
 
 It has the following parameters:
