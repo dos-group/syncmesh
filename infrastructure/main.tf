@@ -75,7 +75,7 @@ resource "google_compute_instance" "vm_instance" {
     access_config {
     }
   }
-  metadata_startup_script = file("${path.module}/syncmesh-startup.sh")
+  metadata_startup_script = file("${path.module}/setup_scripts/syncmesh-startup.sh")
 }
 
 resource "google_compute_instance" "client" {
@@ -99,7 +99,7 @@ resource "google_compute_instance" "client" {
     access_config {
     }
   }
-  metadata_startup_script = file("${path.module}/client-startup.sh")
+  metadata_startup_script = file("${path.module}/setup_scripts/client-startup.sh")
 }
 
 
