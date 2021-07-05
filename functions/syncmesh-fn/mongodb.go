@@ -11,8 +11,8 @@ import (
 )
 
 type mongoDB struct {
-	session *mongo.Client
-	users   *mongo.Collection
+	session    *mongo.Client
+	collection *mongo.Collection
 }
 
 // connect to the database
@@ -24,7 +24,7 @@ func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	mongoUrl, present := os.LookupEnv("mongo_url")
 	if !present {
 		log.Println("MongoDB url not found, defaulting to namespace")
-		mongoUrl = "openfaas-db-mongodb" //default mongodb kubernetes namespace if no env passed
+		mongoUrl = "openfaas-db-mongodb" // default mongodb kubernetes namespace if no env passed
 	}
 	uri := fmt.Sprintf("mongodb://%s", mongoUrl)
 	// attempt connecting to mongodb
@@ -40,8 +40,8 @@ func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	log.Println("Connected to MongoDB")
 	// return a session and the collection of the mongodb instance
 	return mongoDB{
-		session: client,
-		users:   client.Database(db).Collection(collection),
+		session:    client,
+		collection: client.Database(db).Collection(collection),
 	}
 }
 

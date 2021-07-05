@@ -1,0 +1,14 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  syncmesh-fn:
+    lang: golang-http
+    handler: ./syncmesh-fn
+    image: justdeko/syncmesh-fn:latest
+    build_args:
+      GO111MODULE: on
+    write_debug: true
+    environment:
+      mongo_url: openfaas-db-mongodb
