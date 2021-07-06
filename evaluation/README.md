@@ -14,3 +14,10 @@ Read on how to export Logs: https://cloud.google.com/logging/docs/export/configu
 # unzip
 gzip -d export.gz
 ```
+
+```SQL
+SELECT timestamp, jsonPayload.bytes_sent, jsonPayload.rtt_msec, jsonPayload.connection.src_ip, jsonPayload.connection.dest_ip FROM `dspj-315716.syncmesh.compute_googleapis_com_vpc_flows_20210706`
+WHERE jsonPayload.connection.src_ip = "10.2.0.10"
+ORDER BY timestamp
+LIMIT 1000
+```
