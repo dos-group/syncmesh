@@ -25,16 +25,17 @@ def main(args):
     for ip in ips:
         ip_list = ips.copy()
         ip_list.remove(ip)
-        url = ip + "/syncmesh-fn"
+        url = "http://" + ip + "/function/syncmesh-fn"
         r = requests.post(url, json=get_request_body(limit=args.limit, start_time=args.start_time,
                                                      end_time=args.end_time,
                                                      external_nodes_list=ip_list))
         print(r.status_code, r.reason)
+        print(r.text)
         time.sleep(args.delay)
 
 
 def get_request_body(limit: int, start_time: str, end_time: str, external_nodes_list: [str], aggregate=False):
-    query = f"{{sensorsInTimeRange(limit: {limit}, start_time: \"{start_time}\", end_time: \"{end_time}\"){{temperature humidity pressure}}}}",
+    query = f"{{sensorsInTimeRange(limit: {limit}, start_time: \"{start_time}\", end_time: \"{end_time}\"){{temperature humidity pressure}}}}"
     request_type = "collect"
     if aggregate:
         request_type = "aggregate"
