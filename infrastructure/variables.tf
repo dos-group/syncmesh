@@ -8,6 +8,15 @@ variable "project" {
   default = "dspj-315716"
 }
 
+variable "scenario" {
+  type    = string
+  default = "syncmesh"
+  validation {
+    condition     = contains(["syncmesh", "advanced-mongo", "baseline"], var.scenario)
+    error_message = "Allowed values for scenario are \"syncmesh\", \"advanced-mongo\", or \"baseline\"."
+  }
+}
+
 variable "ssh_keys" {
   type = list(object({
     keymaterial = string

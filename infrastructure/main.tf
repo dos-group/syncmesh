@@ -102,6 +102,30 @@ resource "google_compute_instance" "client" {
   metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.vm_instance })
 }
 
+resource "google_compute_instance" "central-server" {
+  name         = "central-server-instance"
+  machine_type = "f1-micro"
+
+  tags = ["demo-vm-instance"]
+  metadata = {
+    ssh-keys = join("\n", [for key in var.ssh_keys : "${key.user}:${key.keymaterial}"])
+  }
+
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.container_optimized_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_with_logging.name
+    access_config {
+    }
+  }
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/central-server-startup.tpl", { instances = google_compute_instance.vm_instance })
+#   metadata_startup_script = file("${path.module}/setup_scripts/central-server-startup.tpl")
+}
 
 
 resource "google_compute_firewall" "ssh-rule" {
@@ -121,95 +145,34 @@ resource "google_compute_firewall" "ssh-rule" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-
-
-
-# Monitoring 
-
-locals {
-  servers = concat(google_compute_instance.vm_instance[*].network_interface.0.network_ip, [google_compute_instance.client.network_interface.0.network_ip])
+## Log Export
+resource "google_logging_project_sink" "sink" {
+  name        = "syncmesh-sink"
+  project     = var.project
+  filter      = "resource.type=\"gce_subnetwork\""
+  destination = "bigquery.googleapis.com/${google_bigquery_dataset.dataset.id}"
+  #   unique_writer_identity = var.unique_writer_identity
+#   unique_writer_identity = true
 }
 
-locals {
-  server_combinations = setproduct(local.servers, local.servers)
-}
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "syncmesh"
+  friendly_name               = "syncmesh"
+  description                 = "Syncmesh export dataset"
+  location                    = "EU"
+  default_table_expiration_ms = 36000000
 
-resource "google_logging_metric" "logging_metric" {
-  for_each = {
-    for combination in local.server_combinations :
-    sha1("${combination[0]}-${combination[1]}") => combination
+  labels = {
+    env = "default"
   }
-  name   = "syncmesh-${each.value[0]}-${each.value[1]}"
-  filter = <<EOF
-logName:("projects/${var.project}/logs/compute.googleapis.com%2Fvpc_flows")
-jsonPayload.connection.src_ip="${each.value[0]}"
-jsonPayload.connection.dest_ip="${each.value[1]}"
-EOF
 
-  metric_descriptor {
-    metric_kind  = "DELTA"
-    value_type   = "DISTRIBUTION"
-    unit         = "By"
-    display_name = "Bytes between ${each.value[0]}-${each.value[1]}"
-  }
-  value_extractor = "EXTRACT(jsonPayload.bytes_sent)"
-
-  bucket_options {
-    linear_buckets {
-      num_finite_buckets = 3
-      width              = 1
-      offset             = 1
-    }
+  access {
+    role          = "OWNER"
+    user_by_email = "habenicht456@gmail.com"
   }
 }
 
-# resource "google_monitoring_dashboard" "dashboard" {
-#   dashboard_json = <<EOF
-# {
-#   "category": "CUSTOM",
-#   "displayName": "DSPJ",
-#   "mosaicLayout": {
-#     "columns": 12,
-#     "tiles": [
-#       {
-#         "height": 4,
-#         "widget": {
-#           "title": "logging/user/Traffic_between_1_and_2 [MEAN]",
-#           "xyChart": {
-#             "chartOptions": {
-#               "mode": "COLOR"
-#             },
-#             "dataSets": [
-#               {
-#                 "minAlignmentPeriod": "60s",
-#                 "plotType": "LINE",
-#                 "timeSeriesQuery": {
-#                   "apiSource": "DEFAULT_CLOUD",
-#                   "timeSeriesFilter": {
-#                     "aggregation": {
-#                       "alignmentPeriod": "60s",
-#                       "crossSeriesReducer": "REDUCE_NONE",
-#                       "perSeriesAligner": "ALIGN_SUM"
-#                     },
-#                     "filter": "metric.type=\"logging.googleapis.com/user/Traffic_between_1_and_2\""
-#                   }
-#                 }
-#               }
-#             ],
-#             "timeshiftDuration": "0s",
-#             "yAxis": {
-#               "label": "y1Axis",
-#               "scale": "LINEAR"
-#             }
-#           }
-#         },
-#         "width": 6,
-#         "xPos": 0,
-#         "yPos": 0
-#       }
-#     ]
-#   }
-# }
-
-# EOF
-# }
+resource "google_storage_bucket" "bucket" {
+  name          = "syncmesh-log-bucket"
+  force_destroy = false
+}
