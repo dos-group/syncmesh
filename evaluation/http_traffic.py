@@ -19,18 +19,18 @@ def main(args):
 
     args = parser.parse_args(args)
     print(args)
-    with open(args["file"]) as f:
+    with open(args.file) as f:
         ip_addresses = f.readlines()
     ips = [x.strip() for x in ip_addresses]
     for ip in ips:
         ip_list = ips.copy()
         ip_list.remove(ip)
         url = ip + "/syncmesh-fn"
-        r = requests.post(url, data=get_request_body(limit=args["limit"], start_time=args["start_time"],
-                                                     end_time=args["end_time"],
+        r = requests.post(url, json=get_request_body(limit=args.limit, start_time=args.start_time,
+                                                     end_time=args.end_time,
                                                      external_nodes_list=ip_list))
         print(r.status_code, r.reason)
-        time.sleep(args["delay"])
+        time.sleep(args.delay)
 
 
 def get_request_body(limit: int, start_time: str, end_time: str, external_nodes_list: [str], aggregate=False):
