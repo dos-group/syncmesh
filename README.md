@@ -22,6 +22,15 @@ Either use [kube-forwarder](https://www.electronjs.org/apps/kube-forwarder) or d
 
 Provision the test ressources via these commands:
 
+Terrafom credentials roles:
+
+- roles/resources.editor
+- roles/storage.admin
+- roles/bigquery.admin
+- roles/logging.configWriter on the logsink's project, folder, or organization (to create the logsink)
+- roles/resourcemanager.projectIamAdmin on the destination project (to grant write permissions for logsink service account)
+- roles/serviceusage.serviceUsageAdmin on
+
 ```terraform
 # Initialize
 terraform init
