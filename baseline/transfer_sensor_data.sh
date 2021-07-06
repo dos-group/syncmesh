@@ -12,6 +12,7 @@ done
 
 declare -a CSV_list
 for i in data/*.csv; do
+    sed -i 's/\ /,/g' $i
     CSV_list=("${CSV_list[@]}" "$i")
 done
 
@@ -21,4 +22,5 @@ echo $CSV_list
 for i in "${!sensor_list[@]}"; do
 	sed -i 1i"sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity" ${CSV_list[i]}
 	scp ${CSV_list[i]} ${sensor_list[i]}:~/data.csv
+    scp ${CSV_list[i]} ${sensor_list[i]}:~/transfer_master.sh
 done
