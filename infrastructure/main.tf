@@ -143,6 +143,11 @@ resource "google_compute_firewall" "ssh-rule" {
     ports    = ["8080"]
   }
 
+  allow {
+    protocol = "tcp"
+    ports    = ["27017"]
+  }
+
   target_tags   = ["demo-vm-instance"]
   source_ranges = ["0.0.0.0/0"]
 }
@@ -171,6 +176,7 @@ resource "google_bigquery_dataset" "dataset" {
   description                 = "Syncmesh export dataset"
   location                    = "EU"
   default_table_expiration_ms = 36000000
+  delete_contents_on_destroy = true
 
   labels = {
     env = "default"
