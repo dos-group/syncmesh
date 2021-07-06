@@ -71,11 +71,12 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   network_interface {
+    network_ip = "10.2.0.1${count.index}"
     subnetwork = google_compute_subnetwork.subnet_with_logging.name
     access_config {
     }
   }
-  metadata_startup_script = file("${path.module}/setup_scripts/syncmesh-startup.sh")
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/syncmesh-startup.tpl", { id = count.index + 1 })
 }
 
 resource "google_compute_instance" "client" {
@@ -96,6 +97,7 @@ resource "google_compute_instance" "client" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging.name
+    network_ip = "10.2.0.2"
     access_config {
     }
   }
@@ -120,11 +122,11 @@ resource "google_compute_instance" "central-server" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging.name
+    network_ip = "10.2.0.3"
     access_config {
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/central-server-startup.tpl", { instances = google_compute_instance.vm_instance })
-#   metadata_startup_script = file("${path.module}/setup_scripts/central-server-startup.tpl")
 }
 
 
@@ -149,10 +151,18 @@ resource "google_compute_firewall" "ssh-rule" {
 resource "google_logging_project_sink" "sink" {
   name        = "syncmesh-sink"
   project     = var.project
-  filter      = "resource.type=\"gce_subnetwork\""
+  filter      = "resource.type=\"gce_subnetwork\" AND jsonPayload.connection.dest_port=\"8080\" OR jsonPayload.connection.dest_port=\"27017\""
   destination = "bigquery.googleapis.com/${google_bigquery_dataset.dataset.id}"
   #   unique_writer_identity = var.unique_writer_identity
-#   unique_writer_identity = true
+  unique_writer_identity = true
+}
+
+resource "google_project_iam_binding" "log-writer-bigquery" {
+  role = "roles/bigquery.dataEditor"
+
+  members = [
+    google_logging_project_sink.sink.writer_identity,
+  ]
 }
 
 resource "google_bigquery_dataset" "dataset" {
@@ -175,4 +185,10 @@ resource "google_bigquery_dataset" "dataset" {
 resource "google_storage_bucket" "bucket" {
   name          = "syncmesh-log-bucket"
   force_destroy = false
+}
+
+
+resource "local_file" "external_addresses" {
+    content     = templatefile("${path.module}/ips.tpl" , { instances = google_compute_instance.vm_instance })
+    filename = "${path.module}/ips.txt"
 }

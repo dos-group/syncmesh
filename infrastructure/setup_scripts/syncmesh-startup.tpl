@@ -16,7 +16,7 @@ sudo mkdir -p /var/lib/faasd/mongo_data
 sudo chown -R 1000:1000 /var/lib/faasd/mongo_data
 
 cat << EOF >> /var/lib/faasd/docker-compose.yaml
-  redis:
+  mongo:
     image: docker.io/bitnami/mongodb:latest
     volumes:
       # we assume cwd == /var/lib/faasd
@@ -44,10 +44,6 @@ sudo apt-get install -y mongodb-org
 # Install Python for data distribution
 sudo apt-get install -y python3.6
 
-# Get Data
-wget https://github.com/DSPJ2021/syncmesh/raw/baseline/baseline/2017-07_bme280sof.csv.zip
-
-
 sleep 30
 # Login
 sudo cat /var/lib/faasd/secrets/basic-auth-password | faas-cli login -s
@@ -58,3 +54,9 @@ cd /syncmesh/functions && faas template pull && faas-cli template store pull gol
 
 #  Install Some Demo Functions
 faas-cli deploy -f https://raw.githubusercontent.com/openfaas/faas/master/stack.yml
+
+# Download Data and prepare MongoDB
+cd /
+wget -O import.csv https://raw.githubusercontent.com/DSPJ2021/data/main/data/${id}.csv
+# Use openfaas loopback IP
+mongoimport --type csv -d syncmesh -c sensor_data --headerline --drop import.csv --host 10.62.0.1:27017
