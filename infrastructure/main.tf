@@ -174,7 +174,6 @@ resource "google_bigquery_dataset" "dataset" {
   dataset_id                  = "syncmesh"
   friendly_name               = "syncmesh"
   description                 = "Syncmesh export dataset"
-  location                    = "EU"
   default_table_expiration_ms = 36000000
   delete_contents_on_destroy = true
 
