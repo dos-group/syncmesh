@@ -8,33 +8,6 @@ import (
 	"time"
 )
 
-func (db mongoDB) getSensors(limit int) (interface{}, error) {
-	var sensors []SensorModel
-	var err error
-
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	cur, err := db.collection.Find(ctx, bson.D{}, options.Find().SetLimit(int64(limit)))
-	if err != nil {
-		return nil, err
-	}
-	for cur.Next(ctx) {
-		var sensor SensorModel
-		err = cur.Decode(&sensor)
-		if err != nil {
-			return nil, err
-		}
-		sensors = append(sensors, sensor)
-	}
-	if err = cur.Err(); err != nil {
-		return nil, err
-	}
-	err = cur.Close(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return sensors, nil
-}
-
 func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, limit int) (interface{}, error) {
 	var sensors []SensorModel
 	var err error

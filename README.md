@@ -64,33 +64,7 @@ sudo journalctl -f | grep mongo
 
 ## How to use
 
-to perform a query on the deployed function, you need to send a JSON request of a type similar to this:
-
-```
-{
-"query": "{sensors{humidity}}",
-"database": "demo",
-"collection": "sensors",
-"request_type": "collect",
-"external_nodes": ["some_ip_1", "some_ip_2", "some_ip_3"]
-}
-```
-
-The sample return would look like this:
-
-```
-{
-  "data": {
-    "sensors": [
-      {
-        "humidity": 20.2302
-      },
-      {
-        "humidity": 1982.2321
-      }
-    ]
-  }
-}
+to perform a query on the deployed function, you need to send a JSON request.
 
 ```
 
@@ -109,7 +83,7 @@ An example query for a specific time range:
 
 ```
 {
-"query": "{sensorsInTimeRange(limit: 10, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){temperature humidity timestamp}}",
+"query": "{sensors(limit: 10, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){temperature humidity timestamp}}",
 "database": "demo",
 "collection": "sensors",
 "request_type": "collect"

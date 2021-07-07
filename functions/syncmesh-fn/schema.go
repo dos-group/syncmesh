@@ -15,7 +15,12 @@ func initSchema() graphql.Schema {
 				"sensors": &graphql.Field{
 					Type: graphql.NewList(SensorType),
 					Args: graphql.FieldConfigArgument{
-						"limit": &graphql.ArgumentConfig{
+						"start_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						},
+						"end_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						}, "limit": &graphql.ArgumentConfig{
 							Type: graphql.Int,
 						}},
 					Resolve: getSensors,
@@ -27,21 +32,7 @@ func initSchema() graphql.Schema {
 							Type: graphql.NewNonNull(graphql.ID),
 						}},
 					Resolve: getSensor,
-				},
-				"sensorsInTimeRange": &graphql.Field{
-					Type: graphql.NewList(SensorType),
-					Args: graphql.FieldConfigArgument{
-						"start_time": &graphql.ArgumentConfig{
-							Type: graphql.NewNonNull(graphql.DateTime),
-						},
-						"end_time": &graphql.ArgumentConfig{
-							Type: graphql.NewNonNull(graphql.DateTime),
-						}, "limit": &graphql.ArgumentConfig{
-							Type: graphql.Int,
-						}},
-					Resolve: getSensorsInTimeRange,
-				},
-			},
+				}},
 		}),
 		Types: []graphql.Type{graphql.ID},
 	})
