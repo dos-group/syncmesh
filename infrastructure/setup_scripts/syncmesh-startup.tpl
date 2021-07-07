@@ -60,3 +60,12 @@ cd /
 wget -O import.csv https://raw.githubusercontent.com/DSPJ2021/data/main/data/${id}.csv
 # Use openfaas loopback IP
 mongoimport --type csv -d syncmesh -c sensor_data --headerline --drop import.csv --host 10.62.0.1:27017
+
+# Fix Dates
+mongo --host 10.62.0.1:27017 <<EOF
+use syncmesh
+db.sensor_data.find().forEach(function(doc) {
+doc.timestamp=new Date(doc.timestamp);
+db.sensor_data.save(doc);
+})
+EOF
