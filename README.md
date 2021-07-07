@@ -66,8 +66,6 @@ sudo journalctl -f | grep mongo
 
 to perform a query on the deployed function, you need to send a JSON request.
 
-```
-
 A query fetching a document with a specific ID:
 
 ```
@@ -79,7 +77,7 @@ A query fetching a document with a specific ID:
 }
 ```
 
-An example query for a specific time range:
+An example query for a specific time range (start_time and end_time are required):
 
 ```
 {
@@ -90,9 +88,7 @@ An example query for a specific time range:
 }
 ```
 
-While sensor2 in that instance might have come from one of the other specified external nodes, thanks to "collect" as a request type.
-
-It has the following parameters:
+The request has the following parameters:
 
 - "query": Contains the GraphQL query
 - "database": Specifies the mongoDB database to query on
