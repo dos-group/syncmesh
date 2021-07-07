@@ -38,3 +38,5 @@ ips.txt
 
 # python
 venv/
+
+out/
