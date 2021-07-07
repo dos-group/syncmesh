@@ -192,7 +192,7 @@ resource "google_bigquery_dataset" "dataset" {
 
 resource "google_storage_bucket" "bucket" {
   name          = "syncmesh-log-bucket"
-  force_destroy = false
+  force_destroy = true
 }
 
 
