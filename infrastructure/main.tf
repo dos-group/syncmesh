@@ -156,7 +156,10 @@ resource "google_compute_firewall" "ssh-rule" {
 resource "google_logging_project_sink" "sink" {
   name        = "syncmesh-sink"
   project     = var.project
-  filter      = "resource.type=\"gce_subnetwork\" AND jsonPayload.connection.dest_port=\"8080\" OR jsonPayload.connection.dest_port=\"27017\""
+  filter      = <<EOF
+resource.type="gce_subnetwork" 
+jsonPayload.connection.dest_port="8080" OR jsonPayload.connection.dest_port="27017" OR jsonPayload.connection.src_port="8080" OR jsonPayload.connection.src_port="27017"
+EOF
   destination = "bigquery.googleapis.com/${google_bigquery_dataset.dataset.id}"
   #   unique_writer_identity = var.unique_writer_identity
   unique_writer_identity = true

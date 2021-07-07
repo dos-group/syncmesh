@@ -106,8 +106,3 @@ The request has the following parameters:
 ## Good Reads
 
 https://willschenk.com/articles/2021/setting_up_services_with_faasd/
-
-db.sensor_data.find().forEach(function(doc) {
-doc.timestamp=new Date(doc.timestamp);
-db.sensor_data.save(doc);
-})
