@@ -18,6 +18,7 @@ gzip -d export.gz
 ```SQL
 SELECT timestamp, jsonPayload.bytes_sent, jsonPayload.rtt_msec, jsonPayload.connection.src_ip, jsonPayload.connection.dest_ip FROM `dspj-315716.syncmesh.compute_googleapis_com_vpc_flows_20210706`
 WHERE jsonPayload.connection.src_ip = "10.2.0.10"
+WHERE CAST(jsonPayload.bytes_sent AS int) > 100
 ORDER BY timestamp
 LIMIT 1000
 ```
