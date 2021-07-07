@@ -43,7 +43,7 @@ terraform apply tfplan
 ssh -L 8080:ip:8080 username@ip
 
 # See Startup Script Log
-sudo journalctl -u google-startup-scripts.service -t | grep startup-script
+sudo journalctl -u google-startup-scripts.service -f | grep startup-script
 
 # Destroy
 terraform destroy
@@ -106,3 +106,8 @@ The request has the following parameters:
 ## Good Reads
 
 https://willschenk.com/articles/2021/setting_up_services_with_faasd/
+
+db.sensor_data.find().forEach(function(doc) {
+doc.timestamp=new Date(doc.timestamp);
+db.sensor_data.save(doc);
+})

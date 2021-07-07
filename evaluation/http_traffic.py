@@ -2,6 +2,7 @@
 import argparse
 import sys
 import time
+import json
 
 import requests
 
@@ -21,34 +22,32 @@ def main(args):
     print(args)
     with open(args.file) as f:
         ip_addresses = f.readlines()
-    ips = [x.strip() for x in ip_addresses]
+    ips = ["http://" + ip.strip() + "/function/syncmesh-fn" for ip in ip_addresses]
     for ip in ips:
         ip_list = ips.copy()
         ip_list.remove(ip)
-        url = "http://" + ip + "/function/syncmesh-fn"
         print(get_request_body(limit=args.limit, start_time=args.start_time,
                                                      end_time=args.end_time,
                                                      external_nodes_list=ip_list))
-        r = requests.post(url, json=get_request_body(limit=args.limit, start_time=args.start_time,
+        r = requests.post(ip, data=get_request_body(limit=args.limit, start_time=args.start_time,
                                                      end_time=args.end_time,
                                                      external_nodes_list=ip_list))
         print(r.status_code, r.reason)
-        print(r.text)
         time.sleep(args.delay)
 
 
 def get_request_body(limit: int, start_time: str, end_time: str, external_nodes_list: [str], aggregate=False):
-    query = f"{{sensorsInTimeRange(limit: {limit}, start_time: \"{start_time}\", end_time: \"{end_time}\"){{temperature humidity pressure}}}}"
+    query = f"{{sensors(start_time: \"{start_time}\", end_time: \"{end_time}\"){{temperature humidity pressure}}}}"
     request_type = "collect"
     if aggregate:
         request_type = "aggregate"
-    return {
+    return json.dumps({
         "query": query,
         "database": "syncmesh",
         "collection": "sensor_data",
         "request_type": request_type,
         "external_nodes": external_nodes_list
-    }
+    })
 
 
 if __name__ == "__main__":
