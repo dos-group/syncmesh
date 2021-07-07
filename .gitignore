@@ -35,3 +35,6 @@ data/
 
 # Terraform generated
 ips.txt
+
+# python
+venv/
