@@ -1,17 +1,18 @@
 #!/bin/bash
+# ./aggregate_sensor_data.sh $day $week $month
+# Parameters get subtracted from Last day of July
+# This aggregates the data files from the subtracted date up until the last day of July from one node
+
 
 username="dnhb"
 MASTER_IP="34.78.87.225"
 MASTER_IP_intern="10.2.0.3"
 PORT="27017"
 
-#time-query, $1 -> day, $2 -> week, $3 -> month ; from last day in july 2017
+#time-query
 currentTime=$(date --date="2017-07-31T24:00:00 -$1 days -$2 week -$3 month" +%s)
-month=$3
-week=$2
-day=$1
 
-echo $currentTime
+#echo $currentTime
 #awk -F '|' -v dateStart="$currentTime" '{if (FNR>1 && dateStart>=$5) {print}}' "import.csv" >>data.csv
 
 
