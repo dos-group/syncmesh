@@ -8,6 +8,29 @@ import (
 
 // Init the schema of Sensor data in GraphQL
 func initSchema() graphql.Schema {
+	sensorInputType := graphql.NewInputObject(graphql.InputObjectConfig{
+		Name: "SensorInputType",
+		Fields: graphql.InputObjectConfigFieldMap{
+			"timestamp": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.DateTime),
+			},
+			"humidity": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.Float),
+			},
+			"temperature": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.Float),
+			},
+			"pressure": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.Float),
+			},
+			"lat": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.Float),
+			},
+			"lon": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.Float),
+			},
+		},
+	})
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query: graphql.NewObject(graphql.ObjectConfig{
 			Name: "Query",
@@ -32,6 +55,26 @@ func initSchema() graphql.Schema {
 							Type: graphql.NewNonNull(graphql.ID),
 						}},
 					Resolve: getSensor,
+				}},
+		}),
+		Mutation: graphql.NewObject(graphql.ObjectConfig{
+			Name: "Mutation",
+			Fields: graphql.Fields{
+				"deleteSensor": &graphql.Field{
+					Type: SensorType,
+					Args: graphql.FieldConfigArgument{
+						"_id": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.ID),
+						}},
+					Resolve: deleteSensor,
+				},
+				"addSensors": &graphql.Field{
+					Type: graphql.NewList(SensorType),
+					Args: graphql.FieldConfigArgument{
+						"sensors": &graphql.ArgumentConfig{
+							Type: graphql.NewList(sensorInputType),
+						}},
+					Resolve: createSensors,
 				}},
 		}),
 		Types: []graphql.Type{graphql.ID},
