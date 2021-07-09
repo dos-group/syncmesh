@@ -87,6 +87,16 @@ An example query for a specific time range (start_time and end_time are required
 "request_type": "collect"
 }
 ```
+A query for collection with external nodes
+```
+{
+"query": "{sensors(limit: 1, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-08-01T00:00:00Z\"){temperature humidity timestamp}}",
+"database": "syncmesh",
+"collection": "sensor_data",
+"request_type": "collect",
+"external_nodes": ["http://some.random.ip:8080/function/syncmesh-fn"]
+}
+```
 
 The request has the following parameters:
 
