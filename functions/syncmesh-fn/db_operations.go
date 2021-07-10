@@ -5,7 +5,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"time"
 )
 
@@ -76,12 +75,20 @@ func (db mongoDB) deleteSensorById(_id string) (interface{}, error) {
 }
 
 func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	res, err := db.collection.InsertMany(ctx, sensors, options.InsertMany().SetOrdered(false))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return res.InsertedIDs, nil
 }
 
-// TODO: operation to fetch approximate amount of docs inside db
+func (db mongoDB) getDocEstimate() (interface{}, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	opts := options.EstimatedDocumentCount().SetMaxTime(5 * time.Second)
+	count, err := db.collection.EstimatedDocumentCount(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	return count, nil
+}

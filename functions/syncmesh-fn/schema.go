@@ -55,8 +55,12 @@ func initSchema() graphql.Schema {
 							Type: graphql.NewNonNull(graphql.ID),
 						}},
 					Resolve: getSensor,
-				}},
-		}),
+				},
+				"docEstimate": &graphql.Field{
+					Type:    graphql.Int,
+					Resolve: getDocEstimate,
+				},
+			}}),
 		Mutation: graphql.NewObject(graphql.ObjectConfig{
 			Name: "Mutation",
 			Fields: graphql.Fields{

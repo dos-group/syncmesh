@@ -22,10 +22,8 @@ func getSensors(p graphql.ResolveParams) (interface{}, error) {
 }
 
 func getSensor(p graphql.ResolveParams) (interface{}, error) {
-	var err error
-	var results interface{}
 	id := p.Args["_id"].(string)
-	results, err = db.getSensor(id)
+	results, err := db.getSensor(id)
 	if err != nil {
 		return nil, err
 	}
@@ -33,10 +31,8 @@ func getSensor(p graphql.ResolveParams) (interface{}, error) {
 }
 
 func deleteSensor(p graphql.ResolveParams) (interface{}, error) {
-	var err error
-	var result interface{}
 	id := p.Args["_id"].(string)
-	result, err = db.deleteSensorById(id)
+	result, err := db.deleteSensorById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +40,16 @@ func deleteSensor(p graphql.ResolveParams) (interface{}, error) {
 }
 
 func createSensors(p graphql.ResolveParams) (interface{}, error) {
-	var err error
-	var result interface{}
 	sensors := p.Args["sensors"].([]interface{})
-	result, err = db.createSensors(sensors)
+	result, err := db.createSensors(sensors)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func getDocEstimate(_ graphql.ResolveParams) (interface{}, error) {
+	result, err := db.getDocEstimate()
 	if err != nil {
 		return nil, err
 	}
