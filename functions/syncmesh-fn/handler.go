@@ -13,11 +13,12 @@ import (
 var db mongoDB
 
 type SyncMeshRequest struct {
-	Query         string   `json:"query"`
-	Database      string   `json:"database"`
-	Collection    string   `json:"collection"`
-	Type          string   `json:"request_type"`
-	ExternalNodes []string `json:"external_nodes,omitempty"`
+	Query         string                 `json:"query"`
+	Database      string                 `json:"database"`
+	Collection    string                 `json:"collection"`
+	Type          string                 `json:"request_type,omitempty"`
+	Variables     map[string]interface{} `json:"variables,omitempty"`
+	ExternalNodes []string               `json:"external_nodes,omitempty"`
 }
 
 // Handle a function invocation
@@ -40,7 +41,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	defer db.closeDB()
 
 	// execute graphql query on own node
-	result := executeQuery(request.Query, initSchema())
+	result := executeQuery(request.Query, initSchema(), request.Variables)
 
 	// encode the query result from bson to a bytes buffer
 	b := new(bytes.Buffer)
@@ -93,10 +94,11 @@ func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
 	return final
 }
 
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
+func executeQuery(query string, schema graphql.Schema, vars map[string]interface{}) *graphql.Result {
 	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
+		Schema:         schema,
+		RequestString:  query,
+		VariableValues: vars,
 	})
 	if len(result.Errors) > 0 {
 		fmt.Printf("Unexpected errors: %v", result.Errors)

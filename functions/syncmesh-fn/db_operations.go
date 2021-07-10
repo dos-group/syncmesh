@@ -75,15 +75,9 @@ func (db mongoDB) deleteSensorById(_id string) (interface{}, error) {
 	return sensor, nil
 }
 
-func (db mongoDB) createSensors(sensors []SensorModelNoId) (interface{}, error) {
-	// convert sensor model structs to generic interfaces
-	docs := make([]interface{}, len(sensors))
-	for i := range sensors {
-		docs[i] = sensors[i]
-	}
-
+func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	res, err := db.collection.InsertMany(ctx, docs, options.InsertMany().SetOrdered(false))
+	res, err := db.collection.InsertMany(ctx, sensors, options.InsertMany().SetOrdered(false))
 	if err != nil {
 		log.Fatal(err)
 	}

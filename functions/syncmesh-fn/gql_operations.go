@@ -46,7 +46,7 @@ func deleteSensor(p graphql.ResolveParams) (interface{}, error) {
 func createSensors(p graphql.ResolveParams) (interface{}, error) {
 	var err error
 	var result interface{}
-	sensors := p.Args["sensors"].([]SensorModelNoId)
+	sensors := p.Args["sensors"].([]interface{})
 	result, err = db.createSensors(sensors)
 	if err != nil {
 		return nil, err

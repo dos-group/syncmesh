@@ -69,7 +69,7 @@ func initSchema() graphql.Schema {
 					Resolve: deleteSensor,
 				},
 				"addSensors": &graphql.Field{
-					Type: graphql.NewList(SensorType),
+					Type: graphql.NewList(graphql.String),
 					Args: graphql.FieldConfigArgument{
 						"sensors": &graphql.ArgumentConfig{
 							Type: graphql.NewList(sensorInputType),
