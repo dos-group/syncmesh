@@ -83,6 +83,32 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	return res.InsertedIDs, nil
 }
 
+func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
+	var updatedSensor SensorModel
+	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
+	filter := bson.D{{"_id", _id}}
+	update := bson.D{{"$set", sensor}}
+	err := db.collection.FindOneAndUpdate(ctx, filter, update).Decode(&updatedSensor)
+	if err != nil {
+		return nil, err
+	}
+	return updatedSensor, nil
+}
+
+func (db mongoDB) deleteInTimeRange(startTime time.Time, endTime time.Time) (interface{}, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
+	res, err := db.collection.DeleteMany(ctx, bson.M{
+		"timestamp": bson.M{
+			"$gte": startTime,
+			"$lte": endTime,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return res.DeletedCount, nil
+}
+
 func (db mongoDB) getDocEstimate() (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	opts := options.EstimatedDocumentCount().SetMaxTime(5 * time.Second)

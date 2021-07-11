@@ -72,6 +72,28 @@ func initSchema() graphql.Schema {
 						}},
 					Resolve: deleteSensor,
 				},
+				"deleteInTimeRange": &graphql.Field{
+					Type: graphql.Int,
+					Args: graphql.FieldConfigArgument{
+						"start_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						},
+						"end_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						}},
+					Resolve: deleteInTimeRange,
+				},
+				"update": &graphql.Field{
+					Type: sensorInputType,
+					Args: graphql.FieldConfigArgument{
+						"_id": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.ID),
+						},
+						"sensor": &graphql.ArgumentConfig{
+							Type: sensorInputType,
+						}},
+					Resolve: update,
+				},
 				"addSensors": &graphql.Field{
 					Type: graphql.NewList(graphql.String),
 					Args: graphql.FieldConfigArgument{
