@@ -84,11 +84,18 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 }
 
 func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
+	var err error
 	var updatedSensor SensorModel
+
+	id, err := primitive.ObjectIDFromHex(_id)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
-	filter := bson.D{{"_id", _id}}
+	filter := bson.M{"_id": id}
 	update := bson.D{{"$set", sensor}}
-	err := db.collection.FindOneAndUpdate(ctx, filter, update).Decode(&updatedSensor)
+	err = db.collection.FindOneAndUpdate(ctx, filter, update).Decode(&updatedSensor)
 	if err != nil {
 		return nil, err
 	}

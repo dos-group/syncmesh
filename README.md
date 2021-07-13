@@ -144,6 +144,25 @@ You can also insert your own data like this:
 }
 ```
 
+An update operation:
+
+```json
+{
+  "query": "mutation{update(_id: \"1\", sensor: {pressure: 1, temperature: 2, humidity: 23, lat: 23.123, lon: 23.232, timestamp: \"2017-06-26T00:00:00Z\"}){temperature}}",
+  "database": "demo",
+  "collection": "sensors"
+}
+```
+
+Deleting entries for a specific time range:
+```json
+{
+  "query": "mutation{deleteInTimeRange(start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-02T00:00:00Z\")}",
+  "database": "demo",
+  "collection": "sensors"
+}
+```
+
 The general request has the following parameters:
 
 - "query": Contains the GraphQL query

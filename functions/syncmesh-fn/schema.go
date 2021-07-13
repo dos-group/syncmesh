@@ -84,7 +84,7 @@ func initSchema() graphql.Schema {
 					Resolve: deleteInTimeRange,
 				},
 				"update": &graphql.Field{
-					Type: sensorInputType,
+					Type: SensorType,
 					Args: graphql.FieldConfigArgument{
 						"_id": &graphql.ArgumentConfig{
 							Type: graphql.NewNonNull(graphql.ID),
