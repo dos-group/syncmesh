@@ -2,6 +2,7 @@ package function
 
 import (
 	"context"
+	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,6 +19,20 @@ type SyncmeshNode struct {
 	Lon     float64 `bson:"lon" json:"lon,omitempty"`
 }
 
+func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interface{}, error) {
+	db := getSyncmeshDB(ctx)
+	switch request.Type {
+	case "get":
+		return db.getSyncmeshNodes()
+	case "update":
+		return db.updateCreateNode(request.Node, request.ID)
+	case "delete":
+		return db.deleteNode(request.ID)
+	default:
+		return nil, errors.New("no matching operation found. It needs to be either \"get\", \"update\" or\"delete\"")
+	}
+}
+
 // getSyncmeshDB as an instance of the meta node database
 func getSyncmeshDB(ctx context.Context) mongoDB {
 	// connect to mongodb external node collection
@@ -27,7 +42,7 @@ func getSyncmeshDB(ctx context.Context) mongoDB {
 }
 
 // getSyncmeshNodes and their information currently stored in the meta db
-func (db mongoDB) getSyncmeshNodes() []SyncmeshNode {
+func (db mongoDB) getSyncmeshNodes() ([]SyncmeshNode, error) {
 	var err error
 	var nodes []SyncmeshNode
 
@@ -41,15 +56,15 @@ func (db mongoDB) getSyncmeshNodes() []SyncmeshNode {
 		var node SyncmeshNode
 		err = cur.Decode(&node)
 		if err != nil {
-			return nodes
+			continue
 		}
 		nodes = append(nodes, node)
 	}
 	if err = cur.Err(); err != nil {
-		return nodes
+		return nodes, err
 	}
 	err = cur.Close(ctx)
-	return nodes
+	return nodes, nil
 }
 
 // updateCreateNode updates an external node entry or creates a new one, if it does not exist

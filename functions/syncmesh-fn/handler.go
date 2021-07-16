@@ -21,9 +21,36 @@ type SyncMeshRequest struct {
 	ExternalNodes []string               `json:"external_nodes,omitempty"`
 }
 
+type SyncmeshMetaRequest struct {
+	Type string       `json:"meta_type"`
+	ID   string       `json:"id,omitempty"`
+	Node SyncmeshNode `json:"node,omitempty"`
+}
+
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 	var err error
+	var metaResponse interface{}
+
+	// if the request is a meta request, handle the operation and return
+	metaRequest := SyncmeshMetaRequest{}
+	err = json.Unmarshal(req.Body, &metaRequest)
+	if err == nil {
+		metaResponse, err = handleMetaRequest(req.Context(), metaRequest)
+		if err != nil {
+			return handler.Response{
+				Body:       []byte(err.Error()),
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
+		// encode the query result from bson to a bytes buffer
+		b := new(bytes.Buffer)
+		err = json.NewEncoder(b).Encode(metaResponse)
+		return handler.Response{
+			Body:       []byte(b.String()),
+			StatusCode: http.StatusOK,
+		}, err
+	}
 
 	// convert the http request to a SyncMesh request
 	request := SyncMeshRequest{}
