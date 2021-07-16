@@ -2,6 +2,7 @@ package function
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/graphql-go/graphql"
@@ -17,6 +18,7 @@ type SyncMeshRequest struct {
 	Database      string                 `json:"database"`
 	Collection    string                 `json:"collection"`
 	Type          string                 `json:"request_type,omitempty"`
+	UseMetaData   bool                   `json:"use_meta_data"`
 	Variables     map[string]interface{} `json:"variables,omitempty"`
 	ExternalNodes []string               `json:"external_nodes,omitempty"`
 }
@@ -43,7 +45,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 				StatusCode: http.StatusInternalServerError,
 			}, err
 		}
-		// encode the query result from bson to a bytes buffer
+		// encode the meta query result from bson to a bytes buffer
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(metaResponse)
 		return handler.Response{
@@ -62,6 +64,10 @@ func Handle(req handler.Request) (handler.Response, error) {
 		}, err
 	}
 	log.Printf("Request: %v", request)
+
+	if request.UseMetaData {
+		combineExternalNodes(&request, req.Context())
+	}
 
 	// connect to mongodb
 	db = connectDB(req.Context(), request.Database, request.Collection)
@@ -103,6 +109,17 @@ func Handle(req handler.Request) (handler.Response, error) {
 		Body:       []byte(b.String()),
 		StatusCode: http.StatusOK,
 	}, err
+}
+
+func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
+	db := getSyncmeshDB(ctx)
+	savedNodes, err := db.getSyncmeshNodes()
+	if err != nil {
+		log.Printf(err.Error())
+	}
+	for _, node := range savedNodes {
+		request.ExternalNodes = append(request.ExternalNodes, node.Address)
+	}
 }
 
 func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
