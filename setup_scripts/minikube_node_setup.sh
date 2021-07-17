@@ -21,5 +21,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install openfaas-db bitnami/mongodb \
   --namespace openfaas-fn \
   --set auth.enabled=false \
+  --set architecture="replicaset" \
+  --set replicaCount=1 \
   --set persistence.enabled=false
 
