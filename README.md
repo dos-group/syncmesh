@@ -170,6 +170,38 @@ The general request has the following parameters:
 - "collection": Specifies the mongoDB collection to query on
 - "request_type": Specifies the SyncMesh request type. Currently, "aggregate" and "collect" are supported.
 - "external_nodes": list of all addressable external SyncMesh nodes for data collection/aggregation
+- "use_meta_data": boolean whether the stored syncmesh metadata of external nodes should be used for collection/aggregation.
+See "Syncmesh meta" for more info.
+
+### Syncmesh meta
+Syncmesh meta is a database which stores metadata regarding nearby nodes.
+This data can be used to query nodes without specifying external IPs, and later aggregation with geofencing will be possible.
+There are three types of requests for the function to manipulate and query this database: "get", "update" and "delete".
+
+#### Updating or creating new node entries
+If you do not specify the ID or it is false in the "update request", a new node will be created:
+```json
+{
+"meta_type": "update",
+"node": {"address": "http://some.ip.here", "lat": 43, "lon": 43}
+}
+```
+if you want to update instead of creating, specify the ID:
+```json
+{
+"meta_type": "update",
+"id": "document_id_here",
+"node": {"address": "http://some.ip.here", "lat": 123}
+}
+```
+Deleting works by just specifying the ID:
+```json
+{
+"meta_type": "delete",
+"id": "document_id_here"
+}
+```
+You can also fetch the array of all saved nodes with a simple `{"meta_type": "get"}`.
 
 ## Libraries and packages used
 

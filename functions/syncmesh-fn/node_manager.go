@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type SyncmeshNode struct {
 
 func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
+	defer db.closeDB()
 	switch request.Type {
 	case "get":
 		return db.getSyncmeshNodes()
@@ -29,7 +31,7 @@ func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interf
 	case "delete":
 		return db.deleteNode(request.ID)
 	default:
-		return nil, errors.New("no matching operation found. It needs to be either \"get\", \"update\" or\"delete\"")
+		return nil, errors.New("no matching operation found. It needs to be either \"get\", \"update\" or \"delete\"")
 	}
 }
 
@@ -37,7 +39,6 @@ func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interf
 func getSyncmeshDB(ctx context.Context) mongoDB {
 	// connect to mongodb external node collection
 	db = connectDB(ctx, MetaDB, NodeCollection)
-	defer db.closeDB()
 	return db
 }
 
@@ -70,11 +71,16 @@ func (db mongoDB) getSyncmeshNodes() ([]SyncmeshNode, error) {
 // updateCreateNode updates an external node entry or creates a new one, if it does not exist
 func (db mongoDB) updateCreateNode(node SyncmeshNode, _id string) (interface{}, error) {
 	var err error
+	var id primitive.ObjectID
 	var updatedNode SyncmeshNode
 
-	id, err := primitive.ObjectIDFromHex(_id)
-	if err != nil {
-		return nil, err
+	if _id == "" {
+		id = primitive.NewObjectID()
+	} else {
+		id, err = primitive.ObjectIDFromHex(_id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
@@ -83,6 +89,9 @@ func (db mongoDB) updateCreateNode(node SyncmeshNode, _id string) (interface{}, 
 	opts := options.FindOneAndUpdate().SetUpsert(true) // insert if no node with id found
 	err = db.collection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedNode)
 	if err != nil {
+		if strings.Contains(err.Error(), "no documents in result") {
+			return "new document created", nil
+		}
 		return nil, err
 	}
 	return updatedNode, nil

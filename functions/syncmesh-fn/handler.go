@@ -34,10 +34,24 @@ func Handle(req handler.Request) (handler.Response, error) {
 	var err error
 	var metaResponse interface{}
 
+	parseError := handler.Response{
+		Body:       []byte("Error parsing the request"),
+		StatusCode: http.StatusInternalServerError,
+	}
+
+	responseMap := make(map[string]interface{})
+	err = json.Unmarshal(req.Body, &responseMap)
+	if err != nil {
+		return parseError, err
+	}
+
 	// if the request is a meta request, handle the operation and return
-	metaRequest := SyncmeshMetaRequest{}
-	err = json.Unmarshal(req.Body, &metaRequest)
-	if err == nil {
+	if _, ok := responseMap["meta_type"]; ok {
+		metaRequest := SyncmeshMetaRequest{}
+		err = json.Unmarshal(req.Body, &metaRequest)
+		if err != nil {
+			return parseError, err
+		}
 		metaResponse, err = handleMetaRequest(req.Context(), metaRequest)
 		if err != nil {
 			return handler.Response{
@@ -52,21 +66,20 @@ func Handle(req handler.Request) (handler.Response, error) {
 			Body:       []byte(b.String()),
 			StatusCode: http.StatusOK,
 		}, err
+
 	}
 
 	// convert the http request to a SyncMesh request
 	request := SyncMeshRequest{}
 	err = json.Unmarshal(req.Body, &request)
 	if err != nil {
-		return handler.Response{
-			Body:       []byte("Error parsing the request"),
-			StatusCode: http.StatusInternalServerError,
-		}, err
+		return parseError, err
 	}
 	log.Printf("Request: %v", request)
 
 	if request.UseMetaData {
 		combineExternalNodes(&request, req.Context())
+		log.Printf("Exernal nodes: %v", request.ExternalNodes)
 	}
 
 	// connect to mongodb
@@ -120,6 +133,7 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	for _, node := range savedNodes {
 		request.ExternalNodes = append(request.ExternalNodes, node.Address)
 	}
+	defer db.closeDB()
 }
 
 func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
