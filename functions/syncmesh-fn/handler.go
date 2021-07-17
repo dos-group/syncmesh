@@ -2,6 +2,7 @@ package function
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/graphql-go/graphql"
@@ -17,24 +18,69 @@ type SyncMeshRequest struct {
 	Database      string                 `json:"database"`
 	Collection    string                 `json:"collection"`
 	Type          string                 `json:"request_type,omitempty"`
+	UseMetaData   bool                   `json:"use_meta_data"`
 	Variables     map[string]interface{} `json:"variables,omitempty"`
 	ExternalNodes []string               `json:"external_nodes,omitempty"`
+}
+
+type SyncmeshMetaRequest struct {
+	Type string       `json:"meta_type"`
+	ID   string       `json:"id,omitempty"`
+	Node SyncmeshNode `json:"node,omitempty"`
 }
 
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 	var err error
+	var metaResponse interface{}
+
+	parseError := handler.Response{
+		Body:       []byte("Error parsing the request"),
+		StatusCode: http.StatusInternalServerError,
+	}
+
+	responseMap := make(map[string]interface{})
+	err = json.Unmarshal(req.Body, &responseMap)
+	if err != nil {
+		return parseError, err
+	}
+
+	// if the request is a meta request, handle the operation and return
+	if _, ok := responseMap["meta_type"]; ok {
+		metaRequest := SyncmeshMetaRequest{}
+		err = json.Unmarshal(req.Body, &metaRequest)
+		if err != nil {
+			return parseError, err
+		}
+		metaResponse, err = handleMetaRequest(req.Context(), metaRequest)
+		if err != nil {
+			return handler.Response{
+				Body:       []byte(err.Error()),
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
+		// encode the meta query result from bson to a bytes buffer
+		b := new(bytes.Buffer)
+		err = json.NewEncoder(b).Encode(metaResponse)
+		return handler.Response{
+			Body:       []byte(b.String()),
+			StatusCode: http.StatusOK,
+		}, err
+
+	}
 
 	// convert the http request to a SyncMesh request
 	request := SyncMeshRequest{}
 	err = json.Unmarshal(req.Body, &request)
 	if err != nil {
-		return handler.Response{
-			Body:       []byte("Error parsing the request"),
-			StatusCode: http.StatusInternalServerError,
-		}, err
+		return parseError, err
 	}
 	log.Printf("Request: %v", request)
+
+	if request.UseMetaData {
+		combineExternalNodes(&request, req.Context())
+		log.Printf("Exernal nodes: %v", request.ExternalNodes)
+	}
 
 	// connect to mongodb
 	db = connectDB(req.Context(), request.Database, request.Collection)
@@ -76,6 +122,18 @@ func Handle(req handler.Request) (handler.Response, error) {
 		Body:       []byte(b.String()),
 		StatusCode: http.StatusOK,
 	}, err
+}
+
+func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
+	db := getSyncmeshDB(ctx)
+	savedNodes, err := db.getSyncmeshNodes()
+	if err != nil {
+		log.Printf(err.Error())
+	}
+	for _, node := range savedNodes {
+		request.ExternalNodes = append(request.ExternalNodes, node.Address)
+	}
+	defer db.closeDB()
 }
 
 func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
