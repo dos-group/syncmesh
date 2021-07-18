@@ -24,60 +24,60 @@ shard01_IP_intern="10.156.0.11"
 
 
 # CONFIG-SERVER node
-
 #create config server replica set
-mongod --replSet shard01 --logpath "1.log" --dbpath shard01 --port 27017 --fork --shardsvr  &
+mkdir shard01
+mongod --configsvr --replSet conf --dbpath shard01 --bind_ip localhost,$MASTER_IP
 
-#connect mongosh to primary config server
-mongosh --host <hostname> --port <port>
-
-mkdir -p shard01 shard02 shard03
-mongod --replSet sharding --logpath "1.log" --dbpath shard01 --port 27017 --fork --shardsvr  &
-mongod --replSet sharding --logpath "2.log" --dbpath shard02 --port 27018 --fork --shardsvr  &
-mongod --replSet sharding --logpath "3.log" --dbpath shard03 --port 27019 --fork --shardsvr  &
-
-
-#initialize replica set on one node
-mongo --port 27017
+#inititate replica set
+mongosh --host $MASTER_IP --port $PORT
 "rs.initiate(
   {
-    _id: "sharding",
+    _id : "conf",
+    configsvr: true,
     members: [
-      { _id : 0, host : "localhost:27017" },
-      { _id : 1, host : "localhost:27018" },
-      { _id : 2, host : "localhost:27019" }
+      { _id : 0, host : "$MASTER_IP:$PORT" }
     ]
   }
 )"
-#rs.status();
+rs.status()
 
 
-#init sharded mongodb
-#mongod --shardsvr --replSet <replSetname>  --dbpath <path> --bind_ip localhost,<hostname(s)|ip address(es)>
-sudo mongod --logpath "cfg-a.log" --dbpath /data/config/config-a --replSet conf --port 57040 --fork --configsvr
-mongo --port 57040
-mongosh --host <hostname> --port <port>
+#Shard-nodes
+#create replica set (for each replica set member | for each sharded node)
+mkdir shard01
+mongod --shardsvr --replSet sharding  --dbpath shard01 --bind_ip localhost,$shard01_IP
+
+#initiate replica set
+mongosh --host $shard01_IP --port $PORT
 "rs.initiate(
   {
     _id : "sharding",
     members: [
-      { _id : 0, host : "34.72.103.114:27017" },
-      { _id : 1, host : "34.72.103.114:27018" },
-      { _id : 2, host : "34.72.103.114:27019" }
+      { _id : 0, host : "$shard01:$PORT" }
     ]
   }
 )"
-mongos --configdb conf/34.72.103.114:27017,34.72.103.114:27018,34.72.103.114:27019 --bind_ip localhost
+rs.status()
 
-#Add shards (e.g. sensors)
-sh.addShard( "sharding/34.72.103.114:27017")
+#START Sharding connection
+mongos --configdb conf/$MASTER_IP:$PORT --bind_ip localhost,$MASTER_IP
+#mongos --configdb conf/cfg1.example.net:27019,cfg2.example.net:27019,cfg3.example.net:27019
 
-#Enable Sharding for DB
-#sh.enableSharding("<database>")
 
-#Start config-server
-#sudo mongod --logpath "cfg-a.log" --dbpath /data/config/config-a --replSet conf --port 57040 --fork --configsvr --smallfiles
-#mongos --configdb conf/localhost:57040,localhost:57041,localhost:57042 --logpath "mongos-1.log" --port 
+#Connect to sharded cluster
+mongosh --host $MASTER_IP --port $PORT
+
+#Add our shard nodes
+sh.addShard( "sharding/$shard01:$PORT")
+
+#Enable sharding for certain DB (from mongosh instance)
+sh.enableSharding("<database>")
+#or shard collection
+#sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+
+
+
+
 
 
 
