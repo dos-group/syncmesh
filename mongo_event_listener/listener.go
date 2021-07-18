@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -24,8 +27,13 @@ func main() {
 	// check mongodb value
 	mongoUrl, present := os.LookupEnv("mongo_url")
 	if !present {
-		log.Println("MongoDB url not found, defaulting to namespace")
+		log.Println("MongoDB url not found, defaulting to localhost")
 		mongoUrl = "localhost:27017/?directConnection=true" // default mongodb location if no env passed
+	}
+	syncmeshBaseUrl, present := os.LookupEnv("syncmesh_url")
+	if !present {
+		log.Println("Syncmesh function base url not found, defaulting to localhost")
+		mongoUrl = "localhost:8080" // default mongodb location if no env passed
 	}
 	uri := fmt.Sprintf("mongodb://%s", mongoUrl)
 	log.Println(uri)
@@ -47,7 +55,11 @@ func main() {
 		var data StreamEvent
 		err := sensorStream.Decode(&data)
 		stopFatal(err)
-		fmt.Printf("%v\n", data) // TODO: request after each change to syncmesh-fn
+		url := fmt.Sprintf("%s/functions/syncmesh-fn", syncmeshBaseUrl)
+		jsonBody, err := json.Marshal(&data)
+		stopFatal(err)
+		_, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+		stopFatal(err)
 	}
 }
 
