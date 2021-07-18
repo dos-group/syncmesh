@@ -27,6 +27,7 @@ func connectDB(ctx context.Context, db string, collection string) mongoDB {
 		mongoUrl = "openfaas-db-mongodb" // default mongodb kubernetes namespace if no env passed
 	}
 	uri := fmt.Sprintf("mongodb://%s", mongoUrl)
+	log.Printf("MongoDB access url: %s", uri)
 	// attempt connecting to mongodb
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {

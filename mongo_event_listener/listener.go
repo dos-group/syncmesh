@@ -23,6 +23,7 @@ type StreamEvent struct {
 }
 
 func main() {
+	log.Println("Starting mongoDB change stream listener...")
 	ctx := context.Background()
 	// check mongodb value
 	mongoUrl, present := os.LookupEnv("mongo_url")
@@ -33,10 +34,10 @@ func main() {
 	syncmeshBaseUrl, present := os.LookupEnv("syncmesh_url")
 	if !present {
 		log.Println("Syncmesh function base url not found, defaulting to localhost")
-		mongoUrl = "localhost:8080" // default mongodb location if no env passed
+		syncmeshBaseUrl = "localhost:8080" // default mongodb location if no env passed
 	}
 	uri := fmt.Sprintf("mongodb://%s", mongoUrl)
-	log.Println(uri)
+	log.Printf("Full mongodb url: %s", uri)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	stopFatal(err)
 
@@ -55,7 +56,8 @@ func main() {
 		var data StreamEvent
 		err := sensorStream.Decode(&data)
 		stopFatal(err)
-		url := fmt.Sprintf("%s/functions/syncmesh-fn", syncmeshBaseUrl)
+		fmt.Printf("%v\n", data)
+		url := fmt.Sprintf("%s/function/syncmesh-fn", syncmeshBaseUrl)
 		jsonBody, err := json.Marshal(&data)
 		stopFatal(err)
 		_, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
