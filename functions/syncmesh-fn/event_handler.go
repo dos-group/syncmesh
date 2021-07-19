@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -24,6 +27,8 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
+	successCounter := 0
+	requestCounter := 0
 	for _, node := range nodes {
 		if node.Subscribed {
 			request := SyncMeshRequest{
@@ -39,11 +44,32 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 			if err != nil {
 				return nil, err
 			}
-			_, err = http.NewRequest("POST", node.Address, bytes.NewBuffer(jsonBody))
+			req, err := http.NewRequest("POST", node.Address, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				return nil, err
 			}
+			req.Header.Set("Content-Type", "application/json")
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			requestCounter += 1
+			if err != nil {
+				return err, nil
+			}
+			// read the response
+			if resp.StatusCode == 200 {
+				successCounter += 1
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				continue
+			}
+			err = resp.Body.Close()
+			if err != nil {
+				continue
+			}
+			log.Println(string(body))
 		}
 	}
-	return "requests sent to subscribed nodes", nil
+	results := fmt.Sprintf("Total of %v requests sent, %v successful", requestCounter, successCounter)
+	return results, nil
 }

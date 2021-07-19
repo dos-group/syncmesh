@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -17,9 +18,9 @@ type DocKey struct {
 }
 
 type StreamEvent struct {
-	OperationType string                 `bson:"operationType"` // can be "insert", "update" or "delete"
-	FullDocument  map[string]interface{} `bson:"fullDocument"`
-	DocumentKey   DocKey                 `bson:"documentKey"`
+	OperationType string                 `bson:"operationType" json:"operationType"` // can be "insert", "update" or "delete"
+	FullDocument  map[string]interface{} `bson:"fullDocument" json:"fullDocument"`
+	DocumentKey   DocKey                 `bson:"documentKey" json:"documentKey"`
 }
 
 func main() {
@@ -34,7 +35,7 @@ func main() {
 	syncmeshBaseUrl, present := os.LookupEnv("syncmesh_url")
 	if !present {
 		log.Println("Syncmesh function base url not found, defaulting to localhost")
-		syncmeshBaseUrl = "localhost:8080" // default mongodb location if no env passed
+		syncmeshBaseUrl = "http://localhost:8080" // default mongodb location if no env passed
 	}
 	uri := fmt.Sprintf("mongodb://%s", mongoUrl)
 	log.Printf("Full mongodb url: %s", uri)
@@ -60,8 +61,18 @@ func main() {
 		url := fmt.Sprintf("%s/function/syncmesh-fn", syncmeshBaseUrl)
 		jsonBody, err := json.Marshal(&data)
 		stopFatal(err)
-		_, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 		stopFatal(err)
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		stopFatal(err)
+		log.Printf("Response status code %v", resp.StatusCode)
+		body, err := ioutil.ReadAll(resp.Body)
+		stopFatal(err)
+		err = resp.Body.Close()
+		stopFatal(err)
+		log.Println(string(body))
 	}
 }
 
