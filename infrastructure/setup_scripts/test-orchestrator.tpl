@@ -18,9 +18,11 @@ cat > /client.txt <<EOF
 ${client.network_interface.0.network_ip}
 EOF
 
+%{ for s in server ~}
 cat > /server.txt <<EOF
-${try(server.network_interface.0.network_ip, "")}
+${s.network_interface.0.network_ip}
 EOF
+%{ endfor ~}
 
 cat > /scenario.txt <<EOF
 ${scenario}
@@ -41,12 +43,14 @@ Host *
     User orchestrator
 EOF
 
-cat > test.sh <<EOF
+# The Quotes are there so the variables arent expanded
+cat > test.sh <<'EOF'
 ${testscript}
 EOF
 
 echo "Waiting for everything to be set up (static timer)"
-sleep 360
+# 5 Minutes should be more than sufficient
+sleep 300
 echo "Executing Scenarios"
 
 # Execute

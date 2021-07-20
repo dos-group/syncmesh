@@ -19,14 +19,24 @@ seperate
 
 # Collect
 echo "Scenario: Collect - 1 day"
+# Write Data Once to central database
+while IFS=, read internalIP; do 
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h $SERVER_IP:$PORT --type csv -d database_test -c test --headerline --drop /import1.csv"
+done < /nodes.txt
+
 for i in $(seq $REPETITIONS)
 do 
-    while IFS=, read internalIP; do 
-        echo "SHH $internalIP"
-        ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h $SERVER_IP:$PORT --type csv -d database_test -c test --headerline --drop /import1.csv"
-    done < /nodes.txt
-
-    # TODO: Client Request
+    # Query Data 
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<EOF
+use syncmesh
+db.sensor_data.find({
+    created_at: {
+        $gte: ISODate("2017-07-31T00:00:00Z"),
+        $lt: ISODate("2017-07-31T23:59:59Z")
+    }
+})
+EOF"
 done
 
 sleep $SLEEP_TIME

@@ -16,13 +16,17 @@ provider "google" {
 }
 
 # resource "random_id" "server" {
-# #   keepers = {
-# #     # Generate a new id each time we switch to a new AMI id
-# #     ami_id = "${var.ami_id}"
-# #   }
+#   keepers = {
+#       scenario = var.scenario
+#       nodes_scenario = var.instance_scenario
+#   }
 
 #   byte_length = 8
 # }
+
+locals {
+  name_prefix         = "experiment-${var.scenario}-${var.instance_scenario}"
+}
 
 resource "tls_private_key" "orchestrator_key" {
   algorithm = "RSA"
@@ -37,37 +41,21 @@ locals {
     ssh_keys = join("\n", [for key in concat(var.ssh_keys, local.deployment_keys) : "${key.user}:${key.keymaterial}"])
 }
 
-resource "google_compute_project_metadata" "my_ssh_key" {
-  metadata = {
-    ssh-keys = local.ssh_keys
-  }
-}
+# resource "google_compute_project_metadata" "my_ssh_key" {
+#   metadata = {
+#     ssh-keys = local.ssh_keys
+#   }
+# }
 
 
 
 locals {
   # Zones: https://cloud.google.com/compute/docs/regions-zones
-  nodes = [
-    {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-    {
-      region   = "asia-east1"
-      location = "asia-east1-a"
-      number   = 2
-    },
-    {
-      region   = "europe-north1"
-      location = "europe-north1-b"
-      number   = 3
-    },
-  ]
+  nodes = local.nodes_selection[var.instance_scenario]
 # This is an array with all location the nodes will be deployed in. 
 # The first element will also host client (and server)
-  future_node = {
-      "wihtout_latency": [
+  nodes_selection = {
+      "wihtout-latency": [
     {
       region   = "us-central1"
       location = "us-central1-a",
@@ -84,7 +72,7 @@ locals {
       number   = 1
     },
   ],
-  "with_latency": [
+  "with-latency": [
     {
       region   = "us-central1"
       location = "us-central1-a",
@@ -100,6 +88,38 @@ locals {
       location = "europe-north1-b"
       number   = 3
     },
+  ],
+  "with-latency-6": [
+    {
+      region   = "us-central1"
+      location = "us-central1-a",
+      number   = 1
+    },
+    {
+      region   = "asia-east1"
+      location = "asia-east1-a"
+      number   = 2
+    },
+    {
+      region   = "europe-north1"
+      location = "europe-north1-b"
+      number   = 3
+    },
+    {
+      region   = "australia-southeast1"
+      location = "australia-southeast1-c",
+      number   = 4
+    },
+    {
+      region   = "southamerica-east1"
+      location = "southamerica-east1-c"
+      number   = 5
+    },
+    {
+      region   = "asia-south2"
+      location = "asia-south2-c"
+      number   = 6
+    },
   ]
   }
 }
@@ -109,7 +129,7 @@ resource "google_compute_subnetwork" "subnet_with_logging" {
     for index, vm in local.nodes :
     index => vm
   }
-  name          = "syncmesh-subnetwork-${each.value.number}"
+  name          = "${local.name_prefix}-subnetwork-${each.value.number}"
   ip_cidr_range = "10.${each.value.number}.0.0/16"
   region        = each.value.region
   network       = google_compute_network.vpc_network.id
@@ -125,7 +145,7 @@ resource "google_compute_subnetwork" "subnet_with_logging" {
 }
 
 resource "google_compute_network" "vpc_network" {
-  name                    = "syncmesh-network"
+  name                    = "${local.name_prefix}-network"
   auto_create_subnetworks = false
 
 }
@@ -147,7 +167,7 @@ resource "google_compute_instance" "nodes" {
     for index, vm in local.nodes :
     index => vm
   }
-  name         = "syncmesh-instance-${each.value.number}"
+  name         = "${local.name_prefix}-node-instance-${each.value.number}"
   machine_type = "f1-micro"
 
   tags = ["demo-vm-instance"]
@@ -169,11 +189,11 @@ resource "google_compute_instance" "nodes" {
     access_config {
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
 }
 
 resource "google_compute_instance" "client" {
-  name         = "client-instance"
+  name         = "${local.name_prefix}-client-instance"
   machine_type = "f1-micro"
 
   tags = ["demo-vm-instance"]
@@ -199,7 +219,7 @@ resource "google_compute_instance" "client" {
 
 resource "google_compute_instance" "central_server" {
   count            = "${var.scenario == "baseline" || var.scenario == "advanced-mongo" ? 1 : 0}"
-  name         = "central-server-instance"
+  name         = "${local.name_prefix}-central-server-instance"
   machine_type = "f1-micro"
 
   tags = ["demo-vm-instance"]
@@ -225,7 +245,7 @@ resource "google_compute_instance" "central_server" {
 
 
 resource "google_compute_instance" "test-orchestrator" {
-  name         = "test-orchestrator"
+  name         = "${local.name_prefix}-test-orchestrator"
   machine_type = "f1-micro"
 
   tags = ["demo-vm-instance"]
@@ -251,29 +271,19 @@ resource "google_compute_instance" "test-orchestrator" {
 
 
 resource "google_compute_firewall" "ssh-rule" {
-  name    = "rule-ssh"
+  name    = "${local.name_prefix}-rule-ssh"
   network = google_compute_network.vpc_network.name
   allow {
     protocol = "tcp"
     ports    = ["22"]
   }
 
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["8080"]
-#   }
-
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["27017"]
-#   }
-
   target_tags   = ["demo-vm-instance"]
   source_ranges = ["0.0.0.0/0"]
 }
 
 resource "google_compute_firewall" "traffic-rule" {
-  name    = "rule-application-traffic"
+  name    = "${local.name_prefix}-rule-application-traffic"
   network = google_compute_network.vpc_network.name
 
   allow {
@@ -292,13 +302,12 @@ resource "google_compute_firewall" "traffic-rule" {
 
 ## Log Export
 resource "google_logging_project_sink" "sink" {
-  name        = "syncmesh-sink"
+  name        = "${local.name_prefix}-sink"
   project     = var.project
   filter      = <<EOF
-resource.type="gce_subnetwork" 
-jsonPayload.connection.dest_port="8080" OR jsonPayload.connection.dest_port="27017" 
-OR jsonPayload.connection.src_port="8080" OR jsonPayload.connection.src_port="27017"
-OR jsonPayload.connection.dest_port="443" OR jsonPayload.connection.src_port="443"
+resource.type="gce_subnetwork"
+${join(" OR ", formatlist("resource.labels.subnetwork_name=\"%s\"", [for o in google_compute_subnetwork.subnet_with_logging : o.name]))}
+jsonPayload.connection.dest_port="8080" OR jsonPayload.connection.dest_port="27017" OR jsonPayload.connection.src_port="8080" OR jsonPayload.connection.src_port="27017" OR jsonPayload.connection.dest_port="443" OR jsonPayload.connection.src_port="443"
 EOF
   destination = "bigquery.googleapis.com/${google_bigquery_dataset.dataset.id}"
   #   unique_writer_identity = var.unique_writer_identity
@@ -314,7 +323,7 @@ resource "google_project_iam_binding" "log-writer-bigquery" {
 }
 
 resource "google_bigquery_dataset" "dataset" {
-  dataset_id                  = "syncmesh"
+  dataset_id                  = replace("${local.name_prefix}", "-", "_")
   friendly_name               = "syncmesh"
   description                 = "Syncmesh export dataset"
   default_table_expiration_ms = 36000000
@@ -331,7 +340,7 @@ resource "google_bigquery_dataset" "dataset" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name          = "syncmesh-log-bucket"
+  name          = "${local.name_prefix}-log-bucket"
   force_destroy = true
 }
 

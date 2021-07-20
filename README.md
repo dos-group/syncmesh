@@ -52,8 +52,17 @@ terraform destroy
 
 # Experiments
 
-Run the terraform the Terraform script with either `baseline`, `syncmesh` or `advanced-mongo` scenario.  
-Get the data after each run by running the `Main` and `monitorin` notebook.
+Run the terraform the Terraform script for either `baseline`, `syncmesh` or `advanced-mongo` scenario:
+
+```bash
+terraform apply -var-file .\experiment-3-baseline.tfvars
+```
+
+Get the data after each run by running the `Main` and `monitoring` notebook.
+
+```bash
+jupyter nbconvert --execute --to notebook --inplace --allow-errors --ExecutePreprocessor.timeout=-1 Main.ipynb  --output Test_main.ipynb
+```
 
 ## Working on Nodes
 

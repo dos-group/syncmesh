@@ -1,11 +1,21 @@
-variable "instance_count" {
-  type    = number
-  default = 3
-}
-
 variable "project" {
   type    = string
   default = "dspj-315716"
+}
+
+variable "seperator_request_ip" {
+    type = string
+    default = "92.60.39.199"
+    description = "IP Address that is used to seperate different Scenarios in the Logs"
+}
+
+variable "instance_scenario" {
+  type    = string
+  default = "with-latency"
+  validation {
+    condition     = contains(["with-latency", "wihtout-latency", "with-latency-6"], var.instance_scenario)
+    error_message = "Allowed values for scenario are \"with-latency\", \"wihtout-latency\", or \"with-latency-6\"."
+  }
 }
 
 variable "scenario" {
@@ -17,11 +27,6 @@ variable "scenario" {
   }
 }
 
-variable "seperator_request_ip" {
-    type = string
-    default = "92.60.39.199"
-    description = "IP Address that is used to seperate different Scenarios in the Logs"
-}
 
 variable "ssh_keys" {
   type = list(object({

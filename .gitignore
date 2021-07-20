@@ -32,6 +32,7 @@ credentials.json
 demo/
 data/
 *.log
+*.bak
 
 # Terraform generated
 ips.txt
