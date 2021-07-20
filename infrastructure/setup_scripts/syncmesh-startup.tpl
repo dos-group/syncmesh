@@ -27,7 +27,6 @@ cat << EOF >> /var/lib/faasd/docker-compose.yaml
       - CAP_NET_RAW
     user: "1000"
     environment:
-      - MONGODB_REPLICA_SET_MODE=primary
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - "10.62.0.1:27017:27017"
