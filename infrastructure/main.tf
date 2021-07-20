@@ -25,7 +25,7 @@ provider "google" {
 # }
 
 locals {
-  name_prefix         = "experiment-${var.scenario}-${var.instance_scenario}"
+  name_prefix = "experiment-${var.scenario}-${var.instance_scenario}"
 }
 
 resource "tls_private_key" "orchestrator_key" {
@@ -34,11 +34,11 @@ resource "tls_private_key" "orchestrator_key" {
 }
 
 locals {
-    deployment_keys = [{
-      user        = "orchestrator"
-      keymaterial = tls_private_key.orchestrator_key.public_key_openssh
-    }]
-    ssh_keys = join("\n", [for key in concat(var.ssh_keys, local.deployment_keys) : "${key.user}:${key.keymaterial}"])
+  deployment_keys = [{
+    user        = "orchestrator"
+    keymaterial = tls_private_key.orchestrator_key.public_key_openssh
+  }]
+  ssh_keys = join("\n", [for key in concat(var.ssh_keys, local.deployment_keys) : "${key.user}:${key.keymaterial}"])
 }
 
 # resource "google_compute_project_metadata" "my_ssh_key" {
@@ -52,75 +52,75 @@ locals {
 locals {
   # Zones: https://cloud.google.com/compute/docs/regions-zones
   nodes = local.nodes_selection[var.instance_scenario]
-# This is an array with all location the nodes will be deployed in. 
-# The first element will also host client (and server)
+  # This is an array with all location the nodes will be deployed in. 
+  # The first element will also host client (and server)
   nodes_selection = {
-      "wihtout-latency": [
-    {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-   {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-    {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-  ],
-  "with-latency": [
-    {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-    {
-      region   = "asia-east1"
-      location = "asia-east1-a"
-      number   = 2
-    },
-    {
-      region   = "europe-north1"
-      location = "europe-north1-b"
-      number   = 3
-    },
-  ],
-  "with-latency-6": [
-    {
-      region   = "us-central1"
-      location = "us-central1-a",
-      number   = 1
-    },
-    {
-      region   = "asia-east1"
-      location = "asia-east1-a"
-      number   = 2
-    },
-    {
-      region   = "europe-north1"
-      location = "europe-north1-b"
-      number   = 3
-    },
-    {
-      region   = "australia-southeast1"
-      location = "australia-southeast1-c",
-      number   = 4
-    },
-    {
-      region   = "southamerica-east1"
-      location = "southamerica-east1-c"
-      number   = 5
-    },
-    {
-      region   = "asia-south2"
-      location = "asia-south2-c"
-      number   = 6
-    },
-  ]
+    "wihtout-latency" : [
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+    ],
+    "with-latency" : [
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+      {
+        region   = "asia-east1"
+        location = "asia-east1-a"
+        number   = 2
+      },
+      {
+        region   = "europe-north1"
+        location = "europe-north1-b"
+        number   = 3
+      },
+    ],
+    "with-latency-6" : [
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+      {
+        region   = "asia-east1"
+        location = "asia-east1-a"
+        number   = 2
+      },
+      {
+        region   = "europe-north1"
+        location = "europe-north1-b"
+        number   = 3
+      },
+      {
+        region   = "australia-southeast1"
+        location = "australia-southeast1-c",
+        number   = 4
+      },
+      {
+        region   = "southamerica-east1"
+        location = "southamerica-east1-c"
+        number   = 5
+      },
+      {
+        region   = "asia-south2"
+        location = "asia-south2-c"
+        number   = 6
+      },
+    ]
   }
 }
 
@@ -218,7 +218,7 @@ resource "google_compute_instance" "client" {
 }
 
 resource "google_compute_instance" "central_server" {
-  count            = "${var.scenario == "baseline" || var.scenario == "advanced-mongo" ? 1 : 0}"
+  count        = var.scenario == "baseline" || var.scenario == "advanced-mongo" ? 1 : 0
   name         = "${local.name_prefix}-central-server-instance"
   machine_type = "f1-micro"
 
@@ -240,7 +240,7 @@ resource "google_compute_instance" "central_server" {
     access_config {
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/central-server-startup.tpl", { instances = google_compute_instance.nodes })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
 }
 
 
@@ -266,7 +266,7 @@ resource "google_compute_instance" "test-orchestrator" {
     access_config {
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem , seperator = var.seperator_request_ip, scenario = var.scenario, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
 }
 
 

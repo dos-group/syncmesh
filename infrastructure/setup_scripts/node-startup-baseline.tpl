@@ -51,7 +51,7 @@ wget -O import.csv https://raw.githubusercontent.com/DSPJ2021/data/main/data/${i
 currentTime=$(date --date="2017-07-31T00:00:00" +%s)
 {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature\n" > data.csv
+printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
 # This Read skipts the header line!
 read 
 while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
@@ -68,7 +68,7 @@ mv data.csv import1.csv
 currentTime=$(date --date="2017-07-31T00:00:00 7 day ago" +%s)
 {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature\n" > data.csv
+printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
 # This Read skipts the header line!
 read 
 while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
@@ -85,7 +85,7 @@ mv data.csv import7.csv
 currentTime=$(date --date="2017-07-31T00:00:00 14 day ago" +%s)
 {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature\n" > data.csv
+printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
 # This Read skipts the header line!
 read 
 while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
@@ -102,7 +102,7 @@ mv data.csv import14.csv
 currentTime=$(date --date="2017-07-31T00:00:00 30 day ago" +%s)
 {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature\n" > data.csv
+printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
 # This Read skipts the header line!
 read 
 while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do

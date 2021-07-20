@@ -4,10 +4,9 @@ pwd
 
 echo "Hello from the Setup script!"
 
-sudo apt update
-
+sudo apt-get update
 # Install Python for data distribution
-sudo apt-get install -y python3.6 python3-pip mongodb-org
+sudo apt-get install -y python3.6 python3-pip mongodb-org mongodb-clients
 
 pip install requests
 

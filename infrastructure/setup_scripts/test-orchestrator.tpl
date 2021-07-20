@@ -1,11 +1,5 @@
 #!/bin/bash
 
-sudo apt update
-
-# Install Python for data distribution
-# sudo apt-get install -y python3.6 python3-pip
-
-# pip install requests
 
 cat > /nodes.txt <<EOF
 %{ for node in nodes ~}
@@ -44,9 +38,9 @@ Host *
 EOF
 
 # The Quotes are there so the variables arent expanded
-cat > test.sh <<'EOF'
+cat > test.sh <<'CUSTOMEOF'
 ${testscript}
-EOF
+CUSTOMEOF
 
 echo "Waiting for everything to be set up (static timer)"
 # 5 Minutes should be more than sufficient
