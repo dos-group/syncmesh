@@ -10,11 +10,17 @@ variable "project" {
 
 variable "scenario" {
   type    = string
-  default = "syncmesh"
+  default = "baseline"
   validation {
-    condition     = contains(["syncmesh", "advanced-mongo", "baseline"], var.scenario)
+    condition     = contains(["baseline", "syncmesh", "advanced-mongo"], var.scenario)
     error_message = "Allowed values for scenario are \"syncmesh\", \"advanced-mongo\", or \"baseline\"."
   }
+}
+
+variable "seperator_request_ip" {
+    type = string
+    default = "92.60.39.199"
+    description = "IP Address that is used to seperate different Scenarios in the Logs"
 }
 
 variable "ssh_keys" {

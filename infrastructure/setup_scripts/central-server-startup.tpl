@@ -5,7 +5,7 @@ pwd
 echo "Hello from the Setup script!"
 
 ## Paste all IPs of the Nodes 
-#cat > nodes.json <<EOF
+#cat > nodes.txt <<EOF
 #%{ for instance in instances ~}
 #${instance.network_interface.0.network_ip}
 #%{ endfor ~}
