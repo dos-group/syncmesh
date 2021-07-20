@@ -20,9 +20,7 @@ Either use [kube-forwarder](https://www.electronjs.org/apps/kube-forwarder) or d
 
 ## Infrastructure
 
-Provision the test ressources via these commands:
-
-Terrafom credentials roles:
+To set up the credentials [follow this guide](https://learn.hashicorp.com/tutorials/terraform/google-cloud-platform-build#set-up-gcp), but additionally grant the folllowing roles:
 
 - roles/resources.editor
 - roles/storage.admin
@@ -31,6 +29,8 @@ Terrafom credentials roles:
 - roles/resourcemanager.projectIamAdmin on the destination project (to grant write permissions for logsink service
   account)
 - roles/serviceusage.serviceUsageAdmin on
+
+Provision the test ressources via these commands:
 
 ```terraform
 # Initialize
@@ -55,7 +55,7 @@ terraform destroy
 Run the terraform the Terraform script for either `baseline`, `syncmesh` or `advanced-mongo` scenario:
 
 ```bash
-terraform apply -var-file .\experiment-3-baseline.tfvars
+terraform apply -var-file ./experiment-3-baseline.tfvars
 ```
 
 Get the data after each run by running the `Main` and `monitoring` notebook.

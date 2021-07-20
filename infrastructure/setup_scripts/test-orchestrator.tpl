@@ -45,6 +45,7 @@ CUSTOMEOF
 echo "Waiting for everything to be set up (static timer)"
 # 5 Minutes should be more than sufficient
 sleep 300
+
 echo "Executing Scenarios"
 
 # Execute
