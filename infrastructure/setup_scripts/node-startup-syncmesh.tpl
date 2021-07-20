@@ -14,7 +14,7 @@ sudo ./hack/install.sh
 # Add Mongo to faasd installation
 sudo mkdir -p /var/lib/faasd/mongo_data
 sudo chown -R 1000:1000 /var/lib/faasd/mongo_data
-
+# TODO(dh): fine-tune replicaset params https://github.com/bitnami/bitnami-docker-mongodb#setting-up-replication
 cat << EOF >> /var/lib/faasd/docker-compose.yaml
   mongo:
     image: docker.io/bitnami/mongodb:latest

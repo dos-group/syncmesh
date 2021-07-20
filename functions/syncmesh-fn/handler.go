@@ -32,7 +32,6 @@ type SyncmeshMetaRequest struct {
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
 	var err error
-	var metaResponse interface{}
 
 	parseError := handler.Response{
 		Body:       []byte("Error parsing the request"),
@@ -52,7 +51,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		if err != nil {
 			return parseError, err
 		}
-		metaResponse, err = handleMetaRequest(req.Context(), metaRequest)
+		metaResponse, err := handleMetaRequest(req.Context(), metaRequest)
 		if err != nil {
 			return handler.Response{
 				Body:       []byte(err.Error()),
@@ -66,7 +65,29 @@ func Handle(req handler.Request) (handler.Response, error) {
 			Body:       []byte(b.String()),
 			StatusCode: http.StatusOK,
 		}, err
+	}
 
+	// if the request is a meta request, handle the operation and return
+	if _, ok := responseMap["operationType"]; ok {
+		event := StreamEvent{}
+		err = json.Unmarshal(req.Body, &event)
+		if err != nil {
+			return parseError, err
+		}
+		eventResponse, err := handleStreamEvent(req.Context(), event)
+		if err != nil {
+			return handler.Response{
+				Body:       []byte(err.Error()),
+				StatusCode: http.StatusInternalServerError,
+			}, err
+		}
+		// encode the meta query result from bson to a bytes buffer
+		b := new(bytes.Buffer)
+		err = json.NewEncoder(b).Encode(eventResponse)
+		return handler.Response{
+			Body:       []byte(b.String()),
+			StatusCode: http.StatusOK,
+		}, err
 	}
 
 	// convert the http request to a SyncMesh request
@@ -93,7 +114,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(result)
 	if err != nil {
-		return catchResponseError(err)
+		return handleEncodingError(err)
 	}
 
 	// if the request type is aggregate, calculate the averages from the data
@@ -108,7 +129,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		b.Reset()
 		err = json.NewEncoder(b).Encode(averages)
 		if err != nil {
-			return catchResponseError(err)
+			return handleEncodingError(err)
 		}
 	}
 
@@ -164,7 +185,7 @@ func executeQuery(query string, schema graphql.Schema, vars map[string]interface
 	return result
 }
 
-func catchResponseError(err error) (handler.Response, error) {
+func handleEncodingError(err error) (handler.Response, error) {
 	return handler.Response{
 		Body:       []byte("Something went wrong encoding the result"),
 		StatusCode: http.StatusInternalServerError,

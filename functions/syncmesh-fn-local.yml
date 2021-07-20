@@ -11,4 +11,4 @@ functions:
       GO111MODULE: on
     write_debug: true
     environment:
-      mongo_url: openfaas-db-mongodb
+      mongo_url: openfaas-db-mongodb-0.openfaas-db-mongodb-headless.openfaas-fn.svc.cluster.local/?directConnection=true

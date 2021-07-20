@@ -15,9 +15,10 @@ const MetaDB = "syncmesh_meta"
 const NodeCollection = "nodes"
 
 type SyncmeshNode struct {
-	Address string  `bson:"address" json:"address"`
-	Lat     float64 `bson:"lat" json:"lat,omitempty"`
-	Lon     float64 `bson:"lon" json:"lon,omitempty"`
+	Address    string  `bson:"address" json:"address"`
+	Lat        float64 `bson:"lat" json:"lat,omitempty"`
+	Lon        float64 `bson:"lon" json:"lon,omitempty"`
+	Subscribed bool    `bson:"subscribed" json:"subscribed"`
 }
 
 func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interface{}, error) {
