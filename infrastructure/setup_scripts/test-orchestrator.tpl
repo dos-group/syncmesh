@@ -43,8 +43,8 @@ ${testscript}
 CUSTOMEOF
 
 echo "Waiting for everything to be set up (static timer)"
-# 5 Minutes should be more than sufficient
-sleep 300
+# 10 Minutes should be more than sufficient
+sleep 600
 
 echo "Executing Scenarios"
 

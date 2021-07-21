@@ -58,7 +58,7 @@ def main(args):
                                                      external_nodes_list=ip_list, 
                                                      request_type=args.requestType)
         print(body)
-        for i in range(repetitions):
+        for i in range(args.repetitions):
             r = requests.post(ip, data=body)
             print(r.status_code, r.reason)
 
