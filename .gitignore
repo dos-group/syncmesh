@@ -39,5 +39,5 @@ ips.txt
 
 # python
 venv/
-
+__pycache__
 out/

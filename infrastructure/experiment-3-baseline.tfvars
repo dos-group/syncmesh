@@ -1,2 +1,2 @@
 scenario = "baseline"
-instance_scenario = "with-latency"
+instance_scenario = "with-latency-3"

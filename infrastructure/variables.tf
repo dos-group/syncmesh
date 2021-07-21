@@ -3,18 +3,23 @@ variable "project" {
   default = "dspj-315716"
 }
 
+variable "public_access" {
+  type    = bool
+  default = true
+}
+
 variable "seperator_request_ip" {
-    type = string
-    default = "92.60.39.199"
-    description = "IP Address that is used to seperate different Scenarios in the Logs"
+  type        = string
+  default     = "92.60.39.199"
+  description = "IP Address that is used to seperate different Scenarios in the Logs"
 }
 
 variable "instance_scenario" {
   type    = string
-  default = "with-latency"
+  default = "with-latency-3"
   validation {
-    condition     = contains(["with-latency", "wihtout-latency", "with-latency-6"], var.instance_scenario)
-    error_message = "Allowed values for scenario are \"with-latency\", \"wihtout-latency\", or \"with-latency-6\"."
+    condition     = contains(["with-latency-3", "without-latency-3", "with-latency-6"], var.instance_scenario)
+    error_message = "Allowed values for scenario are \"with-latency-3\", \"without-latency-3\", or \"with-latency-6\"."
   }
 }
 

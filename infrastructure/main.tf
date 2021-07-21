@@ -55,7 +55,7 @@ locals {
   # This is an array with all location the nodes will be deployed in. 
   # The first element will also host client (and server)
   nodes_selection = {
-    "wihtout-latency" : [
+    "wihtout-latency-3" : [
       {
         region   = "us-central1"
         location = "us-central1-a",
@@ -72,7 +72,7 @@ locals {
         number   = 1
       },
     ],
-    "with-latency" : [
+    "with-latency-3" : [
       {
         region   = "us-central1"
         location = "us-central1-a",
@@ -186,7 +186,9 @@ resource "google_compute_instance" "nodes" {
   network_interface {
     network_ip = "10.${each.value.number}.0.1${each.value.number}"
     subnetwork = google_compute_subnetwork.subnet_with_logging[each.value.number - 1].name
-    access_config {
+    dynamic "access_config" {
+      for_each = var.public_access ? ["active"] : []
+      content {}
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
@@ -211,7 +213,9 @@ resource "google_compute_instance" "client" {
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
     network_ip = "10.1.0.2"
-    access_config {
+    dynamic "access_config" {
+      for_each = var.public_access ? ["active"] : []
+      content {}
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.nodes, testscript = file("${path.module}/test_scripts/client-${var.scenario}.py") })
@@ -237,7 +241,9 @@ resource "google_compute_instance" "central_server" {
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
     network_ip = "10.1.0.3"
-    access_config {
+    dynamic "access_config" {
+      for_each = var.public_access ? ["active"] : []
+      content {}
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
@@ -263,7 +269,9 @@ resource "google_compute_instance" "test-orchestrator" {
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
     network_ip = "10.1.0.255"
-    access_config {
+    dynamic "access_config" {
+      for_each = var.public_access ? ["active"] : []
+      content {}
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
@@ -276,6 +284,14 @@ resource "google_compute_firewall" "ssh-rule" {
   allow {
     protocol = "tcp"
     ports    = ["22"]
+  }
+
+  dynamic "allow" {
+    for_each = var.public_access ? ["8080", "27017"] : []
+    content {
+      protocol = "tcp"
+      ports    = [allow.value]
+    }
   }
 
   target_tags   = ["demo-vm-instance"]
