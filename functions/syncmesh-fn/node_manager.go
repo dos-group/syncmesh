@@ -18,6 +18,8 @@ type SyncmeshNode struct {
 	Address    string  `bson:"address" json:"address"`
 	Lat        float64 `bson:"lat" json:"lat,omitempty"`
 	Lon        float64 `bson:"lon" json:"lon,omitempty"`
+	Distance   float64 `bson:"distance" json:"distance,omitempty"`
+	OwnNode    bool    `bson:"own_node" json:"own_node"`
 	Subscribed bool    `bson:"subscribed" json:"subscribed"`
 }
 

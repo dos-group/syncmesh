@@ -18,6 +18,7 @@ type SyncMeshRequest struct {
 	Database      string                 `json:"database"`
 	Collection    string                 `json:"collection"`
 	Type          string                 `json:"request_type,omitempty"`
+	Radius        int                    `json:"radius"`
 	UseMetaData   bool                   `json:"use_meta_data"`
 	Variables     map[string]interface{} `json:"variables,omitempty"`
 	ExternalNodes []string               `json:"external_nodes,omitempty"`
@@ -67,7 +68,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		}, err
 	}
 
-	// if the request is a meta request, handle the operation and return
+	// if the request is an event request, handle the operation and return
 	if _, ok := responseMap["operationType"]; ok {
 		event := StreamEvent{}
 		err = json.Unmarshal(req.Body, &event)
@@ -146,12 +147,29 @@ func Handle(req handler.Request) (handler.Response, error) {
 }
 
 func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
+	var filteredNodes []SyncmeshNode
+
 	db := getSyncmeshDB(ctx)
 	savedNodes, err := db.getSyncmeshNodes()
 	if err != nil {
 		log.Printf(err.Error())
+		return
 	}
-	for _, node := range savedNodes {
+	err, ownNode, externalNodes := findOwnNode(savedNodes)
+	if err == nil && request.Radius > 0 {
+		for _, node := range externalNodes {
+			if node.Distance == 0 {
+				calculateNodeDistance(ownNode, node)
+			}
+			if node.Distance <= float64(request.Radius) {
+				filteredNodes = append(filteredNodes, node)
+			}
+		}
+	} else {
+		log.Printf(err.Error())
+		filteredNodes = savedNodes
+	}
+	for _, node := range filteredNodes {
 		request.ExternalNodes = append(request.ExternalNodes, node.Address)
 	}
 	defer db.closeDB()
