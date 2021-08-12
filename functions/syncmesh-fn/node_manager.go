@@ -15,6 +15,7 @@ const MetaDB = "syncmesh_meta"
 const NodeCollection = "nodes"
 
 type SyncmeshNode struct {
+	ID         string  `bson:"_id" json:"_id"`
 	Address    string  `bson:"address" json:"address"`
 	Lat        float64 `bson:"lat" json:"lat,omitempty"`
 	Lon        float64 `bson:"lon" json:"lon,omitempty"`

@@ -34,3 +34,19 @@ func findOwnNode(nodes []SyncmeshNode) (error, SyncmeshNode, []SyncmeshNode) {
 	}
 	return errors.New("no own node found"), SyncmeshNode{}, nodes
 }
+
+func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
+	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
+	size := float64(len(sensors))
+	// sum all values
+	for _, item := range sensors {
+		final.AverageHumidity += item.Humidity
+		final.AverageTemperature += item.Temperature
+		final.AveragePressure += item.Pressure
+	}
+	// calculate the averages
+	final.AverageHumidity /= size
+	final.AverageTemperature /= size
+	final.AveragePressure /= size
+	return final
+}

@@ -9,6 +9,7 @@ import (
 	handler "github.com/openfaas/templates-sdk/go-http"
 	"log"
 	"net/http"
+	"sort"
 )
 
 var db mongoDB
@@ -158,9 +159,16 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	err, ownNode, externalNodes := findOwnNode(savedNodes)
 	if err == nil && request.Radius > 0 {
 		for _, node := range externalNodes {
+			// if distance is not available (i.e. 0)...
 			if node.Distance == 0 {
-				calculateNodeDistance(ownNode, node)
+				// calculate the distance to our own node and update the node in the database
+				node.Distance = calculateNodeDistance(ownNode, node)
+				_, errUpdate := db.updateCreateNode(node, node.ID)
+				if errUpdate != nil {
+					log.Printf(errUpdate.Error())
+				}
 			}
+			// if distance is shorter than radius, add id to the filtered nodes
 			if node.Distance <= float64(request.Radius) {
 				filteredNodes = append(filteredNodes, node)
 			}
@@ -169,26 +177,15 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 		log.Printf(err.Error())
 		filteredNodes = savedNodes
 	}
+	// sort the filtered nodes by distance, if possible
+	sort.Slice(filteredNodes, func(i, j int) bool {
+		return filteredNodes[i].Distance < filteredNodes[j].Distance
+	})
+	// append the filtered nodes to the external nodes
 	for _, node := range filteredNodes {
 		request.ExternalNodes = append(request.ExternalNodes, node.Address)
 	}
 	defer db.closeDB()
-}
-
-func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
-	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
-	size := float64(len(sensors))
-	// sum all values
-	for _, item := range sensors {
-		final.AverageHumidity += item.Humidity
-		final.AverageTemperature += item.Temperature
-		final.AveragePressure += item.Pressure
-	}
-	// calculate the averages
-	final.AverageHumidity /= size
-	final.AverageTemperature /= size
-	final.AveragePressure /= size
-	return final
 }
 
 func executeQuery(query string, schema graphql.Schema, vars map[string]interface{}) *graphql.Result {
