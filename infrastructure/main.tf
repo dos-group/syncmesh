@@ -55,7 +55,7 @@ locals {
   # This is an array with all location the nodes will be deployed in. 
   # The first element will also host client (and server)
   nodes_selection = {
-    "wihtout-latency-3" : [
+    "without-latency-3" : [
       {
         region   = "us-central1"
         location = "us-central1-a",
