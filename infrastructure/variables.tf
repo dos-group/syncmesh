@@ -8,6 +8,12 @@ variable "public_access" {
   default = true
 }
 
+variable "machine_type" {
+  type        = string
+  default     = "f1-micro"
+  description = "The Machine Type used for all VMs"
+}
+
 variable "seperator_request_ip" {
   type        = string
   default     = "92.60.39.199"

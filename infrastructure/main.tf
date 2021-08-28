@@ -168,7 +168,7 @@ resource "google_compute_instance" "nodes" {
     index => vm
   }
   name         = "${local.name_prefix}-node-instance-${each.value.number}"
-  machine_type = "f1-micro"
+  machine_type = var.machine_type
 
   tags = ["demo-vm-instance"]
   metadata = {
@@ -196,7 +196,7 @@ resource "google_compute_instance" "nodes" {
 
 resource "google_compute_instance" "client" {
   name         = "${local.name_prefix}-client-instance"
-  machine_type = "f1-micro"
+  machine_type = var.machine_type
 
   tags = ["demo-vm-instance"]
   metadata = {
@@ -224,7 +224,7 @@ resource "google_compute_instance" "client" {
 resource "google_compute_instance" "central_server" {
   count        = var.scenario == "baseline" || var.scenario == "advanced-mongo" ? 1 : 0
   name         = "${local.name_prefix}-central-server-instance"
-  machine_type = "f1-micro"
+  machine_type = var.machine_type
 
   tags = ["demo-vm-instance"]
   metadata = {
@@ -252,7 +252,7 @@ resource "google_compute_instance" "central_server" {
 
 resource "google_compute_instance" "test-orchestrator" {
   name         = "${local.name_prefix}-test-orchestrator"
-  machine_type = "f1-micro"
+  machine_type = var.machine_type
 
   tags = ["demo-vm-instance"]
   metadata = {
