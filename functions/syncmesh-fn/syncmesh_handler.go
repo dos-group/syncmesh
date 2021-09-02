@@ -3,7 +3,6 @@ package function
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -41,6 +40,7 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 	for _, address := range request.ExternalNodes {
 		err, body := makeExternalRequest(request, address)
 		if err != nil {
+			log.Println(err)
 			continue
 		}
 		// convert response to response struct
@@ -107,7 +107,7 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 		return err, nil
 	}
 	// make a POST request to external nodes, fetching the data
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+	req, err := zipRequest("POST", url, jsonBody)
 	if err != nil {
 		return err, nil
 	}
@@ -118,7 +118,7 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 		return err, nil
 	}
 	// read the response
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := unzipResponse(resp)
 	if err != nil {
 		return err, nil
 	}
@@ -129,6 +129,7 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 	return nil, body
 }
 
+// calculateAverages of sensor data for aggregation
 func calculateAverages(averagesList []AveragesResponse) AveragesResponse {
 	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
 	size := float64(len(averagesList))
