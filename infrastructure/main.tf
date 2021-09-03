@@ -249,6 +249,34 @@ resource "google_compute_instance" "central_server" {
   metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
 }
 
+resource "google_compute_instance" "config-server" {
+  count        = var.scenario == "advanced-mongo" ? 1 : 0
+  name         = "${local.name_prefix}-central-config-server"
+  machine_type = var.machine_type
+
+  tags = ["demo-vm-instance"]
+  metadata = {
+    ssh-keys = local.ssh_keys
+  }
+
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.container_optimized_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
+    network_ip = "10.1.0.3"
+    dynamic "access_config" {
+      for_each = var.public_access ? ["active"] : []
+      content {}
+    }
+  }
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/config-server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
+}
+
 
 resource "google_compute_instance" "test-orchestrator" {
   name         = "${local.name_prefix}-test-orchestrator"
@@ -299,7 +327,7 @@ resource "google_compute_firewall" "ssh-rule" {
 }
 
 resource "google_compute_firewall" "traffic-rule" {
-  name    = "${local.name_prefix}-rule-application-traffic"
+  name    = "${local.name_prefix}-rule"
   network = google_compute_network.vpc_network.name
 
   allow {

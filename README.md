@@ -40,6 +40,8 @@ terraform init
 terraform plan --out tfplan
 terraform apply tfplan
 
+terraform apply --var-file=experiment-3-syncmesh.tfvars
+
 # Find one of the IPs and connect to the instance:
 ssh -L 8080:ip:8080 username@ip
 
