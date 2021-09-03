@@ -5,6 +5,7 @@
 - minikube
 - kubectl
 - helm
+- terraform
 
 ## Scripts
 
