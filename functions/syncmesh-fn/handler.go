@@ -125,7 +125,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 
 	var body []byte
-	var header http.Header
+	header := make(http.Header)
 	// if gzip enable, zip the request and add a header, otherwise
 	_, present := os.LookupEnv("gzip")
 	if !present {
@@ -140,7 +140,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		}
 		body = buffer.Bytes()
 		// set a gzip header
-		header.Set("Compression", "gzip")
+		header = http.Header{"Compression": []string{"gzip"}}
 	}
 
 	// return the query result
