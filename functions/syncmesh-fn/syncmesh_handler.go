@@ -107,7 +107,7 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 		return err, nil
 	}
 	// make a POST request to external nodes, fetching the data
-	req, err := zipRequest("POST", url, jsonBody)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err, nil
 	}

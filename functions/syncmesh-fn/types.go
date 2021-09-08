@@ -34,7 +34,7 @@ var SensorType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-// SensorModel struct for parsing json/bson objects
+// SensorModel struct of a sensor measurement in the database
 type SensorModel struct {
 	ID          primitive.ObjectID `bson:"_id" json:"_id,omitempty"`
 	Lat         float64            `bson:"lat" json:"lat,omitempty"`
@@ -45,6 +45,7 @@ type SensorModel struct {
 	Timestamp   time.Time          `bson:"timestamp" json:"timestamp,omitempty"`
 }
 
+// SensorModelNoId is the same struct of a sensor, but without an ID
 type SensorModelNoId struct {
 	Lat         float64   `bson:"lat" json:"lat,omitempty"`
 	Lon         float64   `bson:"lon" json:"lon,omitempty"`
@@ -52,4 +53,23 @@ type SensorModelNoId struct {
 	Temperature float64   `bson:"temperature" json:"temperature,omitempty"`
 	Humidity    float64   `bson:"humidity" json:"humidity,omitempty"`
 	Timestamp   time.Time `bson:"timestamp" json:"timestamp,omitempty"`
+}
+
+// SyncMeshRequest is the structure of the request the syncmesh function receives
+type SyncMeshRequest struct {
+	Query         string                 `json:"query"`
+	Database      string                 `json:"database"`
+	Collection    string                 `json:"collection"`
+	Type          string                 `json:"request_type,omitempty"`
+	Radius        int                    `json:"radius"`
+	UseMetaData   bool                   `json:"use_meta_data"`
+	Variables     map[string]interface{} `json:"variables,omitempty"`
+	ExternalNodes []string               `json:"external_nodes,omitempty"`
+}
+
+// SyncmeshMetaRequest represents meta requests to the function for managing saved nodes
+type SyncmeshMetaRequest struct {
+	Type string       `json:"meta_type"`
+	ID   string       `json:"id,omitempty"`
+	Node SyncmeshNode `json:"node,omitempty"`
 }
