@@ -57,8 +57,8 @@ func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
 	return final
 }
 
-// zipRequest by turning a json byte array into a gzipped byte buffer
-func zipRequest(method string, url string, body []byte) (*http.Request, error) {
+//zip a body using gzip and write it into a byte buffer
+func zip(body []byte) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
 	var err error
 	g := gzip.NewWriter(&buf)
@@ -68,7 +68,13 @@ func zipRequest(method string, url string, body []byte) (*http.Request, error) {
 	if err = g.Close(); err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(method, url, &buf)
+	return &buf, nil
+}
+
+// zipRequest by zipping the body and setting it in the request with corresponding header
+func zipRequest(method string, url string, body []byte) (*http.Request, error) {
+	buffer, err := zip(body)
+	req, err := http.NewRequest(method, url, buffer)
 	req.Header.Set("Compression", "gzip")
 	return req, err
 }

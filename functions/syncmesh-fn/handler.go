@@ -140,9 +140,15 @@ func Handle(req handler.Request) (handler.Response, error) {
 		b = handleSyncMeshRequest(request, b.String())
 	}
 
+	// zip the query result
+	buffer, err := zip([]byte(b.String()))
+	if err != nil {
+		return handleEncodingError(err)
+	}
+
 	// return the query result
 	return handler.Response{
-		Body:       []byte(b.String()),
+		Body:       []byte(buffer.String()),
 		StatusCode: http.StatusOK,
 	}, err
 }
