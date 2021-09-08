@@ -75,13 +75,13 @@ func zip(body []byte) (*bytes.Buffer, error) {
 func zipRequest(method string, url string, body []byte) (*http.Request, error) {
 	buffer, err := zip(body)
 	req, err := http.NewRequest(method, url, buffer)
-	req.Header.Set("Compression", "gzip")
+	req.Header.Set("Content-Encoding", "gzip")
 	return req, err
 }
 
 // unzipResponse by decompressing the response body and returning the bytestream
 func unzipResponse(resp *http.Response) ([]byte, error) {
-	switch resp.Header.Get("Compression") {
+	switch resp.Header.Get("Content-Encoding") {
 	case "gzip":
 		reader, err := gzip.NewReader(resp.Body)
 		defer func(reader io.ReadCloser) {

@@ -140,7 +140,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		}
 		body = buffer.Bytes()
 		// set a gzip header
-		header = http.Header{"Compression": []string{"gzip"}}
+		header = http.Header{"Content-Encoding": []string{"gzip"}}
 	}
 
 	// return the query result
