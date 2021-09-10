@@ -12,7 +12,7 @@ user=$(whoami)
 
 
 hostName=$(hostname)
-iterator=$\{hostName: -1\}
+iterator=$(echo $hostName| cut -c 56)
 
 
 sudo apt update
@@ -80,31 +80,3 @@ replication:
   " > /etc/mongod.conf
 
 sudo mongod --config /etc/mongod.conf &
-sleep 10
-
-
-
-#mongo --host $ShardIP:27017 <<EOF
-#rs.initiate({
-#  _id: "shard$iterator",
-#  members:  [
-#    {_id:0, host:  "$ShardIP:27017"}
-#  ]
-#})
-#EOF
-
-#printf "rs.initiate({
-#  _id: \"shard$iterator\",
-#  members:  [
-#    {_id:0, host:  \"$ShardIP:27017\"}
-#  ]
-#})" > /home/$user/mongoShardConfig.js
-
-#sudo mongo < /home/$user/mongoShardConfig.js
-
-mongo -eval "rs.initiate({
-  _id: \"shard$iterator\",
-  members:  [
-    {_id:0, host:  \"10.$iterator.0.1$iterator:27017\"}
-  ]
-})"

@@ -71,6 +71,44 @@ sharding:
 
 sudo mongos --config /etc/mongod.conf &
 
+mongo --host 10.1.0.4:27017 <<EOF
+rs.initiate({
+  _id: "configserver01",
+  configsvr: true,
+  members:  [
+    {_id:0, host:  "10.1.0.4:27017"}
+  ]
+})
+EOF
+
+mongo --host 10.1.0.11:27017 <<EOF
+rs.initiate({
+  _id: "shard1",
+  members:  [
+    {_id:0, host:  "10.1.0.11:27017"}
+  ]
+})
+EOF
+
+mongo --host 10.2.0.12:27017 <<EOF
+rs.initiate({
+  _id: "shard2",
+  members:  [
+    {_id:0, host:  "10.2.0.12:27017"}
+  ]
+})
+EOF
+
+mongo --host 10.3.0.13:27017 <<EOF
+rs.initiate({
+  _id: "shard3",
+  members:  [
+    {_id:0, host:  "10.3.0.13:27017"}
+  ]
+})
+EOF
+
+
 sleep 10
 #mongosh --host 35.242.219.104 --port 27017
 

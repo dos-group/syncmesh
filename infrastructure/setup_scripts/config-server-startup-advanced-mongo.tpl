@@ -67,8 +67,8 @@ net:
 processManagement:
   timeZoneInfo: /usr/share/zoneinfo
 
-security:
-  keyFile: 
+#security:
+#  keyFile: 
 
 replication:
   replSetName: configserver01
@@ -79,32 +79,3 @@ sharding:
   " > /etc/mongod.conf
 
 sudo mongod --config  /etc/mongod.conf &
-sleep 10
-
-#mongo --host 10.1.0.4:27017 <<EOF
-#rs.initiate({
-#  _id: "configserver01",
-#  configsvr: true,
-#  members:  [
-#    {_id:0, host:  "10.1.0.4:27017"}
-#  ]
-#})
-#EOF
-
-#sudo printf "rs.initiate({
-#  _id: \"configserver01\",
-#  configsvr: true,
-#  members:  [
-#    {_id:0, host:  \"10.1.0.4:27017\"}
-#  ]
-#})" > /home/$user/mongoShardConfig.js
-
-#mongo < /home/$user/mongoShardConfig.js
-
-mongo -eval "rs.initiate({
-  _id: \"configserver01\",
-  configsvr: true,
-  members:  [
-    {_id:0, host:  \"10.1.0.4:27017\"}
-  ]
-})"
