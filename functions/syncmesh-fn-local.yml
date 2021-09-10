@@ -12,4 +12,4 @@ functions:
     write_debug: true
     environment:
       mongo_url: openfaas-db-mongodb-0.openfaas-db-mongodb-headless.openfaas-fn.svc.cluster.local/?directConnection=true
-      #gzip: true #(uncomment to enable)
+      gzip: true
