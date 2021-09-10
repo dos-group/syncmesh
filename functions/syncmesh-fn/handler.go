@@ -9,27 +9,11 @@ import (
 	handler "github.com/openfaas/templates-sdk/go-http"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 )
 
 var db mongoDB
-
-type SyncMeshRequest struct {
-	Query         string                 `json:"query"`
-	Database      string                 `json:"database"`
-	Collection    string                 `json:"collection"`
-	Type          string                 `json:"request_type,omitempty"`
-	Radius        int                    `json:"radius"`
-	UseMetaData   bool                   `json:"use_meta_data"`
-	Variables     map[string]interface{} `json:"variables,omitempty"`
-	ExternalNodes []string               `json:"external_nodes,omitempty"`
-}
-
-type SyncmeshMetaRequest struct {
-	Type string       `json:"meta_type"`
-	ID   string       `json:"id,omitempty"`
-	Node SyncmeshNode `json:"node,omitempty"`
-}
 
 // Handle a function invocation
 func Handle(req handler.Request) (handler.Response, error) {
@@ -140,10 +124,30 @@ func Handle(req handler.Request) (handler.Response, error) {
 		b = handleSyncMeshRequest(request, b.String())
 	}
 
+	var body []byte
+	header := make(http.Header)
+	// if gzip enable, zip the request and add a header, otherwise
+	_, present := os.LookupEnv("gzip")
+	if !present {
+		log.Println("gzip not enabled")
+		body = b.Bytes()
+	} else {
+		log.Println("gzip enabled, zipping request response...")
+		// zip the query result
+		buffer, err := zip(b.Bytes())
+		if err != nil {
+			return handleEncodingError(err)
+		}
+		body = buffer.Bytes()
+		// set a gzip header
+		header = http.Header{"Content-Encoding": []string{"gzip"}}
+	}
+
 	// return the query result
 	return handler.Response{
-		Body:       []byte(b.String()),
+		Body:       body,
 		StatusCode: http.StatusOK,
+		Header:     header,
 	}, err
 }
 

@@ -1,8 +1,14 @@
 package function
 
 import (
+	"bytes"
+	"compress/gzip"
 	"errors"
+	"io"
+	"io/ioutil"
+	"log"
 	"math"
+	"net/http"
 )
 
 const earthRadius = 6371
@@ -49,4 +55,49 @@ func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
 	final.AverageTemperature /= size
 	final.AveragePressure /= size
 	return final
+}
+
+//zip a body using gzip and write it into a byte buffer
+func zip(body []byte) (*bytes.Buffer, error) {
+	var buf bytes.Buffer
+	var err error
+	g := gzip.NewWriter(&buf)
+	if _, err = g.Write(body); err != nil {
+		return nil, err
+	}
+	if err = g.Close(); err != nil {
+		return nil, err
+	}
+	return &buf, nil
+}
+
+// zipRequest by zipping the body and setting it in the request with corresponding header
+func zipRequest(method string, url string, body []byte) (*http.Request, error) {
+	buffer, err := zip(body)
+	req, err := http.NewRequest(method, url, buffer)
+	req.Header.Set("Content-Encoding", "gzip")
+	return req, err
+}
+
+// unzipResponse by decompressing the response body and returning the bytestream
+func unzipResponse(resp *http.Response) ([]byte, error) {
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err := gzip.NewReader(resp.Body)
+		defer func(reader io.ReadCloser) {
+			err := reader.Close()
+			if err != nil {
+				log.Println(err)
+			}
+		}(reader)
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(reader)
+		if err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), err
+	default:
+		return ioutil.ReadAll(resp.Body)
+	}
+
 }
