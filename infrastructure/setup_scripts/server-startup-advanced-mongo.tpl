@@ -108,17 +108,30 @@ rs.initiate({
 })
 EOF
 
+mongo --host 10.1.0.3:27017 <<EOF
+sh.addShard("shard1/10.1.0.11:27017")
+sh.addShard("shard2/10.2.0.12:27017")
+sh.addShard("shard3/10.3.0.13:27017")
+db.collection.createIndex(
+  {
+      "sensor_id": 1
+  },
+  {
+      sparse: true,
+      expireAfterSeconds: 3600
+  }
+)
+EOF
 
-sleep 10
+
+#sleep 10
 #mongosh --host 35.242.219.104 --port 27017
 
 
 
 #sh.addShard("shard01/34.141.45.127:27017")
 
-#sh.addShard("shard1/34.132.202.59:27017")
-#sh.addShard("shard2/34.80.19.221:27017")
-#sh.addShard("shard3/34.88.177.75:27017")
+
 
 
 
@@ -127,16 +140,7 @@ sleep 10
 #sh.shardCollection("test.user", { name : "hashed" } )
 #sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
 
-#db.collection.createIndex(
-#  {
-#      "age": 1
-#  },
-#  {
-#      unique: true,
-#      sparse: true,
-#      expireAfterSeconds: 3600
-#  }
-#)
+
 
 #db.createCollection("user")
 
