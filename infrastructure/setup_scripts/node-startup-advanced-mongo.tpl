@@ -1,91 +1,110 @@
-# TODO
-
-
-
-
 #!/bin/bash
-# Script for setting up mongodb instances and enabling sharding
-# Assumption: all VMs have mongodb installed and can be accessed by each other
 
-#https://www.youtube.com/watch?v=j1eCzBueWoQ&list=LL&index=2
-#https://docs.mongodb.com/manual/tutorial/deploy-shard-cluster/
+pwd
+
+echo "Hello from the Setup script!"
+
+
+ShardIP=$(dig @resolver4.opendns.com myip.opendns.com +short)
+PORT=27017
+
+user=$(whoami)
+
+
+hostName=$(hostname)
+iterator=$\{hostName: -1\}
+
+
+sudo apt update
+
+# Install Python for data distribution
+sudo apt-get install -y python3.6 python3-pip
+
+pip install requests
+
+
+# Install Mongo
 #https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
-#helpful for debugging
-#ps -ef | grep mongod
-#mongo --port
-#db.data.find().pretty()
-#sh.addShard() 
-
-#sudo systemctl start mongod
-username="kreutz"
-MASTER_IP="34.72.103.114"
-MASTER_IP_intern="10.128.0.3"
-PORT="27017"
-
-shard01_IP="34.141.25.222"
-shard01_IP_intern="10.156.0.11"
+wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+sudo systemctl start mongod
 
 
+sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
 
-# CONFIG-SERVER node
-#create config server replica set
-mkdir shard01
-mongod --configsvr --replSet conf --dbpath shard01 --bind_ip localhost,$MASTER_IP
+sudo systemctl daemon-reload
+sudo systemctl start mongod
+sudo systemctl status mongod
+sudo systemctl enable mongod
+sudo systemctl stop mongod
 
-#inititate replica set
-mongosh --host $MASTER_IP --port $PORT
-"rs.initiate(
-  {
-    _id : "conf",
-    configsvr: true,
-    members: [
-      { _id : 0, host : "$MASTER_IP:$PORT" }
-    ]
-  }
-)"
-rs.status()
+#sudo systemctl status mongod
 
 
-#Shard-nodes
-#create replica set (for each replica set member | for each sharded node)
-mkdir shard01
-mongod --shardsvr --replSet sharding  --dbpath shard01 --bind_ip localhost,$shard01_IP
+#Step 2 - Create Shards and connect
 
-#initiate replica set
-mongosh --host $shard01_IP --port $PORT
-"rs.initiate(
-  {
-    _id : "sharding",
-    members: [
-      { _id : 0, host : "$shard01:$PORT" }
-    ]
-  }
-)"
-rs.status()
+printf "
+# mongod.conf
 
-#START Sharding connection
-mongos --configdb conf/$MASTER_IP:$PORT --bind_ip localhost,$MASTER_IP
-#mongos --configdb conf/cfg1.example.net:27019,cfg2.example.net:27019,cfg3.example.net:27019
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
 
+# Where and how to store data.
+storage:
+  dbPath: /var/lib/mongodb
+  journal:
+    enabled: true
 
-#Connect to sharded cluster
-mongosh --host $MASTER_IP --port $PORT
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
 
-#Add our shard nodes
-sh.addShard( "sharding/$shard01:$PORT")
+net:
+  port: 27017
+  bindIp: 0.0.0.0
 
-#Enable sharding for certain DB (from mongosh instance)
-sh.enableSharding("<database>")
-#or shard collection
-#sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+# how the process runs
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+
+sharding:
+    clusterRole: shardsvr
+replication:
+    replSetName: shard$iterator
+
+  " > /etc/mongod.conf
+
+sudo mongod --config /etc/mongod.conf &
+sleep 10
 
 
 
+#mongo --host $ShardIP:27017 <<EOF
+#rs.initiate({
+#  _id: "shard$iterator",
+#  members:  [
+#    {_id:0, host:  "$ShardIP:27017"}
+#  ]
+#})
+#EOF
 
+#printf "rs.initiate({
+#  _id: \"shard$iterator\",
+#  members:  [
+#    {_id:0, host:  \"$ShardIP:27017\"}
+#  ]
+#})" > /home/$user/mongoShardConfig.js
 
+#sudo mongo < /home/$user/mongoShardConfig.js
 
-
-
-#Import CSV, locally into nodes
-mongoimport -h $MASTER_IP_intern:$PORT --type csv -d sensor_data -c data --headerline --drop /import.csv
+mongo -eval "rs.initiate({
+  _id: \"shard$iterator\",
+  members:  [
+    {_id:0, host:  \"10.$iterator.0.1$iterator:27017\"}
+  ]
+})"

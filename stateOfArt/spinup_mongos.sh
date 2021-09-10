@@ -37,3 +37,21 @@ sh.addShard("shard01/34.141.45.127:27017")
 
 # Enable Sharding for database
 sh.enableSharding("database")
+
+
+# Shard Collection
+sh.shardCollection("test.user", { name : "hashed" } )
+#sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+
+db.collection.createIndex(
+  {
+      "age": 1
+  },
+  {
+      unique: true,
+      sparse: true,
+      expireAfterSeconds: 3600
+  }
+)
+
+#db.user.find()

@@ -38,4 +38,4 @@ rs.initiate({
 		{_id:0, host: "34.141.45.127:27017"}
 	]
 })
-#rs.conf
+#rs.conf()
