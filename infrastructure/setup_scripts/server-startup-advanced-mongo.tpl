@@ -85,6 +85,27 @@ rs.initiate({
   ]
 })
 EOF
+
+#ToDo Loop over shards, to allow for more than 3 shards
+
+# count=1
+# while read shardIP; do
+#   until mongo --host $shardIP --eval "print(\"waited for connection\")"
+#   do
+#     sleep 60
+#   done
+#   mongo --host $shardIP:27017 <<EOF
+#   rs.initiate({
+#     _id: "shard$count",
+#     members:  [
+#       {_id:0, host:  "$shardIP:27017"}
+#     ]
+#   })
+# EOF
+# (( count++ ))
+  
+# done <shard.txt
+
 until mongo --host 10.1.0.11 --eval "print(\"waited for connection\")"
   do
     sleep 60
@@ -141,6 +162,10 @@ db.collection.createIndex(
       expireAfterSeconds: 3600
   }
 )
+use syncmesh
+db.createCollection("sensor_data")
+sh.enableSharding("syncmesh")
+sh.shardCollection("syncmesh.sensor_data", {sensor_id: "hashed"})
 EOF
 
 
