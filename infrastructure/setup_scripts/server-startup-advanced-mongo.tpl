@@ -71,6 +71,11 @@ sharding:
 
 sudo mongos --config /etc/mongod.conf &
 
+until mongo --host 10.1.0.4 --eval "print(\"waited for connection\")"
+  do
+    sleep 60
+  done
+
 mongo --host 10.1.0.4:27017 <<EOF
 rs.initiate({
   _id: "configserver01",
@@ -80,6 +85,11 @@ rs.initiate({
   ]
 })
 EOF
+until mongo --host 10.1.0.11 --eval "print(\"waited for connection\")"
+  do
+    sleep 60
+  done
+
 
 mongo --host 10.1.0.11:27017 <<EOF
 rs.initiate({
@@ -90,6 +100,11 @@ rs.initiate({
 })
 EOF
 
+until mongo --host 10.2.0.12 --eval "print(\"waited for connection\")"
+  do
+    sleep 60
+  done
+
 mongo --host 10.2.0.12:27017 <<EOF
 rs.initiate({
   _id: "shard2",
@@ -98,6 +113,11 @@ rs.initiate({
   ]
 })
 EOF
+
+until mongo --host 10.3.0.13 --eval "print(\"waited for connection\")"
+  do
+    sleep 60
+  done
 
 mongo --host 10.3.0.13:27017 <<EOF
 rs.initiate({
