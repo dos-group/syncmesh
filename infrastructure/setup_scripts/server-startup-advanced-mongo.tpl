@@ -9,11 +9,11 @@ PORT=27017
 
 
 ## Paste all IPs of the Nodes 
-#cat > nodes.txt <<EOF
-#%{ for instance in instances ~}
-#${instance.network_interface.0.network_ip}
-#%{ endfor ~}
-#EOF
+cat > nodes.txt <<EOF
+%{ for instance in instances ~}
+${instance.network_interface.0.network_ip}
+%{ endfor ~}
+EOF
 
 
 sudo apt update
@@ -86,68 +86,26 @@ rs.initiate({
 })
 EOF
 
-#ToDo Loop over shards, to allow for more than 3 shards
+#Loop over shards and configure them if mongod ready
 
-# count=1
-# while read shardIP; do
-#   until mongo --host $shardIP --eval "print(\"waited for connection\")"
-#   do
-#     sleep 60
-#   done
-#   mongo --host $shardIP:27017 <<EOF
-#   rs.initiate({
-#     _id: "shard$count",
-#     members:  [
-#       {_id:0, host:  "$shardIP:27017"}
-#     ]
-#   })
-# EOF
-# (( count++ ))
+ count=1
+ while read shardIP; do
+   until mongo --host $shardIP --eval "print(\"waited for connection\")"
+   do
+     sleep 60
+   done
+   mongo --host $shardIP:27017 <<EOF
+   rs.initiate({
+     _id: "shard$count",
+     members:  [
+       {_id:0, host:  "$shardIP:27017"}
+     ]
+   })
+EOF
+ (( count++ ))
   
-# done <shard.txt
+done <nodes.txt
 
-until mongo --host 10.1.0.11 --eval "print(\"waited for connection\")"
-  do
-    sleep 60
-  done
-
-
-mongo --host 10.1.0.11:27017 <<EOF
-rs.initiate({
-  _id: "shard1",
-  members:  [
-    {_id:0, host:  "10.1.0.11:27017"}
-  ]
-})
-EOF
-
-until mongo --host 10.2.0.12 --eval "print(\"waited for connection\")"
-  do
-    sleep 60
-  done
-
-mongo --host 10.2.0.12:27017 <<EOF
-rs.initiate({
-  _id: "shard2",
-  members:  [
-    {_id:0, host:  "10.2.0.12:27017"}
-  ]
-})
-EOF
-
-until mongo --host 10.3.0.13 --eval "print(\"waited for connection\")"
-  do
-    sleep 60
-  done
-
-mongo --host 10.3.0.13:27017 <<EOF
-rs.initiate({
-  _id: "shard3",
-  members:  [
-    {_id:0, host:  "10.3.0.13:27017"}
-  ]
-})
-EOF
 
 mongo --host 10.1.0.3:27017 <<EOF
 sh.addShard("shard1/10.1.0.11:27017")
