@@ -14,16 +14,6 @@ import (
 const MetaDB = "syncmesh_meta"
 const NodeCollection = "nodes"
 
-type SyncmeshNode struct {
-	ID         string  `bson:"_id" json:"_id"`
-	Address    string  `bson:"address" json:"address"`
-	Lat        float64 `bson:"lat" json:"lat,omitempty"`
-	Lon        float64 `bson:"lon" json:"lon,omitempty"`
-	Distance   float64 `bson:"distance" json:"distance,omitempty"`
-	OwnNode    bool    `bson:"own_node" json:"own_node"`
-	Subscribed bool    `bson:"subscribed" json:"subscribed"`
-}
-
 func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()

@@ -10,11 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type mongoDB struct {
-	session    *mongo.Client
-	collection *mongo.Collection
-}
-
 // connect to the database
 func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	if len(db) == 0 || len(collection) == 0 {

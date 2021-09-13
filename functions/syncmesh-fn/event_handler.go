@@ -10,16 +10,6 @@ import (
 	"net/http"
 )
 
-type DocKey struct {
-	ID string `bson:"_id"`
-}
-
-type StreamEvent struct {
-	OperationType string                 `bson:"operationType"` // can be "insert", "update" or "delete"
-	FullDocument  map[string]interface{} `bson:"fullDocument"`
-	DocumentKey   DocKey                 `bson:"documentKey"`
-}
-
 func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()
