@@ -85,7 +85,7 @@ locals {
       },
       {
         region   = "europe-north1"
-        location = "europe-north1-b"
+        location = "europe-north1-a"
         number   = 3
       },
     ],
@@ -268,7 +268,7 @@ resource "google_compute_instance" "config-server" {
 
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
-    network_ip = "10.1.0.3"
+    network_ip = "10.1.0.4"
     dynamic "access_config" {
       for_each = var.public_access ? ["active"] : []
       content {}

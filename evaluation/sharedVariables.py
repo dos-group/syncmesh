@@ -9,7 +9,7 @@ ip_orchestrator = "10.1.0.255"
 ip_seperator = "92.60.39.199"
 
 allPreKnownServers = [ip_client, ip_server]
-experiments = ["experiment-baseline-with-latency", "experiment-syncmesh-with-latency-3", "experiment-syncmesh-with-latency-6"]
+experiments = ["experiment-baseline-with-latency-3", "experiment-syncmesh-with-latency-3", "experiment-syncmesh-with-latency-6", "experiment-baseline-with-latency-6"]
 
 
 def loadData(file):
@@ -30,4 +30,18 @@ def loadData(file):
     df = df.astype({'jsonPayload.connection.dest_port': 'int32'})
     # df.info()
     df.set_index('timestamp', inplace=True)
+    return df
+
+def loadDataCSV(file):
+    df = pd.read_csv(file)
+
+    # df = df.astype({
+    #     'jsonPayload.bytes_sent': 'int32',
+    #     'jsonPayload.rtt_msec': 'int32'
+    #     })
+    df = df.astype({'jsonPayload.connection.src_port': 'int32'})
+    df = df.astype({'jsonPayload.connection.dest_port': 'int32'})
+    # df.info()
+    df.set_index('timestamp', inplace=True)
+    df.index = pd.to_datetime(df.index)
     return df
