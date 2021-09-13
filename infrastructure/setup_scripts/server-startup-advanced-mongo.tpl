@@ -7,6 +7,8 @@ echo "Hello from the Setup script!"
 Mongos_IP=$(dig @resolver4.opendns.com myip.opendns.com +short)
 PORT=27017
 
+currentPath=$(pwd)
+
 
 ## Paste all IPs of the Nodes 
 cat > nodes.txt <<EOF
@@ -42,6 +44,16 @@ sudo systemctl enable mongod
 #Step 3 - Create Mongos and connect
 
 
+## Keyfile-Authentication Create & Distribute to mongod/mongos
+#sudo openssl rand -base64 756 > /tmp/key
+#sudo chmod 400 /tmp/key
+
+#while read internalIP; do
+#    echo "SCP KeyFile $internalIP"
+#    scp -o StrictHostKeyChecking=no /tmp/key $internalIP:/tmp/
+#    ssh -o StrictHostKeyChecking=no $internalIP "sudo chmod 400  /tmp/key"
+#done < /nodes.txt
+
 printf "
 # mongod.conf
 
@@ -62,6 +74,9 @@ net:
 processManagement:
   timeZoneInfo: /usr/share/zoneinfo
 
+#security:
+#  keyFile: /tmp/key
+
 sharding:
   configDB: configserver01/10.1.0.4:27017
 
@@ -75,6 +90,7 @@ until mongo --host 10.1.0.4 --eval "print(\"waited for connection\")"
   do
     sleep 60
   done
+
 
 mongo --host 10.1.0.4:27017 <<EOF
 rs.initiate({

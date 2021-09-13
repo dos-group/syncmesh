@@ -68,7 +68,7 @@ processManagement:
   timeZoneInfo: /usr/share/zoneinfo
 
 #security:
-#  keyFile: 
+#  keyFile: /tmp/key
 
 replication:
   replSetName: configserver01

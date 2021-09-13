@@ -72,6 +72,9 @@ net:
 processManagement:
   timeZoneInfo: /usr/share/zoneinfo
 
+#security:
+#  keyFile: /tmp/key
+  
 sharding:
     clusterRole: shardsvr
 replication:
@@ -154,5 +157,10 @@ while IFS=, read -r sensor_id location lat lon timestamp pressure temperature hu
 done 
 } < import.csv
 mv data.csv import30.csv
+
+
+#Import the Data to MongoDB (local shard)
+
+mongoimport -h $ShardIP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv
 
 #"mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv"
