@@ -11,7 +11,10 @@ SLEEP_TIME=120
 PRE_TIME=60
 
 seperate () {
-    curl "https://$SEPERATOR_IP"
+    echo "Waiting for Seperation Request ($SLEEP_TIME s)"
+    sleep $SLEEP_TIME
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "curl 'https://$SEPERATOR_IP'"
+    echo "Waiting after Seperation Request ($PRE_TIME s)"
     sleep $PRE_TIME
 }
 

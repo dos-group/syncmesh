@@ -46,7 +46,51 @@ echo "Waiting for everything to be set up (static timer)"
 # 10 Minutes should be more than sufficient
 sleep 600
 
+echo "Setting up TCP Dump"
+
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c ' nohup /usr/sbin/tcpdump -ni any net 10.0.0.0/8 or host ${seperator} -w /capture.pcap -s 96 >> /tcpdump.log 2>&1 &'" < /dev/null
+done < /nodes.txt
+
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c ' nohup /usr/sbin/tcpdump -ni any net 10.0.0.0/8 or host ${seperator} -w /capture.pcap -s 96 >> /tcpdump.log 2>&1 &'" < /dev/null
+done < /client.txt
+
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c ' nohup /usr/sbin/tcpdump -ni any net 10.0.0.0/8 or host ${seperator} -w /capture.pcap -s 96 >> /tcpdump.log 2>&1 &'" < /dev/null
+done < /server.txt
+
+
+
 echo "Executing Scenarios"
 
 # Execute
 bash test.sh
+
+echo "Collecting TCP Dumps"
+
+
+mkdir /tmp/captures
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c 'killall tcpdump'" < /dev/null
+    scp $internalIP:/capture.pcap /tmp/captures/$internalIP.pcap
+done < /nodes.txt
+
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c 'killall tcpdump'" < /dev/null
+    scp $internalIP:/capture.pcap /tmp/captures/$internalIP.pcap
+done < /client.txt
+
+while read internalIP; do
+    echo "SHH $internalIP"
+    ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c 'killall tcpdump'" < /dev/null
+    scp $internalIP:/capture.pcap /tmp/captures/$internalIP.pcap
+done < /server.txt
+
+apt install zip -y
+zip -r /captures.zip /tmp/captures/
