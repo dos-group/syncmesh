@@ -22,14 +22,23 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 	for _, node := range nodes {
 		if node.Subscribed {
 			request := SyncMeshRequest{
-				Query:         "{sensors(limit: 1, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-08-01T00:00:00Z\"){temperature humidity timestamp}}",
-				Database:      "syncmesh",
-				Collection:    "sensor_data",
-				Type:          "collect",
-				UseMetaData:   false,
-				Variables:     nil,
-				ExternalNodes: nil,
+				Query:      "",
+				Database:   "syncmesh",
+				Collection: "sensor_data",
 			}
+			switch event.OperationType {
+			case "insert":
+				resp, err := json.Marshal(event.FullDocument)
+				if err != nil {
+					log.Println(err)
+				}
+				request.Query = "mutation{addSensors(sensors: [" + string(resp) + "])}"
+			case "delete":
+				request.Query = "mutation{deleteSensor(_id: \\\"" + event.DocumentKey.ID + "\\\"){temperature}}"
+			default:
+				continue
+			}
+
 			jsonBody, err := json.Marshal(&request)
 			if err != nil {
 				return nil, err
