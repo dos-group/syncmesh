@@ -24,15 +24,19 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 		Database:   "syncmesh",
 		Collection: "sensor_data",
 	}
+	resp, err := json.Marshal(event.FullDocument)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 	switch event.OperationType {
 	case "insert":
-		resp, err := json.Marshal(event.FullDocument)
-		if err != nil {
-			log.Println(err)
-		}
-		request.Query = "mutation{addSensors(sensors: [" + string(resp) + "])}"
+
+		request.Query = fmt.Sprintf("mutation{addSensors(sensors: [%s])}", string(resp))
+	case "update":
+		request.Query = fmt.Sprintf("mutation{update(_id: %s, sensor: %s){temperature}}", event.DocumentKey.ID, string(resp))
 	case "delete":
-		request.Query = "mutation{deleteSensor(_id: \\\"" + event.DocumentKey.ID + "\\\"){temperature}}"
+		request.Query = fmt.Sprintf("mutation{deleteSensor(_id: \\\"%s\\\"){temperature}}", event.DocumentKey.ID)
 	default:
 		return nil, err
 	}
