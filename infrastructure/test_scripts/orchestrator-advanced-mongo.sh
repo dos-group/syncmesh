@@ -23,7 +23,7 @@ uploadData() {
 
 while read internalIP; do
     echo "SHH $internalIP"
-    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv" < /dev/null
+    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h localhost:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv" < /dev/null
 done < /nodes.txt
 
 # Fix Dates
@@ -37,30 +37,30 @@ EOF
 "
 }
 
-# queryDataCollect() {
+queryDataCollect() {
 # # First Argument is the Start ISODate
 
-# # Maybe use .aggregate({ $replaceWith: "$pressure" })
-# read -r -d '' COMMAND <<EOF
-# use syncmesh
-# db.sensor_data.find({
-#     timestamp: {
-#         \$gte: ISODate("$1"),
-#         \$lt: ISODate("2017-07-31T23:59:59Z")
-#     }
-# }, { timestamp: 1, pressure: 1, temperature: 1, humidity: 1, _id: 0 }).toArray()
-# EOF
+ # Maybe use .aggregate({ $replaceWith: "$pressure" })
+read -r -d '' COMMAND <<EOF
+use syncmesh
+db.sensor_data.find({
+    timestamp: {
+        \$gte: ISODate("$1"),
+        \$lt: ISODate("2017-07-31T23:59:59Z")
+    }
+}, { timestamp: 1, pressure: 1, temperature: 1, humidity: 1, _id: 0 }).toArray()
+EOF
 
-# for i in $(seq $REPETITIONS)
-# do
-#     # Query Data 
-#     ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
-#     $COMMAND
-# EOF
-# " 1> /dev/null
-# echo "Finished Mongo Request"
-# done
-# }
+for i in $(seq $REPETITIONS)
+do
+    # Query Data 
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
+    $COMMAND
+EOF
+" 1> /dev/null
+echo "Finished Mongo Request"
+done
+}
 
 queryDataAggregate() {
 # First Argument is the Start ISODate
@@ -103,8 +103,8 @@ seperate
 # Collect
 echo "Scenario: Collect - 1 day"
 # Write Data Once to central database
-uploadData 1
-#queryDataCollect "2017-07-31T00:00:00Z"
+#uploadData 1
+queryDataCollect "2017-07-31T00:00:00Z"
 
 
 sleep $SLEEP_TIME
@@ -112,8 +112,8 @@ seperate
 
 echo "Scenario: Collect - 7 day"
 
-uploadData 7
-#queryDataCollect "2017-07-24T00:00:00Z"
+#uploadData 7
+queryDataCollect "2017-07-24T00:00:00Z"
 
 
 sleep $SLEEP_TIME
@@ -121,8 +121,8 @@ seperate
 
 echo "Scenario: Collect - 14 day"
 
-uploadData 14
-#queryDataCollect "2017-07-17T00:00:00Z"
+#uploadData 14
+queryDataCollect "2017-07-17T00:00:00Z"
 
 sleep $SLEEP_TIME
 seperate
@@ -130,7 +130,7 @@ seperate
 echo "Scenario: Collect - 30 day"
 
 uploadData 30
-#queryDataCollect "2017-06-30T00:00:00Z"
+queryDataCollect "2017-06-30T00:00:00Z"
 
 sleep $SLEEP_TIME
 seperate
@@ -139,8 +139,8 @@ seperate
 # Aggregate
 echo "Scenario: Aggregate - 1 day"
 # Write Data Once to central database
-uploadData 1
-#queryDataAggregate "2017-07-31T00:00:00Z"
+#uploadData 1
+queryDataAggregate "2017-07-31T00:00:00Z"
 
 
 sleep $SLEEP_TIME
@@ -148,7 +148,7 @@ seperate
 
 echo "Scenario: Aggregate - 7 day"
 
-uploadData 7
+#uploadData 7
 queryDataAggregate "2017-07-24T00:00:00Z"
 
 
@@ -157,7 +157,7 @@ seperate
 
 echo "Scenario: Aggregate - 14 day"
 
-uploadData 14
+#uploadData 14
 queryDataAggregate "2017-07-17T00:00:00Z"
 
 sleep $SLEEP_TIME
@@ -165,7 +165,7 @@ seperate
 
 echo "Scenario: Aggregate - 30 day"
 
-uploadData 30
+#uploadData 30
 queryDataAggregate "2017-06-30T00:00:00Z"
 
 sleep $SLEEP_TIME
