@@ -13,36 +13,38 @@ import (
 func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()
+	// fetch external nodes
 	nodes, err := db.getSyncmeshNodes()
 	if err != nil {
 		return nil, err
 	}
+	// create the event request body
+	request := SyncMeshRequest{
+		Query:      "",
+		Database:   "syncmesh",
+		Collection: "sensor_data",
+	}
+	switch event.OperationType {
+	case "insert":
+		resp, err := json.Marshal(event.FullDocument)
+		if err != nil {
+			log.Println(err)
+		}
+		request.Query = "mutation{addSensors(sensors: [" + string(resp) + "])}"
+	case "delete":
+		request.Query = "mutation{deleteSensor(_id: \\\"" + event.DocumentKey.ID + "\\\"){temperature}}"
+	default:
+		return nil, err
+	}
+	jsonBody, err := json.Marshal(&request)
+	if err != nil {
+		return nil, err
+	}
+	// iterate through saved external nodes and send out request
 	successCounter := 0
 	requestCounter := 0
 	for _, node := range nodes {
-		if node.Subscribed {
-			request := SyncMeshRequest{
-				Query:      "",
-				Database:   "syncmesh",
-				Collection: "sensor_data",
-			}
-			switch event.OperationType {
-			case "insert":
-				resp, err := json.Marshal(event.FullDocument)
-				if err != nil {
-					log.Println(err)
-				}
-				request.Query = "mutation{addSensors(sensors: [" + string(resp) + "])}"
-			case "delete":
-				request.Query = "mutation{deleteSensor(_id: \\\"" + event.DocumentKey.ID + "\\\"){temperature}}"
-			default:
-				continue
-			}
-
-			jsonBody, err := json.Marshal(&request)
-			if err != nil {
-				return nil, err
-			}
+		if node.Subscribed && !node.OwnNode {
 			req, err := http.NewRequest("POST", node.Address, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				return nil, err

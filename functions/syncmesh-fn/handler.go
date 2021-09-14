@@ -126,7 +126,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 
 	var body []byte
 	header := make(http.Header)
-	// if gzip enable, zip the request and add a header, otherwise
+	// if gzip enabled, zip the request and add a header, otherwise
 	_, present := os.LookupEnv("gzip")
 	if !present {
 		log.Println("gzip not enabled")
@@ -192,6 +192,7 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	defer db.closeDB()
 }
 
+// execute a GraphQL query on the local mongodb instance
 func executeQuery(query string, schema graphql.Schema, vars map[string]interface{}) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:         schema,
@@ -204,6 +205,7 @@ func executeQuery(query string, schema graphql.Schema, vars map[string]interface
 	return result
 }
 
+// handleEncodingError returns a generic encoding error response
 func handleEncodingError(err error) (handler.Response, error) {
 	return handler.Response{
 		Body:       []byte("Something went wrong encoding the result"),
