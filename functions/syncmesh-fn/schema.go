@@ -29,6 +29,10 @@ func initSchema() graphql.Schema {
 			"lon": &graphql.InputObjectFieldConfig{
 				Type: graphql.NewNonNull(graphql.Float),
 			},
+			"externalIP": &graphql.InputObjectFieldConfig{
+				Type:         graphql.NewNonNull(graphql.String),
+				DefaultValue: "",
+			},
 		},
 	})
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{

@@ -83,7 +83,7 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	return res.InsertedIDs, nil
 }
 
-func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
+func (db mongoDB) update(_id string, sensor interface{}, externalIP string) (interface{}, error) {
 	var err error
 	var updatedSensor SensorModel
 
@@ -94,6 +94,9 @@ func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	filter := bson.M{"_id": id}
+	if externalIP != "" {
+		filter = bson.M{"_id": id, "externalIP": externalIP}
+	}
 	update := bson.D{{"$set", sensor}}
 	err = db.collection.FindOneAndUpdate(ctx, filter, update).Decode(&updatedSensor)
 	if err != nil {

@@ -40,10 +40,15 @@ func deleteInTimeRange(p graphql.ResolveParams) (interface{}, error) {
 	return response(db.deleteInTimeRange(startTime, endTime))
 }
 
+type SensorInput struct {
+	externalIP string
+}
+
 func update(p graphql.ResolveParams) (interface{}, error) {
 	id := p.Args["_id"].(string)
+	externalIP := p.Args["sensor"].(SensorInput).externalIP
 	sensor := p.Args["sensor"].(interface{})
-	return response(db.update(id, sensor))
+	return response(db.update(id, sensor, externalIP))
 }
 
 func response(result interface{}, err error) (interface{}, error) {

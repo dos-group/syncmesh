@@ -31,7 +31,6 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 	}
 	switch event.OperationType {
 	case "insert":
-
 		request.Query = fmt.Sprintf("mutation{addSensors(sensors: [%s])}", string(resp))
 	case "update":
 		request.Query = fmt.Sprintf("mutation{update(_id: %s, sensor: %s){temperature}}", event.DocumentKey.ID, string(resp))
