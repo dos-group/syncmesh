@@ -126,22 +126,46 @@ EOF
 (( count++ ))
 done < nodes.txt
 
+# TODO: Add Zones / Shards for each node (also 6)
 mongo --host 10.1.0.3:27017 <<EOF
-db.collection.createIndex(
+use syncmesh
+
+sh.addShardToZone("shard1", "shard1-zone")
+sh.addShardToZone("shard2", "shard2-zone")
+sh.addShardToZone("shard3", "shard3-zone")
+
+sh.updateZoneKeyRange(
+   "syncmesh.sensor_data",
+   { sensor_id : 0, "_id" : MinKey },
+   { sensor_id : 1765, "_id" : MaxKey },
+   "shard1-zone"
+)
+
+sh.updateZoneKeyRange(
+   "syncmesh.sensor_data",
+   { sensor_id : 1800, "_id" : MinKey },
+   { sensor_id : 1847, "_id" : MaxKey },
+   "shard2-zone"
+)
+sh.updateZoneKeyRange(
+   "syncmesh.sensor_data",
+   { sensor_id : 1848, "_id" : MinKey() },
+   { sensor_id : 1850, "_id" : MaxKey() },
+   "shard3-zone"
+)
+
+db.sensor_data.createIndex(
   {
-      "sensor_id": 1
-  },
-  {
-      sparse: true,
-      expireAfterSeconds: 3600
+      "sensor_id": 1,
+      "_id": "hashed"
   }
 )
-use syncmesh
-db.createCollection("sensor_data")
 sh.enableSharding("syncmesh")
-sh.shardCollection("syncmesh.sensor_data", {sensor_id: "hashed"})
+sh.shardCollection("syncmesh.sensor_data", {sensor_id: 1, _id: "hashed"})
 EOF
 
+# db.createCollection("sensor_data")
+# sh.moveChunk("syncmesh.sensor_data", { sensor_id: 1846 }, "shard2")
 
 
 #sleep 10
