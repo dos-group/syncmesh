@@ -26,21 +26,11 @@ sudo apt-get install -y python3.6 python3-pip
 
 pip install requests
 
-# Install MongoDB
+# Install Mongo
 wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
 sudo apt-get update
 sudo apt-get install -y mongodb-org
-sudo systemctl start mongod
-
-sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
-
-sudo systemctl daemon-reload
-sudo systemctl start mongod
-sudo systemctl status mongod
-sudo systemctl enable mongod
-
-
 
 #Step 3 - Create Mongos and connect
 
