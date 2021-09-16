@@ -164,7 +164,7 @@ mv data.csv import30.csv
 
 #Import the Data to MongoDB (local shard)
 
-mongoimport -h $ShardIP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv
+mongoimport -h $ShardIP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import30.csv
 
 # Fix Dates
 mongo --host localhost:27017 <<-EOF
@@ -174,5 +174,7 @@ mongo --host localhost:27017 <<-EOF
     db.sensor_data.save(doc);
     })
 EOF
+
+#sudo tcpdump -w /home/$user/1.txt
 
 #"mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv"
