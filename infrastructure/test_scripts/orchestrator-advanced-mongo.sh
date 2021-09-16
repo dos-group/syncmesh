@@ -53,7 +53,7 @@ EOF
 
 for i in $(seq $REPETITIONS)
 do
-    # Query Data 
+    # Query Data
     ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
@@ -68,26 +68,26 @@ queryDataAggregate() {
 # Maybe use .aggregate({ $replaceWith: "$pressure" })
 read -r -d '' COMMAND <<EOF
 use syncmesh
-db.sensor_data.aggregate([{ 
+db.sensor_data.aggregate([{
     \$match: {
       timestamp: {
         \$gte: ISODate("$1"),
         \$lt: ISODate("2017-07-31T23:59:59Z")
-        } 
-    } 
+        }
+    }
   },{
     \$group: {
         _id: null,
-        avgTemperature: { \$avg: "\$temperature" }, 
+        avgTemperature: { \$avg: "\$temperature" },
         avgPressure: { \$avg: "\$pressure" },
         avgHumidity: { \$avg: "\$humidity" }
     }
-}]) 
+}])
 EOF
 
 for i in $(seq $REPETITIONS)
 do
-    # Query Data 
+    # Query Data
     ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
@@ -95,10 +95,6 @@ EOF
 echo "Finished Mongo Request"
 done
 }
-
-
-
-#seperate
 
 
 
@@ -114,54 +110,46 @@ seperate
 
 # Collect
 
-# Write Data Once to central database
 echo "Scenario: Collect - 1 day"
 queryDataCollect "2017-07-31T00:00:00Z"
+
+seperate
 
 echo "Scenario: Collect - 7 day"
 queryDataCollect "2017-07-24T00:00:00Z"
 
-
-sleep $SLEEP_TIME
 seperate
 
 echo "Scenario: Collect - 14 day"
 queryDataCollect "2017-07-17T00:00:00Z"
 
-sleep $SLEEP_TIME
 seperate
 
 echo "Scenario: Collect - 30 day"
 queryDataCollect "2017-06-30T00:00:00Z"
 
-sleep $SLEEP_TIME
 seperate
 
 
 # Aggregate
-# Write Data Once to central database
 echo "Scenario: Aggregate - 1 day"
 queryDataAggregate "2017-07-31T00:00:00Z"
 
 
-sleep $SLEEP_TIME
 seperate
 
 echo "Scenario: Aggregate - 7 day"
 queryDataAggregate "2017-07-24T00:00:00Z"
 
 
-sleep $SLEEP_TIME
 seperate
 
 echo "Scenario: Aggregate - 14 day"
 queryDataAggregate "2017-07-17T00:00:00Z"
 
-sleep $SLEEP_TIME
 seperate
 
 echo "Scenario: Aggregate - 30 day"
 queryDataAggregate "2017-06-30T00:00:00Z"
 
-sleep $SLEEP_TIME
 seperate
