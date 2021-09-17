@@ -74,6 +74,18 @@ func (db mongoDB) deleteSensorById(_id string) (interface{}, error) {
 	return sensor, nil
 }
 
+func (db mongoDB) deleteSensorByReplicaId(replicaID string) (interface{}, error) {
+	var sensor SensorModel
+	var err error
+	q := bson.M{"replicaID": replicaID}
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	err = db.collection.FindOneAndDelete(ctx, q).Decode(&sensor)
+	if err != nil {
+		return nil, err
+	}
+	return sensor, nil
+}
+
 func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	res, err := db.collection.InsertMany(ctx, sensors, options.InsertMany().SetOrdered(false))
@@ -83,7 +95,7 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	return res.InsertedIDs, nil
 }
 
-func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
+func (db mongoDB) update(_id string, sensor interface{}, replicaID string) (interface{}, error) {
 	var err error
 	var updatedSensor SensorModel
 
@@ -94,6 +106,9 @@ func (db mongoDB) update(_id string, sensor interface{}) (interface{}, error) {
 
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	filter := bson.M{"_id": id}
+	if replicaID != "" {
+		filter = bson.M{"replicaID": replicaID}
+	}
 	update := bson.D{{"$set", sensor}}
 	err = db.collection.FindOneAndUpdate(ctx, filter, update).Decode(&updatedSensor)
 	if err != nil {

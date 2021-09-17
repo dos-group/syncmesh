@@ -10,40 +10,55 @@ import (
 	"net/http"
 )
 
-type DocKey struct {
-	ID string `bson:"_id"`
-}
-
-type StreamEvent struct {
-	OperationType string                 `bson:"operationType"` // can be "insert", "update" or "delete"
-	FullDocument  map[string]interface{} `bson:"fullDocument"`
-	DocumentKey   DocKey                 `bson:"documentKey"`
-}
-
 func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()
+	// fetch external nodes
 	nodes, err := db.getSyncmeshNodes()
 	if err != nil {
 		return nil, err
 	}
+	// create the event request body
+	request := SyncMeshRequest{
+		Query:      "",
+		Database:   "syncmesh",
+		Collection: "sensor_data",
+	}
+	// find own and external nodes
+	err, ownNode, externalNodes := findOwnNode(nodes)
+	if err != nil {
+		return nil, err
+	}
+	// set the replica id of the document, so it can be found when processing events
+	replicaID := event.DocumentKey.ID + ownNode.Address
+	event.FullDocument["replicaID"] = replicaID
+
+	resp, err := json.Marshal(event.FullDocument)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	// construct GraphQL query for data replication
+	switch event.OperationType {
+	case "insert":
+		request.Query = fmt.Sprintf("mutation{addSensors(sensors: [%s])}", string(resp))
+	case "update":
+		request.Query = fmt.Sprintf("mutation{update(_id: %s, sensor: %s){temperature}}", event.DocumentKey.ID, string(resp))
+	case "delete":
+		request.Query = fmt.Sprintf("mutation{deleteReplicaSensor(replicaID: \\\"%s\\\"){temperature}}", replicaID)
+	default:
+		return nil, err
+	}
+	jsonBody, err := json.Marshal(&request)
+	if err != nil {
+		return nil, err
+	}
+
+	// iterate through saved external nodes and send out request
 	successCounter := 0
 	requestCounter := 0
-	for _, node := range nodes {
+	for _, node := range externalNodes {
 		if node.Subscribed {
-			request := SyncMeshRequest{
-				Query:         "{sensors(limit: 1, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-08-01T00:00:00Z\"){temperature humidity timestamp}}",
-				Database:      "syncmesh",
-				Collection:    "sensor_data",
-				Type:          "collect",
-				UseMetaData:   false,
-				Variables:     nil,
-				ExternalNodes: nil,
-			}
-			jsonBody, err := json.Marshal(&request)
-			if err != nil {
-				return nil, err
-			}
 			req, err := http.NewRequest("POST", node.Address, bytes.NewBuffer(jsonBody))
 			if err != nil {
 				return nil, err

@@ -89,8 +89,8 @@ A query fetching a document with a specific ID:
 ```json
 {
   "query": "{sensor(_id: \"60e0615f39dc2d7833bdb9c9\"){temperature}}",
-  "database": "demo",
-  "collection": "sensors",
+  "database": "syncmesh",
+  "collection": "sensor_data",
   "request_type": "collect"
 }
 ```
@@ -100,8 +100,8 @@ An example query for a specific time range (start_time and end_time are required
 ```json
 {
   "query": "{sensors(limit: 10, start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){temperature humidity timestamp}}",
-  "database": "demo",
-  "collection": "sensors",
+  "database": "syncmesh",
+  "collection": "sensor_data",
   "request_type": "collect"
 }
 ```
@@ -126,11 +126,11 @@ lines in the request, you also don't need to escape strings. An example for quer
 ```json
 {
   "query": "query sensor($id: ID!){sensor(_id: $id){temperature}}",
-  "database": "demo",
+  "database": "syncmesh",
   "variables": {
     "id": "60e9a27ec17cbf8c64ee8796"
   },
-  "collection": "sensors",
+  "collection": "sensor_data",
   "request_type": "collect"
 }
 ```
@@ -152,8 +152,8 @@ You can also insert your own data like this:
 ```json
 {
   "query": "mutation{addSensors(sensors: [{pressure: 1, temperature: 2, humidity: 23, lat: 23.123, lon: 23.232, timestamp: \"2017-06-26T00:00:00Z\"}])}",
-  "database": "demo",
-  "collection": "sensors"
+  "database": "syncmesh",
+  "collection": "sensor_data"
 }
 ```
 
@@ -162,8 +162,8 @@ An update operation:
 ```json
 {
   "query": "mutation{update(_id: \"1\", sensor: {pressure: 1, temperature: 2, humidity: 23, lat: 23.123, lon: 23.232, timestamp: \"2017-06-26T00:00:00Z\"}){temperature}}",
-  "database": "demo",
-  "collection": "sensors"
+  "database": "syncmesh",
+  "collection": "sensor_data"
 }
 ```
 
@@ -172,8 +172,8 @@ Deleting entries for a specific time range:
 ```json
 {
   "query": "mutation{deleteInTimeRange(start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-02T00:00:00Z\")}",
-  "database": "demo",
-  "collection": "sensors"
+  "database": "syncmesh",
+  "collection": "sensor_data"
 }
 ```
 
