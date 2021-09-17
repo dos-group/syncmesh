@@ -139,8 +139,12 @@ case $count in
     TO=1962
     ;;
 esac
+  until mongo --eval "print(\"waited for connection\")"
+  do
+    sleep 20
+  done
 
-  mongo --host 10.1.0.3:27017 <<EOF
+  mongo <<EOF
   sh.addShard("shard$count/$shardIP:27017")
   use syncmesh
   sh.addShardToZone("shard$count", "shard$count-zone")
