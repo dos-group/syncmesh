@@ -97,63 +97,67 @@ EOF
 
 #Loop over shards and configure them if mongod ready
 
- count=1
- while read shardIP; do
-   until mongo --host $shardIP --eval "print(\"waited for connection\")"
-   do
-     sleep 60
-   done
-   mongo --host $shardIP:27017 <<EOF
-   rs.initiate({
-     _id: "shard$count",
-     members:  [
-       {_id:0, host:  "$shardIP:27017"}
-     ]
-   })
+count=1
+while read shardIP; do
+  until mongo --host $shardIP --eval "print(\"waited for connection\")"
+  do
+    sleep 20
+  done
+  mongo --host $shardIP:27017 <<EOF
+  rs.initiate({
+    _id: "shard$count",
+    members:  [
+      {_id:0, host:  "$shardIP:27017"}
+    ]
+  })
+EOF
+
+case $count in
+
+  1) 
+    FROM=0
+    TO=1765
+    ;;
+  2) 
+    FROM=1846
+    TO=1847
+    ;;
+  3) 
+    FROM=1849
+    TO=1850
+    ;;
+  4) 
+    FROM=1951
+    TO=1952
+    ;;
+  5) 
+    FROM=1953
+    TO=1952
+    ;;
+  6) 
+    FROM=1961
+    TO=1962
+    ;;
+esac
+
+  mongo --host 10.1.0.3:27017 <<EOF
+  sh.addShard("shard$count/$shardIP:27017")
+  use syncmesh
+  sh.addShardToZone("shard$count", "shard$count-zone")
+  sh.updateZoneKeyRange(
+   "syncmesh.sensor_data",
+   { sensor_id : $FROM, "_id" : MinKey },
+   { sensor_id : $TO, "_id" : MaxKey },
+   "shard$count-zone"
+)
 EOF
  (( count++ ))
   
 done <nodes.txt
 
-
-#ToDo make for n nodes (to enable 6)
-
-count=1
-while read shardIP; do
-  mongo --host 10.1.0.3:27017 <<EOF
-  sh.addShard("shard$count/$shardIP:27017")
-EOF
-(( count++ ))
-done < nodes.txt
-
-# TODO: Add Zones / Shards for each node (also 6)
+#ToDo Zones for 6 nodes (txt or redo data)
 mongo --host 10.1.0.3:27017 <<EOF
 use syncmesh
-
-sh.addShardToZone("shard1", "shard1-zone")
-sh.addShardToZone("shard2", "shard2-zone")
-sh.addShardToZone("shard3", "shard3-zone")
-
-sh.updateZoneKeyRange(
-   "syncmesh.sensor_data",
-   { sensor_id : 0, "_id" : MinKey },
-   { sensor_id : 1765, "_id" : MaxKey },
-   "shard1-zone"
-)
-
-sh.updateZoneKeyRange(
-   "syncmesh.sensor_data",
-   { sensor_id : 1800, "_id" : MinKey },
-   { sensor_id : 1847, "_id" : MaxKey },
-   "shard2-zone"
-)
-sh.updateZoneKeyRange(
-   "syncmesh.sensor_data",
-   { sensor_id : 1848, "_id" : MinKey() },
-   { sensor_id : 1850, "_id" : MaxKey() },
-   "shard3-zone"
-)
-
 db.sensor_data.createIndex(
   {
       "sensor_id": 1,
@@ -163,32 +167,3 @@ db.sensor_data.createIndex(
 sh.enableSharding("syncmesh")
 sh.shardCollection("syncmesh.sensor_data", {sensor_id: 1, _id: "hashed"})
 EOF
-
-# db.createCollection("sensor_data")
-# sh.moveChunk("syncmesh.sensor_data", { sensor_id: 1846 }, "shard2")
-
-
-#sleep 10
-#mongosh --host 35.242.219.104 --port 27017
-
-
-
-#sh.addShard("shard01/34.141.45.127:27017")
-
-
-
-
-
-
-# Shard Collection
-#sh.shardCollection("test.user", { name : "hashed" } )
-#sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
-
-
-
-#db.createCollection("user")
-
-#db.user.find()
-
-# Enable Sharding for database
-#sh.enableSharding("database")
