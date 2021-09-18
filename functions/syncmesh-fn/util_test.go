@@ -1,6 +1,7 @@
 package function
 
 import (
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"strings"
@@ -20,9 +21,7 @@ func TestCalculateNodeDistance(t *testing.T) {
 	}
 	distance := calculateNodeDistance(node1, node2)
 	t.Log(distance)
-	if (int(distance) > trueDistance+100) || (int(distance) < trueDistance-100) {
-		t.Fail()
-	}
+	assert.False(t, (int(distance) > trueDistance+100) || (int(distance) < trueDistance-100))
 }
 
 // TestFindOwnNode tests the method of finding the own node in a list
@@ -30,21 +29,13 @@ func TestCalculateNodeDistance(t *testing.T) {
 func TestFindOwnNode(t *testing.T) {
 	nodeList := []SyncmeshNode{{OwnNode: false}, {OwnNode: true}, {OwnNode: false}}
 	err, ownNode, externalNodes := findOwnNode(nodeList)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
+	assert.NoError(t, err)
 	t.Log(externalNodes)
-	if len(externalNodes) != 2 || !ownNode.OwnNode {
-		t.Fail()
-	}
+	assert.True(t, len(externalNodes) == 2 && ownNode.OwnNode)
+
 	noOwnNodesList := []SyncmeshNode{{OwnNode: false}, {OwnNode: false}, {OwnNode: false}}
 	err, _, _ = findOwnNode(noOwnNodesList)
-	if err != nil {
-		t.Log(err)
-	} else {
-		t.Fail()
-	}
+	assert.Error(t, err)
 }
 
 // TestCalculateSensorAverages computes the averages count of sensors
@@ -62,20 +53,14 @@ func TestCalculateSensorAverages(t *testing.T) {
 		AverageTemperature: 2.5,
 	}
 	averages := calculateSensorAverages(sensorData)
-	if averages != trueAverages {
-		t.Log(averages)
-		t.Fail()
-	}
+	assert.True(t, averages == trueAverages)
 }
 
 // TestZip does a test gzip encoding
 func TestZip(t *testing.T) {
 	body := []byte("Some test body")
 	buffer, err := zip(body)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
+	assert.NoError(t, err)
 	t.Log(buffer.String())
 }
 
@@ -85,21 +70,13 @@ func TestUnzipResponse(t *testing.T) {
 	// zip an example body
 	body := []byte(initialString)
 	buffer, err := zip(body)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
+	assert.NoError(t, err)
+
 	testResponse := http.Response{
 		Body:   io.NopCloser(strings.NewReader(buffer.String())),
 		Header: http.Header{"Content-Encoding": []string{"gzip"}},
 	}
 	bytes, err := unzipResponse(&testResponse)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	}
-	if string(bytes) != initialString {
-		t.Log(string(bytes))
-		t.Fail()
-	}
+	assert.NoError(t, err)
+	assert.True(t, string(bytes) == initialString)
 }

@@ -232,6 +232,7 @@ You can also fetch the array of all saved nodes with a simple `{"meta_type": "ge
 - [MongoDB](https://www.mongodb.com/)
 - [MongoDB Go Driver](https://pkg.go.dev/go.mongodb.org/mongo-driver#section-readme)
 - [Go Haversine](https://github.com/umahmood/haversine)
+- [Testify](https://github.com/stretchr/testify)
 
 ## Good Reads
 
