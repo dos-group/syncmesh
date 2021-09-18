@@ -1,6 +1,9 @@
 package function
 
 import (
+	"io"
+	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -22,7 +25,8 @@ func TestCalculateNodeDistance(t *testing.T) {
 	}
 }
 
-// TestFindOwnNode tests the method of finding the own node in a list of nodes and returning it
+// TestFindOwnNode tests the method of finding the own node in a list
+// of nodes and returning it
 func TestFindOwnNode(t *testing.T) {
 	nodeList := []SyncmeshNode{{OwnNode: false}, {OwnNode: true}, {OwnNode: false}}
 	err, ownNode, externalNodes := findOwnNode(nodeList)
@@ -43,7 +47,8 @@ func TestFindOwnNode(t *testing.T) {
 	}
 }
 
-// TestCalculateSensorAverages computes the averages count of sensors and checks whether it's correct
+// TestCalculateSensorAverages computes the averages count of sensors
+// and checks whether it's correct
 func TestCalculateSensorAverages(t *testing.T) {
 	sensorData := []SensorModelNoId{
 		{Humidity: 2, Temperature: 1, Pressure: 9},
@@ -59,6 +64,42 @@ func TestCalculateSensorAverages(t *testing.T) {
 	averages := calculateSensorAverages(sensorData)
 	if averages != trueAverages {
 		t.Log(averages)
+		t.Fail()
+	}
+}
+
+// TestZip does a test gzip encoding
+func TestZip(t *testing.T) {
+	body := []byte("Some test body")
+	buffer, err := zip(body)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	t.Log(buffer.String())
+}
+
+// TestUnzipResponse tests unzipping a gzipped HTTP response
+func TestUnzipResponse(t *testing.T) {
+	initialString := "Some test body"
+	// zip an example body
+	body := []byte(initialString)
+	buffer, err := zip(body)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	testResponse := http.Response{
+		Body:   io.NopCloser(strings.NewReader(buffer.String())),
+		Header: http.Header{"Content-Encoding": []string{"gzip"}},
+	}
+	bytes, err := unzipResponse(&testResponse)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	if string(bytes) != initialString {
+		t.Log(string(bytes))
 		t.Fail()
 	}
 }
