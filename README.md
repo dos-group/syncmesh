@@ -225,12 +225,13 @@ Deleting works by just specifying the ID:
 
 You can also fetch the array of all saved nodes with a simple `{"meta_type": "get"}`.
 
-## Libraries and packages used
+## Libraries, frameworks and packages used
 
-- OpenFaaS
-- Graphql-Go
-- MongoDB
-- Go Mongo Driver
+- [OpenFaaS](https://github.com/openfaas)
+- [Graphql-Go](https://github.com/graphql-go/graphql)
+- [MongoDB](https://www.mongodb.com/)
+- [MongoDB Go Driver](https://pkg.go.dev/go.mongodb.org/mongo-driver#section-readme)
+- [Go Haversine](https://github.com/umahmood/haversine)
 
 ## Good Reads
 

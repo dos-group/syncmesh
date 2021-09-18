@@ -1,24 +1,12 @@
 package function
 
 import (
-	"fmt"
 	"testing"
 )
 
-// TestDegToRad checks the accuracy of the degrees to radians function
-func TestDegToRad(t *testing.T) {
-	deg := 123
-	trueRad := "2.14675"
-	calculatedRad := rad(float64(deg))
-	truncatedRad := fmt.Sprintf("%.5f", calculatedRad)
-	if truncatedRad != trueRad {
-		t.Log(calculatedRad)
-		t.Fail()
-	}
-}
-
+// TestCalculateNodeDistance tests the distance calculation between two nodes
 func TestCalculateNodeDistance(t *testing.T) {
-	trueDistance := 6381
+	trueDistance := 6381   // approximate "true" distance using maps
 	node1 := SyncmeshNode{ // Berlin
 		Lat: 52.520008,
 		Lon: 13.404954,
@@ -29,7 +17,7 @@ func TestCalculateNodeDistance(t *testing.T) {
 	}
 	distance := calculateNodeDistance(node1, node2)
 	t.Log(distance)
-	if int(distance) <= trueDistance+100 || int(distance) >= trueDistance-100 {
+	if (int(distance) > trueDistance+100) || (int(distance) < trueDistance-100) {
 		t.Fail()
 	}
 }
