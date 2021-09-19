@@ -25,6 +25,11 @@ func deleteSensor(p graphql.ResolveParams) (interface{}, error) {
 	return response(db.deleteSensorById(id))
 }
 
+func deleteReplicaSensor(p graphql.ResolveParams) (interface{}, error) {
+	id := p.Args["replicaID"].(string)
+	return response(db.deleteSensorByReplicaId(id))
+}
+
 func createSensors(p graphql.ResolveParams) (interface{}, error) {
 	sensors := p.Args["sensors"].([]interface{})
 	return response(db.createSensors(sensors))
@@ -40,10 +45,15 @@ func deleteInTimeRange(p graphql.ResolveParams) (interface{}, error) {
 	return response(db.deleteInTimeRange(startTime, endTime))
 }
 
+type SensorInput struct {
+	replicaID string
+}
+
 func update(p graphql.ResolveParams) (interface{}, error) {
 	id := p.Args["_id"].(string)
+	replicaID := p.Args["sensor"].(SensorInput).replicaID
 	sensor := p.Args["sensor"].(interface{})
-	return response(db.update(id, sensor))
+	return response(db.update(id, sensor, replicaID))
 }
 
 func response(result interface{}, err error) (interface{}, error) {

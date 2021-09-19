@@ -19,20 +19,6 @@ func handleSyncMeshRequest(request SyncMeshRequest, ownResponse string) *bytes.B
 	return b
 }
 
-type SensorResponse struct {
-	Sensors []SensorModelNoId `json:"sensors"`
-}
-
-type GraphQLResponse struct {
-	Data SensorResponse `json:"data"`
-}
-
-type AveragesResponse struct {
-	AverageHumidity    float64 `json:"average_humidity"`
-	AverageTemperature float64 `json:"average_temperature"`
-	AveragePressure    float64 `json:"average_pressure"`
-}
-
 // startCollecting the data from external nodes
 func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
 	combinedResponse := ownResponse

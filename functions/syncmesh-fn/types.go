@@ -3,6 +3,7 @@ package function
 import (
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"time"
 )
 
@@ -72,4 +73,50 @@ type SyncmeshMetaRequest struct {
 	Type string       `json:"meta_type"`
 	ID   string       `json:"id,omitempty"`
 	Node SyncmeshNode `json:"node,omitempty"`
+}
+
+// DocKey is a unique ID of a document
+type DocKey struct {
+	ID string `bson:"_id"`
+}
+
+// A StreamEvent is a type returned by the database event listener containing the change and operation type
+type StreamEvent struct {
+	OperationType string                 `bson:"operationType"` // can be "insert", "update" or "delete"
+	FullDocument  map[string]interface{} `bson:"fullDocument"`
+	DocumentKey   DocKey                 `bson:"documentKey"`
+}
+
+// The SensorResponse is a list of sensors without an ID
+type SensorResponse struct {
+	Sensors []SensorModelNoId `json:"sensors"`
+}
+
+// The GraphQLResponse returned by a GraphQL query
+type GraphQLResponse struct {
+	Data SensorResponse `json:"data"`
+}
+
+// AveragesResponse is returned in case of data aggregation
+type AveragesResponse struct {
+	AverageHumidity    float64 `json:"average_humidity"`
+	AverageTemperature float64 `json:"average_temperature"`
+	AveragePressure    float64 `json:"average_pressure"`
+}
+
+// SyncmeshNode specifies an external or internal node entry in the database
+type SyncmeshNode struct {
+	ID         string  `bson:"_id" json:"_id"`
+	Address    string  `bson:"address" json:"address"`
+	Lat        float64 `bson:"lat" json:"lat,omitempty"`
+	Lon        float64 `bson:"lon" json:"lon,omitempty"`
+	Distance   float64 `bson:"distance" json:"distance,omitempty"`
+	OwnNode    bool    `bson:"own_node" json:"own_node"`
+	Subscribed bool    `bson:"subscribed" json:"subscribed"`
+}
+
+// mongoDB represents a mongoDB client with corresponding collection
+type mongoDB struct {
+	session    *mongo.Client
+	collection *mongo.Collection
 }

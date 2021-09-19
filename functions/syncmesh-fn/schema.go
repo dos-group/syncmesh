@@ -29,6 +29,10 @@ func initSchema() graphql.Schema {
 			"lon": &graphql.InputObjectFieldConfig{
 				Type: graphql.NewNonNull(graphql.Float),
 			},
+			"replicaID": &graphql.InputObjectFieldConfig{
+				Type:         graphql.NewNonNull(graphql.String),
+				DefaultValue: "",
+			},
 		},
 	})
 	graphqlSchema, err := graphql.NewSchema(graphql.SchemaConfig{
@@ -71,6 +75,14 @@ func initSchema() graphql.Schema {
 							Type: graphql.NewNonNull(graphql.ID),
 						}},
 					Resolve: deleteSensor,
+				},
+				"deleteReplicaSensor": &graphql.Field{
+					Type: SensorType,
+					Args: graphql.FieldConfigArgument{
+						"replicaID": &graphql.ArgumentConfig{
+							Type: graphql.String,
+						}},
+					Resolve: deleteReplicaSensor,
 				},
 				"deleteInTimeRange": &graphql.Field{
 					Type: graphql.Int,

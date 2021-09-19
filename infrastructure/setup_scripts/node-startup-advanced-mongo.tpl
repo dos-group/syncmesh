@@ -12,7 +12,6 @@ user=$(whoami)
 
 
 hostName=$(hostname)
-iterator=$(echo $hostName| cut -c 56)
 
 
 sudo apt update
@@ -81,7 +80,7 @@ processManagement:
 sharding:
     clusterRole: shardsvr
 replication:
-    replSetName: shard$iterator
+    replSetName: shard${id}
 
   " > /etc/mongod.conf
 
@@ -93,58 +92,58 @@ sudo mongod --config /etc/mongod.conf &
 cd /
 wget -O import.csv https://raw.githubusercontent.com/DSPJ2021/data/main/data/${id}.csv
 
-# 1 Day
-currentTime=$(date --date="2017-07-31T00:00:00" +%s)
-{
+# # 1 Day
+# currentTime=$(date --date="2017-07-31T00:00:00" +%s)
+# {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# This Read skipts the header line!
-read 
-while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-    temp=$(date --date=$timestamp +%s)  
-    if [ $temp -ge $currentTime ];
-    then
-        printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-    fi
-done 
-} < import.csv
-mv data.csv import1.csv
+# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
+# # This Read skipts the header line!
+# read 
+# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
+#     temp=$(date --date=$timestamp +%s)  
+#     if [ $temp -ge $currentTime ];
+#     then
+#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
+#     fi
+# done 
+# } < import.csv
+# mv data.csv import1.csv
 
-# 7 Day
-currentTime=$(date --date="2017-07-31T00:00:00 7 day ago" +%s)
-{
+# # 7 Day
+# currentTime=$(date --date="2017-07-31T00:00:00 7 day ago" +%s)
+# {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# This Read skipts the header line!
-read 
-while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-    temp=$(date --date=$timestamp +%s)  
-    if [ $temp -ge $currentTime ];
-    then
-        printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-    fi
-done 
-} < import.csv
-mv data.csv import7.csv
+# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
+# # This Read skipts the header line!
+# read 
+# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
+#     temp=$(date --date=$timestamp +%s)  
+#     if [ $temp -ge $currentTime ];
+#     then
+#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
+#     fi
+# done 
+# } < import.csv
+# mv data.csv import7.csv
 
-# 14 Day
-currentTime=$(date --date="2017-07-31T00:00:00 14 day ago" +%s)
-{
+# # 14 Day
+# currentTime=$(date --date="2017-07-31T00:00:00 14 day ago" +%s)
+# {
 
-printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# This Read skipts the header line!
-read 
-while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-    temp=$(date --date=$timestamp +%s)  
-    if [ $temp -ge $currentTime ];
-    then
-        printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-    fi
-done 
-} < import.csv
-mv data.csv import14.csv
+# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
+# # This Read skipts the header line!
+# read 
+# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
+#     temp=$(date --date=$timestamp +%s)  
+#     if [ $temp -ge $currentTime ];
+#     then
+#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
+#     fi
+# done 
+# } < import.csv
+# mv data.csv import14.csv
 
-# 14 Day
+# 30 Day
 currentTime=$(date --date="2017-07-31T00:00:00 30 day ago" +%s)
 {
 
@@ -174,7 +173,3 @@ mongo --host localhost:27017 <<-EOF
     db.sensor_data.save(doc);
     })
 EOF
-
-#sudo tcpdump -w /home/$user/1.txt
-
-#"mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv"
