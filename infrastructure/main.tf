@@ -297,9 +297,12 @@ resource "google_compute_instance" "test-orchestrator" {
   network_interface {
     subnetwork = google_compute_subnetwork.subnet_with_logging[0].name
     network_ip = "10.1.0.255"
-    dynamic "access_config" {
-      for_each = var.public_access ? ["active"] : []
-      content {}
+    #    dynamic "access_config" {
+    #      for_each = var.public_access ? ["active"] : []
+    #      content {}
+    #    }
+    access_config {
+      // Ephemeral public IP
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
