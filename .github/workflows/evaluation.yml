@@ -1,5 +1,5 @@
 
-name: 'Terraform'
+name: 'Benchmark'
 
 on:
   workflow_dispatch:
