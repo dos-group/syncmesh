@@ -19,9 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: ["baseline", "syncmesh", "advanced-mongo"]
-        latency: [with-latency, without-latency]
-        node_count: [3, 6]
+        scenario: ["baseline"] #, "syncmesh", "advanced-mongo"]
+        latency: ["with-latency"] #, without-latency]
+        node_count: [3] #, 6]
     defaults:
       run:
         working-directory: infrastructure
@@ -51,7 +51,8 @@ jobs:
       run: terraform apply -auto-approve
 
     - name: Sleep
-      run: sleep 3540 # 59 minutes
+      run: sleep 2540
+
     - name: Set up Python 
       uses: actions/setup-python@v2
 
@@ -60,33 +61,26 @@ jobs:
       run: | 
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        sudo apt install tshark -y
 
-    - uses: yaananth/run-notebook@v1
-      env:
-        RUNNER: ${{ toJson(runner) }}
-        SECRETS: ${{ toJson(secrets) }}
-        GITHUB: ${{ toJson(github) }}
-      with:
-        notebook: "evaluation/1_QueryData.ipynb"
-        poll: True
+    - name: Query Data
+      working-directory: evaluation
+      run: papermill 1_QueryData.ipynb /tmp/1_QueryData.ipynb -p experiment "experiment-$scenario-$latency-$node_count"
+        
+    - name: Prepare Data
+      working-directory: evaluation
+      run: papermill 02_PrepareData.ipynb /tmp/02_PrepareData.ipynb
 
     - uses: actions/upload-artifact@master
       if: always()
       with:
         name: output
-        path: ${{ RUNNER.temp }}/nb-runner
-      env:
-        RUNNER: ${{ toJson(runner) }}
+        path: /tmp/
     - uses: actions/upload-artifact@master
       if: always()
       with:
-        name: output
-        path: ${{ RUNNER.temp }}/nb-runner
-      env:
-        RUNNER: ${{ toJson(runner) }}
-    # - name: Get Data
-    #   run: jupyter nbconvert --execute --to notebook --inplace --allow-errors --ExecutePreprocessor.timeout=-1 1_QueryData.ipynb  --output Test_main.ipynb
-    #   working-directory: evaluation
+        name: data
+        path: ./evaluation/data/
     - name: Terraform Apply
       if: always()
       run: terraform destroy -auto-approve
