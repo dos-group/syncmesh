@@ -439,11 +439,11 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 
-
-resource "local_file" "external_addresses" {
-  content  = templatefile("${path.module}/ips.tpl", { instances = google_compute_instance.nodes })
-  filename = "${path.module}/nodes.txt"
-}
+# Not working for delete step
+#resource "local_file" "external_addresses" {
+#  content  = templatefile("${path.module}/ips.tpl", { instances = google_compute_instance.nodes })
+#  filename = "${path.module}/nodes.txt"
+#}
 
 resource "local_file" "orchestrator_address" {
   content  = google_compute_instance.test-orchestrator.network_interface.0.access_config.0.nat_ip
