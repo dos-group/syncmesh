@@ -18,25 +18,6 @@ seperate () {
     sleep $PRE_TIME
 }
 
-uploadData() {
-# First Argument is the days for the import script
-
-while read internalIP; do
-    echo "SHH $internalIP"
-    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h localhost:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv" < /dev/null
-done < /nodes.txt
-
-# Fix Dates
-ssh -o StrictHostKeyChecking=no $SERVER_IP "mongo --host localhost:27017 <<-EOF
-    use syncmesh
-    db.sensor_data.find().forEach(function(doc) {
-    doc.timestamp=new Date(doc.timestamp);
-    db.sensor_data.save(doc);
-    })
-EOF
-"
-}
-
 queryDataCollect() {
 # # First Argument is the Start ISODate
 
@@ -96,14 +77,6 @@ echo "Finished Mongo Request"
 done
 }
 
-
-
-
-# Upload all data 
-#uploadData 1
-#uploadData 7
-#uploadData 14
-#uploadData 30
 
 sleep $SLEEP_TIME
 seperate
