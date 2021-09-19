@@ -45,7 +45,7 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: terraform plan -var public_access=false -var scenario="$scenario" -var instance_scenario="$latency-$node_count"
+      run: terraform plan -var public_access=false -var scenario="${{ matrix.scenario }}" -var instance_scenario="${{ matrix.latency }}-${{ matrix.node_count}}" -var machine_type="n1-standard-1"
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
@@ -65,7 +65,7 @@ jobs:
 
     - name: Query Data
       working-directory: evaluation
-      run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-$scenario-$latency-$node_count"
+      run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}"
         
     - name: Prepare Data
       working-directory: evaluation
