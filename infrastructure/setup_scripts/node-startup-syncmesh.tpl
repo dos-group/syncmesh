@@ -9,6 +9,8 @@ echo "Hello from the Setup script!"
 # https://github.com/openfaas/faasd#deploy-faasd
 git clone https://github.com/openfaas/faasd --depth=1
 cd faasd
+git fetch --tags
+git checkout tags/0.14.2
 
 sudo ./hack/install.sh
 
