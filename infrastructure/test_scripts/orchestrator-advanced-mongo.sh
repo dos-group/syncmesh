@@ -78,7 +78,6 @@ done
 }
 
 
-sleep $SLEEP_TIME
 seperate
 
 # Collect
