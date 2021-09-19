@@ -24,6 +24,8 @@ credentials.json
 .terraform.tfstate.lock.info
 *.tfstate
 *.backup
+*.pem
+*.txt
 .terraform
 
 # environment

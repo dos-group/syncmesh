@@ -413,6 +413,16 @@ resource "local_file" "external_addresses" {
   filename = "${path.module}/nodes.txt"
 }
 
+resource "local_file" "orchestrator_address" {
+  content  = google_compute_instance.test-orchestrator.network_interface.0.access_config.0.nat_ip
+  filename = "${path.module}/orchestrator.txt"
+}
+
+resource "local_file" "cert" {
+  content         = tls_private_key.orchestrator_key.private_key_pem
+  filename        = "orchestrator.pem"
+  file_permission = "600"
+}
 
 
 # For Advanced Logging:
