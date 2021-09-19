@@ -32,31 +32,36 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Setup Credential
-      run: echo $GCE_CREDENTIALS | base64 -di > ./credentials.json
-      env:
-        GCE_CREDENTIALS: '${{ secrets.GCE_CREDENTIALS }}'
+    # - name: Setup Credential
+    #   run: echo $GCE_CREDENTIALS | base64 -di > ./credentials.json
+    #   env:
+    #     GCE_CREDENTIALS: '${{ secrets.GCE_CREDENTIALS }}'
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
+    # # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    # - name: Terraform Init
+    #   run: terraform init
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    # - name: Terraform Format
-    #   run: terraform fmt -check
+    # # Checks that all Terraform configuration files adhere to a canonical format
+    # # - name: Terraform Format
+    # #   run: terraform fmt -check
 
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: terraform plan -var public_access=false -var scenario="${{ matrix.scenario }}" -var instance_scenario="${{ matrix.latency }}-${{ matrix.node_count}}" -var machine_type="n1-standard-1" -out tfplan
+    # # Generates an execution plan for Terraform
+    # - name: Terraform Plan
+    #   run: terraform plan -var public_access=false -var scenario="${{ matrix.scenario }}" -var instance_scenario="${{ matrix.latency }}-${{ matrix.node_count}}" -var machine_type="n1-standard-1" -out tfplan
 
-    - name: Terraform Apply
-      run: terraform apply tfplan
+    # - name: Terraform Apply
+    #   run: terraform apply tfplan
 
-    - name: Sleep
-      run: sleep 2540
+    # - name: Sleep
+    #   run: sleep 2540
 
     - name: Set up Python 
       uses: actions/setup-python@v2
+
+    - name: Install conda environment
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: python3
 
     - name: Install dependencies
       working-directory: evaluation
