@@ -65,6 +65,9 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         sudo apt install tshark -y
 
+    - name: Make dir
+      run: mkdir /tmp/ipynb
+
     - name: Query Data
       working-directory: evaluation
       run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}"
@@ -88,7 +91,7 @@ jobs:
     #   with:
     #     name: out
     #     path: ./evaluation/out/
-    - name: Terraform Apply
+    - name: Terraform Destroy
       if: always()
       run: terraform destroy -auto-approve
 
