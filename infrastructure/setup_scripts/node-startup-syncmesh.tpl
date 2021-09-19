@@ -1,4 +1,5 @@
 #!/bin/bash
+VERSION=${mongo_version}
 
 pwd
 
@@ -17,7 +18,7 @@ sudo chown -R 1000:1000 /var/lib/faasd/mongo_data
 # TODO(dh): fine-tune replicaset params https://github.com/bitnami/bitnami-docker-mongodb#setting-up-replication
 cat << EOF >> /var/lib/faasd/docker-compose.yaml
   mongo:
-    image: docker.io/bitnami/mongodb:latest
+    image: docker.io/bitnami/mongodb:MONGO_VERSION
     volumes:
       # we assume cwd == /var/lib/faasd
       - type: bind
@@ -32,14 +33,18 @@ cat << EOF >> /var/lib/faasd/docker-compose.yaml
       - "10.62.0.1:27017:27017"
 EOF
 
+sed -i "s/MONGO_VERSION/$VERSION/" /var/lib/faasd/docker-compose.yaml
+
+
 sudo systemctl daemon-reload
 sudo systemctl restart faasd
 
 # Install Mongo CLI
-wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
 sudo apt-get update
-sudo apt-get install -y mongodb-org
+sudo apt-get install -y mongodb-org=$VERSION mongodb-org-server=$VERSION mongodb-org-shell=$VERSION mongodb-org-mongos=$VERSION mongodb-org-tools=$VERSION
+mongod --version
 
 # Install Python for data distribution
 sudo apt-get install -y python3.6

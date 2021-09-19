@@ -54,6 +54,12 @@ variable "test_pre_time" {
   description = "Time before the seperation request (in seconds)"
 }
 
+variable "test_mongo_version" {
+  type        = string
+  default     = "5.0.2"
+  description = "Mongo Version"
+}
+
 
 
 variable "ssh_keys" {

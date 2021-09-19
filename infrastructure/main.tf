@@ -117,7 +117,7 @@ locals {
       },
       {
         region   = "europe-north1"
-        location = "europe-north1-b"
+        location = "europe-north1-a"
         number   = 3
       },
       {
@@ -165,6 +165,38 @@ resource "google_compute_network" "vpc_network" {
 
 }
 
+# Add Internet Access to VMs without public IP
+resource "google_compute_router" "router" {
+  for_each = {
+    for index, vm in local.nodes :
+    index => vm
+  }
+  name    = "${local.name_prefix}-router-${each.value.number}"
+  region  = each.value.region
+  network = google_compute_network.vpc_network.id
+
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_router_nat" "nat" {
+  for_each = {
+    for index, vm in local.nodes :
+    index => vm
+  }
+  name                               = "${local.name_prefix}-router-nat-${each.value.number}"
+  region                             = each.value.region
+  router                             = google_compute_router.router[each.value.number].name
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = false
+    filter = "ERRORS_ONLY"
+  }
+}
+
 
 
 data "google_compute_image" "container_optimized_image" {
@@ -207,7 +239,7 @@ resource "google_compute_instance" "nodes" {
       content {}
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"), mongo_version = var.test_mongo_version })
 }
 
 resource "google_compute_instance" "client" {
@@ -234,7 +266,7 @@ resource "google_compute_instance" "client" {
       content {}
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.nodes, testscript = file("${path.module}/test_scripts/client-${var.scenario}.py") })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.nodes, testscript = file("${path.module}/test_scripts/client-${var.scenario}.py"), mongo_version = var.test_mongo_version })
 }
 
 resource "google_compute_instance" "central_server" {
@@ -262,7 +294,7 @@ resource "google_compute_instance" "central_server" {
       content {}
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes, mongo_version = var.test_mongo_version })
 }
 
 resource "google_compute_instance" "config-server" {
@@ -290,7 +322,7 @@ resource "google_compute_instance" "config-server" {
       content {}
     }
   }
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/config-server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/config-server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes, mongo_version = var.test_mongo_version })
 }
 
 
