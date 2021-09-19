@@ -93,4 +93,4 @@ while read internalIP; do
 done < /server.txt
 
 apt install zip -y
-zip -r /captures.zip /tmp/captures/
+cd /tmp/captures && zip -r /captures.zip ./*
