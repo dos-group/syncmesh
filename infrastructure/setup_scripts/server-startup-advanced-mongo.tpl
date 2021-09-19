@@ -71,32 +71,34 @@ processManagement:
 #  keyFile: /home/$user/mongodb.key
 
 sharding:
-  configDB: configserver01/10.1.0.4:27017
+  configDB: configserver01/10.0.0.4:27017
 
   " > /etc/mongod.conf
 
 #<configReplSetName>/cfg1.example.net:27019,cfg2.example.net:27019
 
+echo "Start Mongo Server"
 sudo mongos --config /etc/mongod.conf &
 
-until mongo --host 10.1.0.4 --eval "print(\"waited for connection\")"
+
+echo "Wait for Config Server"
+until mongo --host 10.0.0.4 --eval "print(\"waited for connection\")"
   do
     sleep 60
-  done
+done
 
-
-mongo --host 10.1.0.4:27017 <<EOF
+echo "Add Config Server"
+mongo --host 10.0.0.4:27017 <<EOF
 rs.initiate({
   _id: "configserver01",
   configsvr: true,
   members:  [
-    {_id:0, host:  "10.1.0.4:27017"}
+    {_id:0, host:  "10.0.0.4:27017"}
   ]
 })
 EOF
 
-#Loop over shards and configure them if mongod ready
-
+echo "Loop over shards and configure them if mongod ready"
 count=1
 while read shardIP; do
   until mongo --host $shardIP --eval "print(\"waited for connection\")"
@@ -160,7 +162,7 @@ EOF
 done <nodes.txt
 
 #ToDo Zones for 6 nodes (txt or redo data)
-mongo --host 10.1.0.3:27017 <<EOF
+mongo --host 10.0.0.3:27017 <<EOF
 use syncmesh
 db.sensor_data.createIndex(
   {

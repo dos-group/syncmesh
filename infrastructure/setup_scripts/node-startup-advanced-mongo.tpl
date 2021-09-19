@@ -4,13 +4,7 @@ pwd
 
 echo "Hello from the Setup script!"
 
-
-ShardIP=$(dig @resolver4.opendns.com myip.opendns.com +short)
-PORT=27017
-
 user=$(whoami)
-
-
 hostName=$(hostname)
 
 
@@ -86,64 +80,11 @@ replication:
 
 sudo mongod --config /etc/mongod.conf &
 
-
-
 # Download the data 
 cd /
 wget -O import.csv https://raw.githubusercontent.com/DSPJ2021/data/main/data/${id}.csv
 
-# # 1 Day
-# currentTime=$(date --date="2017-07-31T00:00:00" +%s)
-# {
-
-# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# # This Read skipts the header line!
-# read 
-# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-#     temp=$(date --date=$timestamp +%s)  
-#     if [ $temp -ge $currentTime ];
-#     then
-#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-#     fi
-# done 
-# } < import.csv
-# mv data.csv import1.csv
-
-# # 7 Day
-# currentTime=$(date --date="2017-07-31T00:00:00 7 day ago" +%s)
-# {
-
-# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# # This Read skipts the header line!
-# read 
-# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-#     temp=$(date --date=$timestamp +%s)  
-#     if [ $temp -ge $currentTime ];
-#     then
-#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-#     fi
-# done 
-# } < import.csv
-# mv data.csv import7.csv
-
-# # 14 Day
-# currentTime=$(date --date="2017-07-31T00:00:00 14 day ago" +%s)
-# {
-
-# printf "sensor_id,location,lat,lon,timestamp,pressure,temperature,humidity\n" > data.csv
-# # This Read skipts the header line!
-# read 
-# while IFS=, read -r sensor_id location lat lon timestamp pressure temperature humidity; do
-#     temp=$(date --date=$timestamp +%s)  
-#     if [ $temp -ge $currentTime ];
-#     then
-#         printf "$sensor_id,$location,$lat,$lon,$timestamp,$pressure,$temperature,$humidity\n" >> data.csv
-#     fi
-# done 
-# } < import.csv
-# mv data.csv import14.csv
-
-# 30 Day
+# Import 30 Days worth of data 
 currentTime=$(date --date="2017-07-31T00:00:00 30 day ago" +%s)
 {
 
@@ -161,9 +102,18 @@ done
 mv data.csv import30.csv
 
 
-#Import the Data to MongoDB (local shard)
 
-mongoimport -h $ShardIP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import30.csv
+echo "Wait for Central Instance to be up"
+until mongo --host 10.0.0.3 --eval "print(\"waited for connection\")"
+do
+sleep 20
+done
+
+echo "Wait a fixed amount of time so the shard is registred to the central server"
+sleep 120
+
+echo "Import the Data to MongoDB (local shard)"
+mongoimport -h localhost:27017 --type csv -d syncmesh -c sensor_data --headerline --drop /import30.csv
 
 # Fix Dates
 mongo --host localhost:27017 <<-EOF

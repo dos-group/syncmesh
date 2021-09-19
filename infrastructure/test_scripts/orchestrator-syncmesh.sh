@@ -3,9 +3,10 @@
 CLIENT_IP="$(</client.txt)"
 SEPERATOR_IP="$(</seperator.txt)"
 
-SLEEP_TIME=10
-PRE_TIME=10
-# REPETITIONS=20
+# Those variables are set in the Orchestratore Template
+#SLEEP_TIME=120
+#PRE_TIME=60
+#REPETITIONS=20
 
 seperate () {
     echo "Waiting for Seperation Request ($SLEEP_TIME s)"

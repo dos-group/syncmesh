@@ -1,14 +1,14 @@
 #!/bin/bash
 
-SERVER_IP=$(</server.txt) #10.1.0.3
-CLIENT_IP="$(</client.txt)" #10.1.0.2
+SERVER_IP=$(</server.txt) #10.0.0.3
+CLIENT_IP="$(</client.txt)" #10.0.0.2
 SEPERATOR_IP="$(</seperator.txt)" #92.60.39.199
 PORT="27017"
 
-REPETITIONS=20
-
-SLEEP_TIME=120
-PRE_TIME=60
+# Those variables are set in the Orchestratore Template
+#SLEEP_TIME=120
+#PRE_TIME=60
+#REPETITIONS=20
 
 seperate () {
     echo "Waiting for Seperation Request ($SLEEP_TIME s)"

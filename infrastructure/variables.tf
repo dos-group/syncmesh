@@ -37,6 +37,23 @@ variable "scenario" {
     error_message = "Allowed values for scenario are \"syncmesh\", \"advanced-mongo\", or \"baseline\"."
   }
 }
+variable "test_client_repetitions" {
+  type    = number
+  default = 20
+}
+
+variable "test_sleep_time" {
+  type        = number
+  default     = 120
+  description = "Time Between each testrun (in seconds)"
+}
+
+variable "test_pre_time" {
+  type        = number
+  default     = 60
+  description = "Time before the seperation request (in seconds)"
+}
+
 
 
 variable "ssh_keys" {

@@ -67,6 +67,10 @@ done < /server.txt
 
 echo "Executing Scenarios"
 
+# Those variables are set in the Orchestratore Template
+export SLEEP_TIME=${sleep_time}
+export PRE_TIME=${pre_time}
+export REPETITIONS=${repetitions}
 # Execute
 bash test.sh
 
