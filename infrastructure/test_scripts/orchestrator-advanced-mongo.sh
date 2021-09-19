@@ -35,7 +35,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 " 1> /dev/null
@@ -69,7 +69,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 "

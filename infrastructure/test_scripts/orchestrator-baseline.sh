@@ -27,7 +27,7 @@ while read internalIP; do
 done < /nodes.txt
 
 # Fix Dates
-ssh -o StrictHostKeyChecking=no $SERVER_IP "mongo --host localhost:27017 <<-EOF
+ssh -o StrictHostKeyChecking=no $SERVER_IP "mongo --networkMessageCompressors snappy --host localhost:27017 <<-EOF
     use syncmesh
     db.sensor_data.find().forEach(function(doc) {
     doc.timestamp=new Date(doc.timestamp);
@@ -54,7 +54,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data 
-    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 " 1> /dev/null
@@ -88,7 +88,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data 
-    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --host $SERVER_IP:$PORT <<'EOF'
+    ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 "
