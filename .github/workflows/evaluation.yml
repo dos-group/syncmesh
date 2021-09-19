@@ -34,9 +34,8 @@ jobs:
 
     - name: Setup Credential
       run: echo $GCE_CREDENTIALS | base64 -di > ./credentials.json
-      
-    - name: Test
-      run: ls
+      env:
+        GCE_CREDENTIALS: '${{ secrets.GCE_CREDENTIALS }}'
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
