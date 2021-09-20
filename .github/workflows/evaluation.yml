@@ -85,20 +85,38 @@ jobs:
     - uses: actions/upload-artifact@master
       if: always()
       with:
-        name: output
+        name: output-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}
         path: /tmp/ipynb
     - uses: actions/upload-artifact@master
       if: always()
       with:
-        name: data
+        name: data-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}
         path: ./evaluation/data/
-    # - uses: actions/upload-artifact@master
-    #   if: always()
-    #   with:
-    #     name: out
-    #     path: ./evaluation/out/
     - name: Terraform Destroy
       if: always()
       run: terraform destroy -auto-approve
 
 
+  bundle:
+    name: 'Bundle'
+    runs-on: ubuntu-latest
+    needs: [terraform]
+    timeout-minutes:  240
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/download-artifact@v2
+      with:
+        path: ./artifacts
+    - uses: actions/upload-artifact@master
+      if: always()
+      with:
+        name: bundle
+        path: ./artifacts
+    # - uses: actions/upload-artifact@master
+    #   if: always()
+    #   with:
+    #     name: out
+    #     path: ./evaluation/out/
