@@ -53,7 +53,7 @@ jobs:
       run: terraform apply tfplan
 
     - name: Sleep
-      run: sleep 3600
+      run: sleep 3480
       timeout-minutes: 120
 
     - name: Set up Python 
