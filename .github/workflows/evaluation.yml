@@ -54,6 +54,7 @@ jobs:
 
     - name: Sleep
       run: sleep 3600
+      timeout-minutes: 120
 
     - name: Set up Python 
       uses: actions/setup-python@v2
