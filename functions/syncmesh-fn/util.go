@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sort"
 )
 
 // calculateNodeDistance between two nodes using the haversine formula
@@ -94,5 +95,28 @@ func unzipResponse(resp *http.Response) ([]byte, error) {
 	default:
 		return ioutil.ReadAll(resp.Body)
 	}
+}
 
+func filterExternalNodes(externalNodes []SyncmeshNode, ownNode SyncmeshNode, radius float64) []SyncmeshNode {
+	var filteredNodes []SyncmeshNode
+	for _, node := range externalNodes {
+		// if distance is not available (i.e. 0)...
+		if node.Distance == 0 {
+			// calculate the distance to our own node and update the node in the database
+			node.Distance = calculateNodeDistance(ownNode, node)
+			_, errUpdate := db.updateCreateNode(node, node.ID)
+			if errUpdate != nil {
+				log.Printf(errUpdate.Error())
+			}
+		}
+		// if distance is inside radius, add id to the filtered nodes
+		if node.Distance <= radius {
+			filteredNodes = append(filteredNodes, node)
+		}
+	}
+	// sort the filtered nodes by distance, if possible
+	sort.Slice(filteredNodes, func(i, j int) bool {
+		return filteredNodes[i].Distance < filteredNodes[j].Distance
+	})
+	return filteredNodes
 }

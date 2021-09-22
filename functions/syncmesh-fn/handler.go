@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sort"
 )
 
 var db mongoDB
@@ -162,29 +161,11 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	}
 	err, ownNode, externalNodes := findOwnNode(savedNodes)
 	if err == nil && request.Radius > 0 {
-		for _, node := range externalNodes {
-			// if distance is not available (i.e. 0)...
-			if node.Distance == 0 {
-				// calculate the distance to our own node and update the node in the database
-				node.Distance = calculateNodeDistance(ownNode, node)
-				_, errUpdate := db.updateCreateNode(node, node.ID)
-				if errUpdate != nil {
-					log.Printf(errUpdate.Error())
-				}
-			}
-			// if distance is shorter than radius, add id to the filtered nodes
-			if node.Distance <= float64(request.Radius) {
-				filteredNodes = append(filteredNodes, node)
-			}
-		}
+		filteredNodes = filterExternalNodes(externalNodes, ownNode, float64(request.Radius))
 	} else {
 		log.Printf(err.Error())
 		filteredNodes = savedNodes
 	}
-	// sort the filtered nodes by distance, if possible
-	sort.Slice(filteredNodes, func(i, j int) bool {
-		return filteredNodes[i].Distance < filteredNodes[j].Distance
-	})
 	// append the filtered nodes to the external nodes
 	for _, node := range filteredNodes {
 		request.ExternalNodes = append(request.ExternalNodes, node.Address)

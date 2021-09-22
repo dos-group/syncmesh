@@ -80,3 +80,36 @@ func TestUnzipResponse(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, string(bytes) == initialString)
 }
+
+// TestFilterNodes tests the radius node filtering algorithm.
+// uncomment the mongodb update lines to test properly
+func TestFilterNodes(t *testing.T) {
+	radius := 30 // 30km
+	nodeList := []SyncmeshNode{{
+		Lat:     52.476318, // grunewald
+		Lon:     13.236049,
+		OwnNode: false,
+	}, {
+		Lat:     52.503008, // Berlin, closest to own node
+		Lon:     13.334111,
+		OwnNode: false,
+	}, {
+		Lat:     52.515127, // Berlin
+		Lon:     13.368466,
+		OwnNode: true,
+	}, {
+		Lat:     52.403192, // Potsdam
+		Lon:     13.102689,
+		OwnNode: false,
+	}, {
+		Lat:     52.373047, // Hanover
+		Lon:     9.732859,
+		OwnNode: false,
+	}}
+	err, ownNode, externalNodes := findOwnNode(nodeList)
+	assert.NoError(t, err)
+	filteredNodes := filterExternalNodes(externalNodes, ownNode, float64(radius))
+	t.Log(filteredNodes)
+	assert.True(t, len(filteredNodes) == 3)
+	assert.True(t, filteredNodes[0].Distance < filteredNodes[2].Distance)
+}
