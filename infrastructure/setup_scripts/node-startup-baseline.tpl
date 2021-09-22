@@ -1,4 +1,5 @@
 #!/bin/bash
+VERSION=${mongo_version}
 
 pwd
 
