@@ -119,6 +119,9 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 func calculateAverages(averagesList []AveragesResponse) AveragesResponse {
 	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
 	size := float64(len(averagesList))
+	if size == 0 {
+		return final
+	}
 	// sum all values
 	for _, item := range averagesList {
 		final.AverageHumidity += item.AverageHumidity

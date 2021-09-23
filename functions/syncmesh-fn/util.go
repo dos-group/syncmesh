@@ -4,30 +4,26 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+	"github.com/umahmood/haversine"
 	"io"
 	"io/ioutil"
 	"log"
-	"math"
 	"net/http"
+	"sort"
 )
-
-const earthRadius = 6371
-
-// rad calculates a degree to radians using highly advanced maths (pi and 180)
-func rad(a float64) float64 {
-	return a * math.Pi / 180
-}
 
 // calculateNodeDistance between two nodes using the haversine formula
 func calculateNodeDistance(node1 SyncmeshNode, node2 SyncmeshNode) float64 {
-	latDeltaRadians := rad(node1.Lat - node2.Lat)
-	lonDeltaRadians := rad(node1.Lon - node2.Lon)
-
-	a := math.Pow(math.Sin(latDeltaRadians/2), 2) +
-		(math.Cos(rad(node1.Lat)) * math.Cos(rad(node2.Lat)) * math.Pow(math.Sin(lonDeltaRadians/2), 2))
-	b := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
-	distance := earthRadius * b
-	return math.Pow(distance, 2)
+	loc1 := haversine.Coord{
+		Lon: node1.Lon,
+		Lat: node1.Lat,
+	}
+	loc2 := haversine.Coord{
+		Lon: node2.Lon,
+		Lat: node2.Lat,
+	}
+	_, km := haversine.Distance(loc1, loc2)
+	return km
 }
 
 // findOwnNode in a list of nodes
@@ -99,5 +95,24 @@ func unzipResponse(resp *http.Response) ([]byte, error) {
 	default:
 		return ioutil.ReadAll(resp.Body)
 	}
+}
 
+func filterExternalNodes(externalNodes []SyncmeshNode, ownNode SyncmeshNode, radius float64) []SyncmeshNode {
+	var filteredNodes []SyncmeshNode
+	for _, node := range externalNodes {
+		// if distance is not available (i.e. 0)...
+		if node.Distance == 0 {
+			// calculate the distance to our own node and update the node in the database
+			node.Distance = calculateNodeDistance(ownNode, node)
+		}
+		// if distance is inside radius, add id to the filtered nodes
+		if node.Distance <= radius {
+			filteredNodes = append(filteredNodes, node)
+		}
+	}
+	// sort the filtered nodes by distance, if possible
+	sort.Slice(filteredNodes, func(i, j int) bool {
+		return filteredNodes[i].Distance < filteredNodes[j].Distance
+	})
+	return filteredNodes
 }
