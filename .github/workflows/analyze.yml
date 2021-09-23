@@ -49,3 +49,33 @@ jobs:
           name: bundle
           # Optional, directory where to extract artifact. Defaults to the artifact name (see `name` input)
           path: evaluation/data
+
+      - name: Set up Python 
+        uses: actions/setup-python@v2
+
+      - name: Install dependencies
+        working-directory: evaluation
+        run: | 
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          sudo apt install tshark -y
+      - name: Make dir
+        working-directory: evaluation
+        run: mkdir /tmp/ipynb && mkdir out
+
+      - name: Analyze  Data
+        working-directory: evaluation
+        run: papermill 03_Pcap.ipynb /tmp/ipynb/03_Pcap.ipynb -var ci="true"
+
+      - uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: output-ipynb
+          path: /tmp/ipynb
+        
+        
+      - uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: output-images
+          path: evaluation/out
