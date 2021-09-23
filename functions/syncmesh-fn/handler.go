@@ -162,6 +162,13 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	err, ownNode, externalNodes := findOwnNode(savedNodes)
 	if err == nil && request.Radius > 0 {
 		filteredNodes = filterExternalNodes(externalNodes, ownNode, float64(request.Radius))
+		for _, node := range filteredNodes {
+			// update the node in the database for reducing overhead in the future
+			_, errUpdate := db.updateCreateNode(node, node.ID)
+			if errUpdate != nil {
+				log.Printf(errUpdate.Error())
+			}
+		}
 	} else {
 		log.Printf(err.Error())
 		filteredNodes = savedNodes

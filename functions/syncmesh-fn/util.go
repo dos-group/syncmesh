@@ -104,10 +104,6 @@ func filterExternalNodes(externalNodes []SyncmeshNode, ownNode SyncmeshNode, rad
 		if node.Distance == 0 {
 			// calculate the distance to our own node and update the node in the database
 			node.Distance = calculateNodeDistance(ownNode, node)
-			_, errUpdate := db.updateCreateNode(node, node.ID)
-			if errUpdate != nil {
-				log.Printf(errUpdate.Error())
-			}
 		}
 		// if distance is inside radius, add id to the filtered nodes
 		if node.Distance <= radius {
