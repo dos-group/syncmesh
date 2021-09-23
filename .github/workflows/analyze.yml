@@ -1,0 +1,81 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Analyze
+
+# Controls when the workflow will run
+on:
+  workflow_run:
+    workflows: ["Benchmark"]
+    branches: [main]
+    types: 
+      - completed
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          # Optional, GitHub token, a Personal Access Token with `public_repo` scope if needed
+          # Required, if artifact is from a different repo
+          # Required, if repo is private a Personal Access Token with `repo` scope is needed
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          # Required, workflow file name or ID
+          workflow: evaluation.yml
+          # Optional, the status or conclusion of a completed workflow to search for
+          # Can be one of a workflow conclusion:
+          #   "failure", "success", "neutral", "cancelled", "skipped", "timed_out", "action_required"
+          # Or a workflow status:
+          #   "completed", "in_progress", "queued"
+          workflow_conclusion: success
+          # Optional, will use the branch
+          branch: main
+          # Optional, uploaded artifact name,
+          # will download all artifacts if not specified
+          # and extract them in respective subdirectories
+          # https://github.com/actions/download-artifact#download-all-artifacts
+          name: bundle
+          # Optional, directory where to extract artifact. Defaults to the artifact name (see `name` input)
+          path: evaluation/data
+
+      - name: Set up Python 
+        uses: actions/setup-python@v2
+
+      - name: Install dependencies
+        working-directory: evaluation
+        run: | 
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          sudo apt install tshark -y
+      - name: Make dir
+        working-directory: evaluation
+        run: mkdir /tmp/ipynb && mkdir out
+
+      - name: Analyze  Data
+        working-directory: evaluation
+        run: papermill 03_Pcap.ipynb /tmp/ipynb/03_Pcap.ipynb -var ci="true"
+
+      - uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: output-ipynb
+          path: /tmp/ipynb
+        
+        
+      - uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: output-images
+          path: evaluation/out
