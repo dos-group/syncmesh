@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 )
@@ -38,6 +39,29 @@ func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, 
 		return nil, err
 	}
 	return sensors, nil
+}
+
+func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.Time) (interface{}, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
+	// filter out items outside of start/end time bounds
+	gteStage := bson.D{{"$gte", bson.D{{"$timestamp", startTime}}}}
+	lteStage := bson.D{{"$lte", bson.D{{"$timestamp", endTime}}}}
+	// calculate averages for relevant values
+	avgStage := bson.D{{"$group",
+		bson.D{
+			{"average_humidity", bson.D{{"$avg", "$humidity"}}},
+			{"average_pressure", bson.D{{"$avg", "$pressure"}}},
+			{"average_temperature", bson.D{{"$avg", "$temperature"}}},
+		}}}
+	averagesCursor, err := db.collection.Aggregate(ctx, mongo.Pipeline{gteStage, lteStage, avgStage})
+	if err != nil {
+		return nil, err
+	}
+	var averages AveragesResponse
+	if err = averagesCursor.Decode(&averages); err != nil {
+		return nil, err
+	}
+	return averages, nil
 }
 
 func (db mongoDB) getSensor(_id string) (interface{}, error) {
