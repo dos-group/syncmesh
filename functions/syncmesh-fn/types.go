@@ -105,7 +105,8 @@ type StreamEvent struct {
 
 // The SensorResponse is a list of sensors without an ID
 type SensorResponse struct {
-	Sensors []SensorModelNoId `json:"sensors"`
+	Sensors  []SensorModelNoId `json:"sensors"`
+	Averages AveragesResponse  `json:"sensorsAggregate"`
 }
 
 // The GraphQLResponse returned by a GraphQL query

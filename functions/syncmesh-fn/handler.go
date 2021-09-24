@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var db mongoDB
@@ -92,6 +93,14 @@ func Handle(req handler.Request) (handler.Response, error) {
 	db = connectDB(req.Context(), request.Database, request.Collection)
 	defer db.closeDB()
 
+	// if request is aggregate, force the aggregation by replacing the query to aggregate
+	if !strings.Contains(request.Query, "sensorsAggregate") && request.Type == "aggregate" {
+		request.Query = strings.Replace(request.Query, "sensors", "sensorsAggregate", 1)
+		request.Query = strings.Replace(request.Query, "humidity", "average_humidity", 1)
+		request.Query = strings.Replace(request.Query, "temperature", "average_temperature", 1)
+		request.Query = strings.Replace(request.Query, "pressure", "average_pressure", 1)
+	}
+
 	// execute graphql query on own node
 	result := executeQuery(request.Query, initSchema(), request.Variables)
 
@@ -110,7 +119,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		averages := calculateSensorAverages(out.Data.Sensors)
+		averages := out.Data.Averages
 		b.Reset()
 		err = json.NewEncoder(b).Encode(averages)
 		if err != nil {
