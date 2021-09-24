@@ -108,6 +108,17 @@ An example query for a specific time range (start_time and end_time are required
 }
 ```
 
+A new aggregation query:
+
+```json
+{
+  "query": "{sensorsAggregate(start_time: \"2017-06-26T00:00:00Z\", end_time: \"2017-07-01T00:00:00Z\"){average_humidity average_pressure average_temperature}}",
+  "database": "syncmesh",
+  "collection": "sensor_data",
+  "request_type": "collect"
+}
+```
+
 A query for collection with external nodes
 
 ```json

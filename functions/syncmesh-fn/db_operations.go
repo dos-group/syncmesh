@@ -41,15 +41,10 @@ func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, 
 	return sensors, nil
 }
 
-func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.Time) (interface{}, error) {
+func (db mongoDB) aggregateSensorsInTimeRange(startTime interface{}, endTime interface{}) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
-	// filter out items outside of start/end time bounds
-	dateFilterStage := bson.D{{"$match",
-		bson.D{{"timestamp",
-			bson.D{
-				{"$lte", endTime},
-				{"$gte", startTime}},
-		}}}}
+	var averagesCursor *mongo.Cursor
+	var err error
 	// calculate averages for relevant values
 	avgStage := bson.D{{"$group",
 		bson.D{
@@ -58,7 +53,19 @@ func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.
 			{"average_pressure", bson.D{{"$avg", "$pressure"}}},
 			{"average_temperature", bson.D{{"$avg", "$temperature"}}},
 		}}}
-	averagesCursor, err := db.collection.Aggregate(ctx, mongo.Pipeline{dateFilterStage, avgStage})
+	if startTime != nil && endTime != nil {
+		// filter out items outside of start/end time bounds
+		dateFilterStage := bson.D{{"$match",
+			bson.D{{"timestamp",
+				bson.D{
+					{"$lte", endTime.(time.Time)},
+					{"$gte", startTime.(time.Time)}},
+			}}}}
+		averagesCursor, err = db.collection.Aggregate(ctx, mongo.Pipeline{dateFilterStage, avgStage})
+	} else {
+		// aggregate without time range
+		averagesCursor, err = db.collection.Aggregate(ctx, mongo.Pipeline{avgStage})
+	}
 	if err != nil {
 		return nil, err
 	}

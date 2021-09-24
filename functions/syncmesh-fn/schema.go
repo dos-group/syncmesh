@@ -56,10 +56,10 @@ func initSchema() graphql.Schema {
 					Type: AveragesType,
 					Args: graphql.FieldConfigArgument{
 						"start_time": &graphql.ArgumentConfig{
-							Type: graphql.NewNonNull(graphql.DateTime),
+							Type: graphql.DateTime,
 						},
 						"end_time": &graphql.ArgumentConfig{
-							Type: graphql.NewNonNull(graphql.DateTime),
+							Type: graphql.DateTime,
 						}, "limit": &graphql.ArgumentConfig{
 							Type: graphql.Int,
 						}},
