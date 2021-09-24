@@ -10,9 +10,15 @@ func getSensors(p graphql.ResolveParams) (interface{}, error) {
 	if limit == nil {
 		limit = 0
 	}
-	startDate := p.Args["start_time"].(time.Time)
-	endDate := p.Args["end_time"].(time.Time)
-	return response(db.getSensorsInTimeRange(startDate, endDate, limit.(int)))
+	endTime := p.Args["end_time"]
+	if endTime == nil { // default is now if no end time given
+		endTime = time.Now()
+	}
+	startTime := p.Args["start_time"]
+	if startTime == nil { // default is golang zero time if no start time given
+		startTime = time.Time{}
+	}
+	return response(db.getSensorsInTimeRange(startTime.(time.Time), endTime.(time.Time), limit.(int)))
 }
 
 func aggregateSensors(p graphql.ResolveParams) (interface{}, error) {

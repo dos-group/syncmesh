@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// getSensorsInTimeRange for a given mongodb collection
 func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, limit int) (interface{}, error) {
 	var sensors []SensorModel
 	var err error
