@@ -52,6 +52,19 @@ func initSchema() graphql.Schema {
 						}},
 					Resolve: getSensors,
 				},
+				"sensorsAggregate": &graphql.Field{
+					Type: AveragesType,
+					Args: graphql.FieldConfigArgument{
+						"start_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						},
+						"end_time": &graphql.ArgumentConfig{
+							Type: graphql.NewNonNull(graphql.DateTime),
+						}, "limit": &graphql.ArgumentConfig{
+							Type: graphql.Int,
+						}},
+					Resolve: aggregateSensors,
+				},
 				"sensor": &graphql.Field{
 					Type: SensorType,
 					Args: graphql.FieldConfigArgument{

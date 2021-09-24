@@ -15,6 +15,12 @@ func getSensors(p graphql.ResolveParams) (interface{}, error) {
 	return response(db.getSensorsInTimeRange(startDate, endDate, limit.(int)))
 }
 
+func aggregateSensors(p graphql.ResolveParams) (interface{}, error) {
+	startDate := p.Args["start_time"].(time.Time)
+	endDate := p.Args["end_time"].(time.Time)
+	return response(db.aggregateSensorsInTimeRange(startDate, endDate))
+}
+
 func getSensor(p graphql.ResolveParams) (interface{}, error) {
 	id := p.Args["_id"].(string)
 	return response(db.getSensor(id))

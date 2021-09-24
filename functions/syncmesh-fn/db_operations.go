@@ -44,16 +44,21 @@ func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, 
 func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.Time) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	// filter out items outside of start/end time bounds
-	gteStage := bson.D{{"$gte", bson.D{{"$timestamp", startTime}}}}
-	lteStage := bson.D{{"$lte", bson.D{{"$timestamp", endTime}}}}
+	dateFilterStage := bson.D{{"$match",
+		bson.D{{"timestamp",
+			bson.D{
+				{"$lte", endTime},
+				{"$lte", startTime}},
+		}}}}
 	// calculate averages for relevant values
 	avgStage := bson.D{{"$group",
 		bson.D{
+			{"_id", "null"},
 			{"average_humidity", bson.D{{"$avg", "$humidity"}}},
 			{"average_pressure", bson.D{{"$avg", "$pressure"}}},
 			{"average_temperature", bson.D{{"$avg", "$temperature"}}},
 		}}}
-	averagesCursor, err := db.collection.Aggregate(ctx, mongo.Pipeline{gteStage, lteStage, avgStage})
+	averagesCursor, err := db.collection.Aggregate(ctx, mongo.Pipeline{dateFilterStage, avgStage})
 	if err != nil {
 		return nil, err
 	}

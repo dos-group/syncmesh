@@ -2,7 +2,7 @@ package function
 
 import (
 	"github.com/stretchr/testify/assert"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -73,7 +73,7 @@ func TestUnzipResponse(t *testing.T) {
 	assert.NoError(t, err)
 
 	testResponse := http.Response{
-		Body:   io.NopCloser(strings.NewReader(buffer.String())),
+		Body:   ioutil.NopCloser(strings.NewReader(buffer.String())),
 		Header: http.Header{"Content-Encoding": []string{"gzip"}},
 	}
 	bytes, err := unzipResponse(&testResponse)

@@ -35,6 +35,22 @@ var SensorType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
+// AveragesType as the response of a db-side aggregation
+var AveragesType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "SensorAverages",
+	Fields: graphql.Fields{
+		"average_humidity": &graphql.Field{
+			Type: graphql.Float,
+		},
+		"average_pressure": &graphql.Field{
+			Type: graphql.Float,
+		},
+		"average_temperature": &graphql.Field{
+			Type: graphql.Float,
+		},
+	},
+})
+
 // SensorModel struct of a sensor measurement in the database
 type SensorModel struct {
 	ID          primitive.ObjectID `bson:"_id" json:"_id,omitempty"`
