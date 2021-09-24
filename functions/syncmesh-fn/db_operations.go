@@ -48,7 +48,7 @@ func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.
 		bson.D{{"timestamp",
 			bson.D{
 				{"$lte", endTime},
-				{"$lte", startTime}},
+				{"$gte", startTime}},
 		}}}}
 	// calculate averages for relevant values
 	avgStage := bson.D{{"$group",
@@ -62,11 +62,11 @@ func (db mongoDB) aggregateSensorsInTimeRange(startTime time.Time, endTime time.
 	if err != nil {
 		return nil, err
 	}
-	var averages AveragesResponse
-	if err = averagesCursor.Decode(&averages); err != nil {
+	var averages []bson.M
+	if err = averagesCursor.All(ctx, &averages); err != nil {
 		return nil, err
 	}
-	return averages, nil
+	return averages[0], nil
 }
 
 func (db mongoDB) getSensor(_id string) (interface{}, error) {
