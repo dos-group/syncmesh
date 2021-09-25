@@ -150,3 +150,9 @@ const (
 	DefaultDB         string = "syncmesh"
 	DefaultCollection        = "sensor_data"
 )
+
+// default meta collection and database values
+const (
+	MetaDB         string = "syncmesh_meta"
+	NodeCollection        = "nodes"
+)

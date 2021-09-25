@@ -1,6 +1,7 @@
 package function
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
@@ -111,4 +112,33 @@ func TestFilterNodes(t *testing.T) {
 	t.Log(filteredNodes)
 	assert.True(t, len(filteredNodes) == 3)
 	assert.True(t, filteredNodes[0].Distance < filteredNodes[2].Distance)
+}
+
+// TestFunctionResponse tests the creation of a generic function response
+func TestFunctionResponse(t *testing.T) {
+	// error request
+	someError := errors.New("hi there")
+	resp, err := functionResponse(someError.Error(), someError)
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+	assert.Error(t, err)
+	// normal request
+	body := "hi there without err"
+	resp, err = functionResponse(body, nil)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, body, string(resp.Body))
+}
+
+func TestGetRequestType(t *testing.T) {
+	// meta case
+	metaMap := map[string]interface{}{"meta_type": ""}
+	metaMapType := getRequestType(metaMap)
+	assert.Equal(t, Meta, metaMapType)
+	// event case
+	eventMap := map[string]interface{}{"operationType": ""}
+	eventMapType := getRequestType(eventMap)
+	assert.Equal(t, Event, eventMapType)
+	// default case
+	defaultMap := map[string]interface{}{"query": ""}
+	defaultMapType := getRequestType(defaultMap)
+	assert.Equal(t, Default, defaultMapType)
 }
