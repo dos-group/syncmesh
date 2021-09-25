@@ -86,7 +86,7 @@ type SyncMeshRequest struct {
 
 // SyncmeshMetaRequest represents meta requests to the function for managing saved nodes
 type SyncmeshMetaRequest struct {
-	Type string       `json:"meta_type"`
+	Type string       `json:"meta_type"` // get, update or delete
 	ID   string       `json:"id,omitempty"`
 	Node SyncmeshNode `json:"node,omitempty"`
 }

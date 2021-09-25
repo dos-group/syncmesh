@@ -137,7 +137,7 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	return res.InsertedIDs, nil
 }
 
-// update or create (if id does not exist) a sensor with an id using a new body
+// update a sensor with an id or replica ID using a new body
 func (db mongoDB) update(_id string, sensor interface{}, replicaID string) (interface{}, error) {
 	var err error
 	var updatedSensor SensorModel

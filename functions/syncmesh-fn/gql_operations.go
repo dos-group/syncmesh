@@ -69,7 +69,7 @@ type SensorInput struct {
 	replicaID string
 }
 
-// update or create a syncmesh node with optional replica ID
+// update a syncmesh node with ID and optional replica ID
 func update(p graphql.ResolveParams) (interface{}, error) {
 	id := p.Args["_id"].(string)
 	replicaID := p.Args["sensor"].(SensorInput).replicaID
