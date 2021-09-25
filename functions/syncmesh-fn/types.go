@@ -105,13 +105,22 @@ type StreamEvent struct {
 
 // The SensorResponse is a list of sensors without an ID
 type SensorResponse struct {
-	Sensors  []SensorModelNoId `json:"sensors"`
-	Averages AveragesResponse  `json:"sensorsAggregate"`
+	Sensors []SensorModelNoId `json:"sensors"`
 }
 
 // The GraphQLResponse returned by a GraphQL query
 type GraphQLResponse struct {
 	Data SensorResponse `json:"data"`
+}
+
+// The SensorAveragesResponse is a result of a db aggregation query
+type SensorAveragesResponse struct {
+	Averages AveragesResponse `json:"sensorsAggregate"`
+}
+
+// The GraphQLAveragesResponse returned by a GraphQL query for aggregation
+type GraphQLAveragesResponse struct {
+	Data SensorAveragesResponse `json:"data"`
 }
 
 // AveragesResponse is returned in case of data aggregation

@@ -81,7 +81,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	// if the request type is aggregate, calculate the averages from the data
 	if request.Type == "aggregate" {
 		// convert response to response struct
-		out := GraphQLResponse{}
+		out := GraphQLAveragesResponse{}
 		err = json.Unmarshal([]byte(b.String()), &out)
 		if err != nil {
 			log.Fatal(err)

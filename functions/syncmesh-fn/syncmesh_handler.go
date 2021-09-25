@@ -78,7 +78,7 @@ func startAggregating(request SyncMeshRequest, ownResponse string, b *bytes.Buff
 	}
 	finalAverages := calculateAverages(averagesList)
 	outputJSON, _ := json.Marshal(finalAverages)
-	err = json.NewEncoder(b).Encode(string(outputJSON))
+	err = json.NewEncoder(b).Encode(json.RawMessage(string(outputJSON)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,12 @@ func startAggregating(request SyncMeshRequest, ownResponse string, b *bytes.Buff
 // makeExternalRequest to one of the syncmesh nodes
 func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 	// prepare SyncMesh Request body for the external request
-	requestStruct := &SyncMeshRequest{Query: request.Query, Database: request.Database, Collection: request.Collection}
+	requestStruct := &SyncMeshRequest{
+		Query:      request.Query,
+		Database:   request.Database,
+		Collection: request.Collection,
+		Type:       request.Type,
+	}
 	jsonBody, err := json.Marshal(requestStruct)
 	if err != nil {
 		return err, nil
