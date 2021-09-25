@@ -30,7 +30,7 @@ func initSchema() graphql.Schema {
 				Type: graphql.NewNonNull(graphql.Float),
 			},
 			"replicaID": &graphql.InputObjectFieldConfig{
-				Type:         graphql.NewNonNull(graphql.String),
+				Type:         graphql.String,
 				DefaultValue: "",
 			},
 		},

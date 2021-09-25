@@ -65,14 +65,13 @@ func deleteInTimeRange(p graphql.ResolveParams) (interface{}, error) {
 	return response(db.deleteInTimeRange(startTime, endTime))
 }
 
-type SensorInput struct {
-	replicaID string
-}
-
 // update a syncmesh node with ID and optional replica ID
 func update(p graphql.ResolveParams) (interface{}, error) {
 	id := p.Args["_id"].(string)
-	replicaID := p.Args["sensor"].(SensorInput).replicaID
+	// the type of the p.Args value to its corresponding key is map[string]interface{}, NOT interface{}
+	// we convert to the map to fetch the replica ID
+	replicaID := p.Args["sensor"].(map[string]interface{})["replicaID"].(string)
+	// we convert to interface to pass the sensor document to the db operation function
 	sensor := p.Args["sensor"].(interface{})
 	return response(db.update(id, sensor, replicaID))
 }
