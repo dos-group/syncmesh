@@ -1,5 +1,16 @@
 # Syncmesh
 
+<img src="/images/syncmesh_logo.png" align="left"
+width="200" hspace="10" vspace="10">
+
+Distributed storage querying and coordination system, based on OpenFaaS.  
+
+## About
+
+This is a project by students of the Technical University of Berlin on Distributed Systems.
+Syncmesh tackles the topics of Distributed Storage, Function-as-a-Service, and Edge Computing.
+[Read our paper here](https://github.com/DSPJ2021/paper).
+
 ## Prerequisites
 
 - minikube
