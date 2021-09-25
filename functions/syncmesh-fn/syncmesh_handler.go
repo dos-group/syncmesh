@@ -44,7 +44,7 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 			continue
 		}
 	}
-	err := json.NewEncoder(b).Encode(combinedResponse)
+	err := json.NewEncoder(b).Encode(json.RawMessage(combinedResponse))
 	if err != nil {
 		log.Fatal(err)
 	}
