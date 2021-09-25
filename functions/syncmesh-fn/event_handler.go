@@ -23,8 +23,8 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 	// create the event request body
 	request := SyncMeshRequest{
 		Query:      "",
-		Database:   "syncmesh",
-		Collection: "sensor_data",
+		Database:   DefaultDB,
+		Collection: DefaultCollection,
 	}
 	// find own and external nodes
 	err, ownNode, externalNodes := findOwnNode(nodes)

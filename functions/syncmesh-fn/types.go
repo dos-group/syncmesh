@@ -144,3 +144,9 @@ const (
 	Event          = "event"
 	Default        = "default"
 )
+
+// default collection and database values
+const (
+	DefaultDB         string = "syncmesh"
+	DefaultCollection        = "sensor_data"
+)

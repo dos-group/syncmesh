@@ -43,6 +43,14 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 	log.Printf("Request: %v", request)
 
+	// set default collection and db if not given
+	if request.Database == "" {
+		request.Database = DefaultDB
+	}
+	if request.Collection == "" {
+		request.Collection = DefaultCollection
+	}
+
 	if request.UseMetaData {
 		combineExternalNodes(&request, req.Context())
 		log.Printf("Exernal nodes: %v", request.ExternalNodes)
