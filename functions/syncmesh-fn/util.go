@@ -38,6 +38,7 @@ func findOwnNode(nodes []SyncmeshNode) (error, SyncmeshNode, []SyncmeshNode) {
 	return errors.New("no own node found"), SyncmeshNode{}, nodes
 }
 
+// calculateSensorAverages of all "sensor averages" responses by combining them
 func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
 	final := AveragesResponse{AveragePressure: 0, AverageTemperature: 0, AverageHumidity: 0}
 	size := float64(len(sensors))
@@ -54,7 +55,7 @@ func calculateSensorAverages(sensors []SensorModelNoId) AveragesResponse {
 	return final
 }
 
-//zip a body using gzip and write it into a byte buffer
+// zip a body using gzip and write it into a byte buffer
 func zip(body []byte) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
 	var err error
@@ -98,6 +99,7 @@ func unzipResponse(resp *http.Response) ([]byte, error) {
 	}
 }
 
+// filterExternalNodes by a given radius in km and sort them in ascending order by distance
 func filterExternalNodes(externalNodes []SyncmeshNode, ownNode SyncmeshNode, radius float64) []SyncmeshNode {
 	var filteredNodes []SyncmeshNode
 	for _, node := range externalNodes {

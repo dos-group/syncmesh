@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TestHandlerError by not passing anything in the request and forcing an error
 func TestHandlerError(t *testing.T) {
 	req := handler.Request{}
 	resp, err := Handle(req)

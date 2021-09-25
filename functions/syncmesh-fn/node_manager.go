@@ -14,6 +14,7 @@ import (
 const MetaDB = "syncmesh_meta"
 const NodeCollection = "nodes"
 
+// handleMetaRequest to manage the querying, updating and deletion of locally stored nodes
 func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()

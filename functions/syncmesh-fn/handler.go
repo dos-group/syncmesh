@@ -148,6 +148,8 @@ func handleSpecialRequest(req handler.Request, isMeta bool) (handler.Response, e
 	return functionResponse(b.String(), err)
 }
 
+// combineExternalNodes by applying range filtering and sorting by distance
+// appends locally stored nodes to those specified in the request
 func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 	var filteredNodes []SyncmeshNode
 

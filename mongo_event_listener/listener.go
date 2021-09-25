@@ -23,6 +23,7 @@ type StreamEvent struct {
 	DocumentKey   DocKey                 `bson:"documentKey" json:"documentKey"`
 }
 
+// main is a running change stream listener for mongodb change events in the default collection (syncmesh/sensor_data)
 func main() {
 	log.Println("Starting mongoDB change stream listener...")
 	ctx := context.Background()
@@ -76,7 +77,7 @@ func main() {
 	}
 }
 
-// logPanic is a fatal log if the error is not nil
+// stopFatal is a fatal log if the error is not nil
 func stopFatal(err error) {
 	if err != nil {
 		log.Fatal(err)

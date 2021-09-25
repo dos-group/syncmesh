@@ -82,7 +82,6 @@ func TestUnzipResponse(t *testing.T) {
 }
 
 // TestFilterNodes tests the radius node filtering algorithm.
-// uncomment the mongodb update lines to test properly
 func TestFilterNodes(t *testing.T) {
 	radius := 30 // 30km
 	nodeList := []SyncmeshNode{{

@@ -10,6 +10,8 @@ import (
 	"net/http"
 )
 
+// handleStreamEvent handles the stream event request type
+// it sends queries to subscribed external nodes to maintain data replication
 func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, error) {
 	db := getSyncmeshDB(ctx)
 	defer db.closeDB()

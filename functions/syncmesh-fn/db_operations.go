@@ -42,6 +42,7 @@ func (db mongoDB) getSensorsInTimeRange(startTime time.Time, endTime time.Time, 
 	return sensors, nil
 }
 
+// aggregateSensorsInTimeRange using averages and optional time ranges
 func (db mongoDB) aggregateSensorsInTimeRange(startTime interface{}, endTime interface{}) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	var averagesCursor *mongo.Cursor
@@ -77,6 +78,7 @@ func (db mongoDB) aggregateSensorsInTimeRange(startTime interface{}, endTime int
 	return averages[0], nil
 }
 
+// getSensor for a given id
 func (db mongoDB) getSensor(_id string) (interface{}, error) {
 	var sensor SensorModel
 	var err error
@@ -94,6 +96,7 @@ func (db mongoDB) getSensor(_id string) (interface{}, error) {
 	return sensor, nil
 }
 
+// deleteSensorById with a given id
 func (db mongoDB) deleteSensorById(_id string) (interface{}, error) {
 	var sensor SensorModel
 	var err error
@@ -111,6 +114,7 @@ func (db mongoDB) deleteSensorById(_id string) (interface{}, error) {
 	return sensor, nil
 }
 
+// deleteSensorByReplicaId with a given replica ID
 func (db mongoDB) deleteSensorByReplicaId(replicaID string) (interface{}, error) {
 	var sensor SensorModel
 	var err error
@@ -123,6 +127,7 @@ func (db mongoDB) deleteSensorByReplicaId(replicaID string) (interface{}, error)
 	return sensor, nil
 }
 
+// createSensors using a given list of sensors to add into the db
 func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	res, err := db.collection.InsertMany(ctx, sensors, options.InsertMany().SetOrdered(false))
@@ -132,6 +137,7 @@ func (db mongoDB) createSensors(sensors []interface{}) (interface{}, error) {
 	return res.InsertedIDs, nil
 }
 
+// update or create (if id does not exist) a sensor with an id using a new body
 func (db mongoDB) update(_id string, sensor interface{}, replicaID string) (interface{}, error) {
 	var err error
 	var updatedSensor SensorModel
@@ -154,6 +160,7 @@ func (db mongoDB) update(_id string, sensor interface{}, replicaID string) (inte
 	return updatedSensor, nil
 }
 
+// deleteInTimeRange for deleting sensors in a given time range
 func (db mongoDB) deleteInTimeRange(startTime time.Time, endTime time.Time) (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 90*time.Second)
 	res, err := db.collection.DeleteMany(ctx, bson.M{
@@ -168,6 +175,7 @@ func (db mongoDB) deleteInTimeRange(startTime time.Time, endTime time.Time) (int
 	return res.DeletedCount, nil
 }
 
+// getDocEstimate approximates the current number of documents in the collection
 func (db mongoDB) getDocEstimate() (interface{}, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	opts := options.EstimatedDocumentCount().SetMaxTime(5 * time.Second)

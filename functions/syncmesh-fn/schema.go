@@ -6,7 +6,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-// Init the schema of Sensor data in GraphQL
+// initSchema of Sensor data in GraphQL
 func initSchema() graphql.Schema {
 	sensorInputType := graphql.NewInputObject(graphql.InputObjectConfig{
 		Name: "SensorInputType",

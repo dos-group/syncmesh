@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// connect to the database
+// connectDB for connecting to the database with a specified db name and collection
 func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	if len(db) == 0 || len(collection) == 0 {
 		log.Fatal("Database and collection need to be specified")
@@ -41,7 +41,7 @@ func connectDB(ctx context.Context, db string, collection string) mongoDB {
 	}
 }
 
-// disconnect and close the session
+// closeDB to disconnect and close the session
 func (db mongoDB) closeDB() {
 	err := db.session.Disconnect(context.Background())
 	if err != nil {
