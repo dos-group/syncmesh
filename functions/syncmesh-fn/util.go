@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+	handler "github.com/openfaas/templates-sdk/go-http"
 	"github.com/umahmood/haversine"
 	"io"
 	"io/ioutil"
@@ -115,4 +116,30 @@ func filterExternalNodes(externalNodes []SyncmeshNode, ownNode SyncmeshNode, rad
 		return filteredNodes[i].Distance < filteredNodes[j].Distance
 	})
 	return filteredNodes
+}
+
+// functionResponse handles a generic function response with included error handling
+func functionResponse(body string, err error) (handler.Response, error) {
+	log.Printf("%s is the request body", body)
+	var statusCode int
+	if err != nil {
+		statusCode = http.StatusInternalServerError
+	} else {
+		statusCode = http.StatusOK
+	}
+	return handler.Response{
+		Body:       []byte(body),
+		StatusCode: statusCode,
+	}, err
+}
+
+// getRequestType determines the syncmesh request type: meta, event, or regular (default) request
+func getRequestType(response map[string]interface{}) string {
+	if _, ok := response["meta_type"]; ok {
+		return Meta
+	} else if _, ok := response["operationType"]; ok {
+		return Event
+	} else {
+		return Default
+	}
 }

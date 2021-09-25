@@ -137,3 +137,10 @@ type mongoDB struct {
 	session    *mongo.Client
 	collection *mongo.Collection
 }
+
+// request types for any given syncmesh function call
+const (
+	Meta    string = "meta"
+	Event          = "event"
+	Default        = "default"
+)

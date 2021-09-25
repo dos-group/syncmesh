@@ -19,68 +19,27 @@ var db mongoDB
 func Handle(req handler.Request) (handler.Response, error) {
 	var err error
 
-	parseError := handler.Response{
-		Body:       []byte("Error parsing the request"),
-		StatusCode: http.StatusInternalServerError,
-	}
-
 	responseMap := make(map[string]interface{})
 	err = json.Unmarshal(req.Body, &responseMap)
 	if err != nil {
-		return parseError, err
+		return functionResponse(err.Error(), err)
 	}
 
-	// if the request is a meta request, handle the operation and return
-	if _, ok := responseMap["meta_type"]; ok {
-		metaRequest := SyncmeshMetaRequest{}
-		err = json.Unmarshal(req.Body, &metaRequest)
-		if err != nil {
-			return parseError, err
-		}
-		metaResponse, err := handleMetaRequest(req.Context(), metaRequest)
-		if err != nil {
-			return handler.Response{
-				Body:       []byte(err.Error()),
-				StatusCode: http.StatusInternalServerError,
-			}, err
-		}
-		// encode the meta query result from bson to a bytes buffer
-		b := new(bytes.Buffer)
-		err = json.NewEncoder(b).Encode(metaResponse)
-		return handler.Response{
-			Body:       []byte(b.String()),
-			StatusCode: http.StatusOK,
-		}, err
-	}
-
-	// if the request is an event request, handle the operation and return
-	if _, ok := responseMap["operationType"]; ok {
-		event := StreamEvent{}
-		err = json.Unmarshal(req.Body, &event)
-		if err != nil {
-			return parseError, err
-		}
-		eventResponse, err := handleStreamEvent(req.Context(), event)
-		if err != nil {
-			return handler.Response{
-				Body:       []byte(err.Error()),
-				StatusCode: http.StatusInternalServerError,
-			}, err
-		}
-		// encode the meta query result from bson to a bytes buffer
-		b := new(bytes.Buffer)
-		err = json.NewEncoder(b).Encode(eventResponse)
-		return handler.Response{
-			Body:       []byte(b.String()),
-			StatusCode: http.StatusOK,
-		}, err
+	// handle the request depending on its type
+	switch requestType := getRequestType(responseMap); requestType {
+	case Meta:
+		return handleSpecialRequest(req, true)
+	case Event:
+		return handleSpecialRequest(req, false)
+	default:
+		break
 	}
 
 	// convert the http request to a SyncMesh request
 	request := SyncMeshRequest{}
 	err = json.Unmarshal(req.Body, &request)
 	if err != nil {
-		return parseError, err
+		return functionResponse(err.Error(), err)
 	}
 	log.Printf("Request: %v", request)
 
@@ -108,7 +67,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 	b := new(bytes.Buffer)
 	err = json.NewEncoder(b).Encode(result)
 	if err != nil {
-		return handleEncodingError(err)
+		return functionResponse(err.Error(), err)
 	}
 
 	// if the request type is aggregate, calculate the averages from the data
@@ -123,7 +82,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		b.Reset()
 		err = json.NewEncoder(b).Encode(averages)
 		if err != nil {
-			return handleEncodingError(err)
+			return functionResponse(err.Error(), err)
 		}
 	}
 
@@ -144,7 +103,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		// zip the query result
 		buffer, err := zip(b.Bytes())
 		if err != nil {
-			return handleEncodingError(err)
+			return functionResponse(err.Error(), err)
 		}
 		body = buffer.Bytes()
 		// set a gzip header
@@ -157,6 +116,36 @@ func Handle(req handler.Request) (handler.Response, error) {
 		StatusCode: http.StatusOK,
 		Header:     header,
 	}, err
+}
+
+func handleSpecialRequest(req handler.Request, isMeta bool) (handler.Response, error) {
+	var err error
+	var resp interface{}
+	if isMeta {
+		body := SyncmeshMetaRequest{}
+		err = json.Unmarshal(req.Body, &body)
+		if err != nil {
+			return functionResponse(err.Error(), err)
+		}
+		resp, err = handleMetaRequest(req.Context(), body)
+		if err != nil {
+			return functionResponse(err.Error(), err)
+		}
+	} else {
+		body := StreamEvent{}
+		err = json.Unmarshal(req.Body, &body)
+		if err != nil {
+			return functionResponse(err.Error(), err)
+		}
+		resp, err = handleStreamEvent(req.Context(), body)
+		if err != nil {
+			return functionResponse(err.Error(), err)
+		}
+	}
+	// encode the meta query result from bson to a bytes buffer
+	b := new(bytes.Buffer)
+	err = json.NewEncoder(b).Encode(resp)
+	return functionResponse(b.String(), err)
 }
 
 func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
@@ -200,12 +189,4 @@ func executeQuery(query string, schema graphql.Schema, vars map[string]interface
 		fmt.Printf("Unexpected errors: %v", result.Errors)
 	}
 	return result
-}
-
-// handleEncodingError returns a generic encoding error response
-func handleEncodingError(err error) (handler.Response, error) {
-	return handler.Response{
-		Body:       []byte("Something went wrong encoding the result"),
-		StatusCode: http.StatusInternalServerError,
-	}, err
 }
