@@ -13,10 +13,18 @@ Syncmesh tackles the topics of Distributed Storage, Function-as-a-Service, and E
 
 ## Prerequisites
 
-- minikube
-- kubectl
-- helm
-- terraform
+General/Recommended:
+-  [go](https://golang.org/doc/install)
+-  [openfaas CLI](https://docs.openfaas.com/cli/install/)
+
+For local deployment:
+- [minikube](https://minikube.sigs.k8s.io/docs/start/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [helm](https://helm.sh/docs/intro/install/)
+
+For remote deployment:
+- [terraform CLI](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+- [Cloud SDK](https://cloud.google.com/sdk/docs/install) (recommended)
 
 ## Scripts
 
