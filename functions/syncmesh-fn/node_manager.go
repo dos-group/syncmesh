@@ -61,10 +61,10 @@ func (db mongoDB) getSyncmeshNodes() ([]SyncmeshNode, error) {
 }
 
 // updateCreateNode updates an external node entry or creates a new one, if it does not exist
-func (db mongoDB) updateCreateNode(node SyncmeshNode, _id string) (interface{}, error) {
+func (db mongoDB) updateCreateNode(node SyncmeshNodeNoId, _id string) (interface{}, error) {
 	var err error
 	var id primitive.ObjectID
-	var updatedNode SyncmeshNode
+	var updatedNode SyncmeshNodeNoId
 
 	if _id == "" {
 		id = primitive.NewObjectID()

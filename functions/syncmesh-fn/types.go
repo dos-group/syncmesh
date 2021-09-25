@@ -86,9 +86,9 @@ type SyncMeshRequest struct {
 
 // SyncmeshMetaRequest represents meta requests to the function for managing saved nodes
 type SyncmeshMetaRequest struct {
-	Type string       `json:"meta_type"` // get, update or delete
-	ID   string       `json:"id,omitempty"`
-	Node SyncmeshNode `json:"node,omitempty"`
+	Type string           `json:"meta_type"` // get, update or delete
+	ID   string           `json:"id,omitempty"`
+	Node SyncmeshNodeNoId `json:"node,omitempty"`
 }
 
 // DocKey is a unique ID of a document
@@ -124,6 +124,16 @@ type AveragesResponse struct {
 // SyncmeshNode specifies an external or internal node entry in the database
 type SyncmeshNode struct {
 	ID         string  `bson:"_id" json:"_id"`
+	Address    string  `bson:"address" json:"address"`
+	Lat        float64 `bson:"lat" json:"lat,omitempty"`
+	Lon        float64 `bson:"lon" json:"lon,omitempty"`
+	Distance   float64 `bson:"distance" json:"distance,omitempty"`
+	OwnNode    bool    `bson:"own_node" json:"own_node"`
+	Subscribed bool    `bson:"subscribed" json:"subscribed"`
+}
+
+// SyncmeshNodeNoId without an ID for updating/creating mongoDB entries
+type SyncmeshNodeNoId struct {
 	Address    string  `bson:"address" json:"address"`
 	Lat        float64 `bson:"lat" json:"lat,omitempty"`
 	Lon        float64 `bson:"lon" json:"lon,omitempty"`
