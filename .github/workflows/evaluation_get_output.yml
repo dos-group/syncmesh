@@ -35,4 +35,5 @@ jobs:
       run: gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-3-test-orchestrator > /tmp/logoutput/test.log
 
     - name: cat
+      if: always()
       run: cat /tmp/logoutput/test.log 
