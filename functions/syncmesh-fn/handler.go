@@ -168,6 +168,7 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 		return
 	}
 	err, ownNode, externalNodes := findOwnNode(savedNodes)
+	// if own node exists and radius specified, calculate distances and filter by radius
 	if err == nil && request.Radius > 0 {
 		filteredNodes = filterExternalNodes(externalNodes, ownNode, float64(request.Radius))
 		for _, node := range filteredNodes {
@@ -186,8 +187,11 @@ func combineExternalNodes(request *SyncMeshRequest, ctx context.Context) {
 				log.Printf(errUpdate.Error())
 			}
 		}
+	} else if err == nil {
+		// no radius specified, all external nodes are queried
+		filteredNodes = externalNodes
 	} else {
-		log.Printf(err.Error())
+		// no own node found, all saved nodes are external
 		filteredNodes = savedNodes
 	}
 	// append the filtered nodes to the external nodes
