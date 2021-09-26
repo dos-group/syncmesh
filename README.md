@@ -85,6 +85,11 @@ sudo journalctl -u google-startup-scripts.service -f | grep startup-script
 # See Startup Script Log
 sudo journalctl -u google-startup-scripts.service | grep startup-script
 
+gcloud auth activate-service-account terraform@dspj-315716.iam.gserviceaccount.com --key-file="credentials.json"
+gcloud config set project dspj-315716
+gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-3-test-orchestrator
+# For Better display on smaller screens add | cut -d "]" -f2-
+
 # Destroy
 terraform destroy
 ```
