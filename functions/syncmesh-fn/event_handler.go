@@ -1,13 +1,10 @@
 package function
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 )
 
 // handleStreamEvent handles the stream event request type
@@ -51,40 +48,20 @@ func handleStreamEvent(ctx context.Context, event StreamEvent) (interface{}, err
 	default:
 		return nil, err
 	}
-	jsonBody, err := json.Marshal(&request)
-	if err != nil {
-		return nil, err
-	}
-
 	// iterate through saved external nodes and send out request
 	successCounter := 0
 	requestCounter := 0
 	for _, node := range externalNodes {
 		if node.Subscribed {
-			req, err := http.NewRequest("POST", node.Address, bytes.NewBuffer(jsonBody))
+			requestCounter += 1
+			err, body := makeExternalRequest(request, node.Address)
 			if err != nil {
 				return nil, err
-			}
-			req.Header.Set("Content-Type", "application/json")
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			requestCounter += 1
-			if err != nil {
-				return err, nil
-			}
-			// read the response
-			if resp.StatusCode == 200 {
+			} else {
 				successCounter += 1
+				// log the response
+				log.Printf("response of node %s: %s", node.Address, string(body))
 			}
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				continue
-			}
-			err = resp.Body.Close()
-			if err != nil {
-				continue
-			}
-			log.Println(string(body))
 		}
 	}
 	results := fmt.Sprintf("Total of %v requests sent, %v successful", requestCounter, successCounter)
