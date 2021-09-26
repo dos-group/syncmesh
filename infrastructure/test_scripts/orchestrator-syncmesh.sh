@@ -21,7 +21,7 @@ seperate
 # Collect
 echo "Scenario: Collect - 1 day"
 COMMAND=
-ssh -o StrictHostKeyChecking=no $CLIENT_IP 'python3 /test.py --repetitions'$REPETITIONS' --requestType "collect" --startTime "2017-07-31T00:00:00Z" --endTime "2017-07-31T23:59:59Z"'
+ssh -o StrictHostKeyChecking=no $CLIENT_IP 'python3 /test.py --repetitions '$REPETITIONS' --requestType "collect" --startTime "2017-07-31T00:00:00Z" --endTime "2017-07-31T23:59:59Z"'
 
 seperate
 
