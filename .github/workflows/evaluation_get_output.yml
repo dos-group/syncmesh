@@ -33,3 +33,6 @@ jobs:
 
     - name: Use gcloud CLI
       run: gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-3-test-orchestrator > /tmp/logoutput/test.log
+
+    - name: cat
+      run: cat /tmp/logoutput/test.log 
