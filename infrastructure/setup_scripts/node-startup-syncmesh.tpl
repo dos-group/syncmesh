@@ -32,6 +32,7 @@ cat << EOF >> /var/lib/faasd/docker-compose.yaml
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
+    # Why? https://github.com/openfaas/faasd/issues/134#issuecomment-768587793
       - "10.62.0.1:27017:27017"
 EOF
 
