@@ -30,8 +30,8 @@ func handleMetaRequest(ctx context.Context, request SyncmeshMetaRequest) (interf
 // getSyncmeshDB as an instance of the meta node database
 func getSyncmeshDB(ctx context.Context) mongoDB {
 	// connect to mongodb external node collection
-	db = connectDB(ctx, MetaDB, NodeCollection)
-	return db
+	metaDB := connectDB(ctx, MetaDB, NodeCollection)
+	return metaDB
 }
 
 // getSyncmeshNodes and their information currently stored in the meta db
