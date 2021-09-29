@@ -11,8 +11,8 @@ provider "google" {
   credentials = file("credentials.json")
 
   project = var.project
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  region  = local.nodes[0].region
+  zone    = local.nodes[0].location
 }
 
 # resource "random_id" "server" {
@@ -240,7 +240,7 @@ resource "google_compute_instance" "nodes" {
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"), mongo_version = var.test_mongo_version })
-  depends_on              = [google_compute_router_nat.nat]
+  depends_on              = [google_compute_router_nat.nat, module.output_log_nodes]
 }
 
 resource "google_compute_instance" "client" {
@@ -355,6 +355,10 @@ resource "google_compute_instance" "test-orchestrator" {
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, repetitions = var.test_client_repetitions, sleep_time = var.test_sleep_time, pre_time = var.test_pre_time, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
+
+  depends_on = [
+    module.output_log_nodes
+  ]
 }
 
 
@@ -460,3 +464,38 @@ resource "local_file" "cert" {
 
 # For Advanced Logging:
 # https://registry.terraform.io/modules/terraform-google-modules/cloud-operations/google/latest
+
+
+module "output_log_nodes" {
+  for_each = {
+    # Ignore first, because it's the basic test infrastructure
+    for index, vm in slice(local.nodes, 1, length(local.nodes)) :
+    index => vm
+  }
+  source                   = "terraform-google-modules/gcloud/google"
+  version                  = "~> 2.0"
+  skip_download            = false
+  service_account_key_file = "credentials.json"
+
+
+  platform              = "linux"
+  additional_components = ["beta"]
+
+  destroy_cmd_entrypoint = "gcloud"
+  destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-node-instance-${each.value.number} --project ${var.project} --zone ${each.value.location} > /tmp/logoutput/${local.name_prefix}-node-instance-${each.value.number}.log"
+}
+
+module "output_log_orchestrator" {
+
+  source                   = "terraform-google-modules/gcloud/google"
+  version                  = "~> 2.0"
+  skip_download            = false
+  service_account_key_file = "credentials.json"
+
+
+  platform              = "linux"
+  additional_components = ["beta"]
+
+  destroy_cmd_entrypoint = "gcloud"
+  destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
+}
