@@ -20,10 +20,11 @@ seperate () {
 
 uploadData() {
 # First Argument is the days for the import script
-
+do_only_on_first="--drop"
 while read internalIP; do
     echo "SHH $internalIP"
-    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data --headerline --drop /import$1.csv" < /dev/null
+    ssh -o StrictHostKeyChecking=no $internalIP "mongoimport -h $SERVER_IP:$PORT --type csv -d syncmesh -c sensor_data $do_only_on_first --headerline /import$1.csv" < /dev/null
+    do_only_on_first=""
 done < /nodes.txt
 
 # Fix Dates
