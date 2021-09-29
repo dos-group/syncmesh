@@ -56,7 +56,10 @@ jobs:
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       run: terraform plan -var public_access=false -var scenario="${{ matrix.scenario }}" -var instance_scenario="${{ matrix.latency }}-${{ matrix.node_count}}" -var machine_type="n1-standard-1" -out tfplan
-
+    - name: Make dir
+      run: mkdir /tmp/ipynb
+    - name: Create directory
+      run: mkdir /tmp/logoutput    
     - name: Terraform Apply
       run: terraform apply tfplan
 
@@ -79,10 +82,7 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         sudo apt install tshark -y
 
-    - name: Make dir
-      run: mkdir /tmp/ipynb
-    - name: Create directory
-      run: mkdir /tmp/logoutput      
+  
 
     - name: Query Data
       working-directory: evaluation
