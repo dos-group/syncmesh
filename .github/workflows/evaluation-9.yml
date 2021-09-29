@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         scenario: ["baseline", "syncmesh", "advanced-mongo"]
-        latency: ["without-latency"]
+        latency: ["with-latency"]
         node_count: [9] #, 6]
     defaults:
       run:

@@ -136,55 +136,55 @@ locals {
         number   = 6
       },
     ],
-    "without-latency-9" : [
+    "with-latency-9" : [
       {
         region   = "us-central1"
         location = "us-central1-a",
         number   = 0
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "northamerica-northeast1"
+        location = "northamerica-northeast1-a",
         number   = 1
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "asia-east1"
+        location = "asia-east1-a"
         number   = 2
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "europe-north1"
+        location = "europe-north1-a"
         number   = 3
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "australia-southeast1"
+        location = "australia-southeast1-c",
         number   = 4
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "southamerica-east1"
+        location = "southamerica-east1-c"
         number   = 5
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "asia-south2"
+        location = "asia-south2-c"
         number   = 6
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "asia-northeast1"
+        location = "asia-northeast1-a",
         number   = 7
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "europe-central2"
+        location = "europe-central2-a",
         number   = 8
       },
       {
-        region   = "us-central1"
-        location = "us-central1-a",
+        region   = "us-west1"
+        location = "us-west1-a",
         number   = 9
       },
     ],
@@ -567,7 +567,7 @@ module "output_log_nodes" {
   service_account_key_file = "credentials.json"
 
 
-  platform              = "linux"
+  platform = "linux"
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-node-instance-${each.value.number} --project ${var.project} --zone ${each.value.location} > /tmp/logoutput/${local.name_prefix}-node-instance-${each.value.number}.log"
@@ -584,7 +584,7 @@ module "output_log_orchestrator" {
   service_account_key_file = "credentials.json"
 
 
-  platform              = "linux"
+  platform = "linux"
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
@@ -601,7 +601,7 @@ module "output_log_client" {
   service_account_key_file = "credentials.json"
 
 
-  platform              = "linux"
+  platform = "linux"
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-client-instance --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-client-instance.log"
