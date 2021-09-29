@@ -240,7 +240,7 @@ resource "google_compute_instance" "nodes" {
     }
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"), mongo_version = var.test_mongo_version })
-  depends_on              = [google_compute_router_nat.nat, module.output_log_nodes]
+  depends_on              = [google_compute_router_nat.nat]
 }
 
 resource "google_compute_instance" "client" {
@@ -356,9 +356,6 @@ resource "google_compute_instance" "test-orchestrator" {
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, repetitions = var.test_client_repetitions, sleep_time = var.test_sleep_time, pre_time = var.test_pre_time, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
 
-  depends_on = [
-    module.output_log_nodes
-  ]
 }
 
 
@@ -483,6 +480,9 @@ module "output_log_nodes" {
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-node-instance-${each.value.number} --project ${var.project} --zone ${each.value.location} > /tmp/logoutput/${local.name_prefix}-node-instance-${each.value.number}.log"
+  depends_on = [
+    google_compute_instance.nodes
+  ]
 }
 
 module "output_log_orchestrator" {
@@ -498,4 +498,7 @@ module "output_log_orchestrator" {
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
+  depends_on = [
+    google_compute_instance.test-orchestrator
+  ]
 }
