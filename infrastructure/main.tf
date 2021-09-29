@@ -568,7 +568,6 @@ module "output_log_nodes" {
 
 
   platform              = "linux"
-  additional_components = ["beta"]
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-node-instance-${each.value.number} --project ${var.project} --zone ${each.value.location} > /tmp/logoutput/${local.name_prefix}-node-instance-${each.value.number}.log"
@@ -586,7 +585,6 @@ module "output_log_orchestrator" {
 
 
   platform              = "linux"
-  additional_components = ["beta"]
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
@@ -604,7 +602,6 @@ module "output_log_client" {
 
 
   platform              = "linux"
-  additional_components = ["beta"]
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-client-instance --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-client-instance.log"
