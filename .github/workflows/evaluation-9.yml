@@ -15,7 +15,7 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    timeout-minutes:  240
+    timeout-minutes:  300
     strategy:
       max-parallel: 1
       fail-fast: false
@@ -61,8 +61,8 @@ jobs:
       run: terraform apply tfplan
 
     - name: Sleep
-      run: sleep 3480
-      timeout-minutes: 120
+      run: sleep 5480
+      timeout-minutes: 150
 
     - name: Set up Python 
       uses: actions/setup-python@v2
