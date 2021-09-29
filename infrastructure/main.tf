@@ -69,12 +69,12 @@ locals {
       {
         region   = "us-central1"
         location = "us-central1-a",
-        number   = 1
+        number   = 2
       },
       {
         region   = "us-central1"
         location = "us-central1-a",
-        number   = 1
+        number   = 3
       },
     ],
     "with-latency-3" : [
@@ -135,7 +135,59 @@ locals {
         location = "asia-south2-c"
         number   = 6
       },
-    ]
+    ],
+    "without-latency-9" : [
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 0
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 1
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 2
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 3
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 4
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 5
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 6
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 7
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 8
+      },
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 9
+      },
+    ],
   }
 }
 
