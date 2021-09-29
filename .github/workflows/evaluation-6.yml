@@ -74,6 +74,8 @@ jobs:
 
     - name: Make dir
       run: mkdir /tmp/ipynb
+    - name: Create directory
+      run: mkdir /tmp/logoutput      
 
     - name: Query Data
       working-directory: evaluation
@@ -96,7 +98,11 @@ jobs:
     - name: Terraform Destroy
       if: always() 
       run: terraform destroy -auto-approve
-
+    - uses: actions/upload-artifact@master
+      if: always()
+      with:
+        name: gcp-output-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}
+        path: /tmp/logoutput
 
   bundle:
     if: always()
