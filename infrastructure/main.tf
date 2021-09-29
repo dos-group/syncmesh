@@ -239,6 +239,14 @@ resource "google_compute_instance" "nodes" {
       content {}
     }
   }
+  service_account {
+    scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/trace.append",
+    ]
+  }
+
   metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"), mongo_version = var.test_mongo_version })
   depends_on              = [google_compute_router_nat.nat]
 }
@@ -266,6 +274,13 @@ resource "google_compute_instance" "client" {
       for_each = var.public_access ? ["active"] : []
       content {}
     }
+  }
+  service_account {
+    scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/trace.append",
+    ]
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/client-startup.tpl", { instances = google_compute_instance.nodes, testscript = file("${path.module}/test_scripts/client-${var.scenario}.py"), mongo_version = var.test_mongo_version })
 }
@@ -295,6 +310,14 @@ resource "google_compute_instance" "central_server" {
       content {}
     }
   }
+
+  service_account {
+    scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/trace.append",
+    ]
+  }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes, mongo_version = var.test_mongo_version })
 }
 
@@ -322,6 +345,14 @@ resource "google_compute_instance" "config-server" {
       for_each = var.public_access ? ["active"] : []
       content {}
     }
+  }
+
+  service_account {
+    scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/trace.append",
+    ]
   }
   metadata_startup_script = templatefile("${path.module}/setup_scripts/config-server-startup-${var.scenario}.tpl", { instances = google_compute_instance.nodes, mongo_version = var.test_mongo_version })
 }
@@ -354,6 +385,15 @@ resource "google_compute_instance" "test-orchestrator" {
       // Ephemeral public IP
     }
   }
+
+  service_account {
+    scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write",
+      "https://www.googleapis.com/auth/trace.append",
+    ]
+  }
+
   metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, repetitions = var.test_client_repetitions, sleep_time = var.test_sleep_time, pre_time = var.test_pre_time, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
 
 }
@@ -469,9 +509,9 @@ module "output_log_nodes" {
     for index, vm in slice(local.nodes, 1, length(local.nodes)) :
     index => vm
   }
-  source                   = "terraform-google-modules/gcloud/google"
-  version                  = "~> 2.0"
-  skip_download            = false
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 2.0"
+  # skip_download            = false
   service_account_key_file = "credentials.json"
 
 
@@ -487,9 +527,9 @@ module "output_log_nodes" {
 
 module "output_log_orchestrator" {
 
-  source                   = "terraform-google-modules/gcloud/google"
-  version                  = "~> 2.0"
-  skip_download            = false
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 2.0"
+  # skip_download            = false
   service_account_key_file = "credentials.json"
 
 
@@ -498,6 +538,24 @@ module "output_log_orchestrator" {
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
+  module_depends_on = [
+    google_compute_instance.test-orchestrator
+  ]
+}
+
+module "output_log_client" {
+
+  source  = "terraform-google-modules/gcloud/google"
+  version = "~> 2.0"
+  # skip_download            = false
+  service_account_key_file = "credentials.json"
+
+
+  platform              = "linux"
+  additional_components = ["beta"]
+
+  destroy_cmd_entrypoint = "gcloud"
+  destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-client-instance --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-client-instance.log"
   module_depends_on = [
     google_compute_instance.test-orchestrator
   ]

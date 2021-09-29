@@ -42,6 +42,9 @@ cat > test.sh <<'CUSTOMEOF'
 ${testscript}
 CUSTOMEOF
 
+# Install Monitoring Agent
+curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo bash add-monitoring-agent-repo.sh --also-install && sudo service stackdriver-agent start
+
 echo "Waiting for everything to be set up (static timer)"
 # 10 Minutes should be more than sufficient
 sleep 600

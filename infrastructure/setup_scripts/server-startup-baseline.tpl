@@ -4,6 +4,8 @@ VERSION=${mongo_version}
 pwd
 
 echo "Hello from the Setup script!"
+# Install Monitoring Agent
+curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo bash add-monitoring-agent-repo.sh --also-install && sudo service stackdriver-agent start
 
 ## Paste all IPs of the Nodes 
 #cat > nodes.txt <<EOF
