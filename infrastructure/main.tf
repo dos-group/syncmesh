@@ -2,7 +2,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "3.5.0"
+      version = "3.53"
     }
   }
 }
@@ -480,7 +480,7 @@ module "output_log_nodes" {
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-node-instance-${each.value.number} --project ${var.project} --zone ${each.value.location} > /tmp/logoutput/${local.name_prefix}-node-instance-${each.value.number}.log"
-  depends_on = [
+  module_depends_on = [
     google_compute_instance.nodes
   ]
 }
@@ -498,7 +498,7 @@ module "output_log_orchestrator" {
 
   destroy_cmd_entrypoint = "gcloud"
   destroy_cmd_body       = "compute instances get-serial-port-output ${local.name_prefix}-test-orchestrator --project ${var.project} --zone ${local.nodes[0].location} > /tmp/logoutput/${local.name_prefix}-test-orchestrator.log"
-  depends_on = [
+  module_depends_on = [
     google_compute_instance.test-orchestrator
   ]
 }
