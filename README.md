@@ -1,6 +1,6 @@
 # Syncmesh
 
-<img src="/images/syncmesh_logo.png" align="left"
+<img src="/images/syncmesh_logo.png" align="middle"
 width="200" hspace="10" vspace="10">
 
 Distributed data storage, querying and coordination system, based on OpenFaaS and MongoDB.
@@ -9,7 +9,7 @@ Distributed data storage, querying and coordination system, based on OpenFaaS an
 
 This is a project by students of the Technical University of Berlin, completed as part of the Distributed Systems
 course. Syncmesh tackles the topics of Distributed Storage, Function-as-a-Service, and Edge Computing. The goal was to
-evaluate the performance of a custom solution against traditional centralized and distributed storage use cases.
+evaluate the performance of a custom solution against traditional centralized and distributed storage use cases. Read more about it in our [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki) or have a look at our [Paper](https://github.com/DSPJ2021/paper). You can find more information from our analysis in the [Benchmark Data Repository](https://github.com/DSPJ2021/benchmark-data) or in the [Github Actions](https://github.com/DSPJ2021/syncmesh/actions).
 
 ## Prerequisites
 
