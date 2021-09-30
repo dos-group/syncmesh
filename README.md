@@ -9,7 +9,11 @@ Distributed data storage, querying and coordination system, based on OpenFaaS an
 
 This is a project by students of the Technical University of Berlin, completed as part of the Distributed Systems
 course. Syncmesh tackles the topics of Distributed Storage, Function-as-a-Service, and Edge Computing. The goal was to
-evaluate the performance of a custom solution against traditional centralized and distributed storage use cases. Read more about it in our [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki) or have a look at our [Paper](https://github.com/DSPJ2021/paper). You can find more information from our analysis in the [Benchmark Data Repository](https://github.com/DSPJ2021/benchmark-data) or in the [Github Actions](https://github.com/DSPJ2021/syncmesh/actions).
+evaluate the performance of a custom solution against traditional centralized and distributed storage use cases. Read
+more about it in our [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki) or have a look at
+our [Paper](https://github.com/DSPJ2021/paper). You can find more information from our analysis in
+the [Benchmark Data Repository](https://github.com/DSPJ2021/benchmark-data) or in
+the [Github Actions](https://github.com/DSPJ2021/syncmesh/actions).
 
 ## Prerequisites
 
@@ -30,17 +34,18 @@ For remote deployment:
 - [terraform CLI](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 - [Cloud SDK](https://cloud.google.com/sdk/docs/install) (recommended)
 
-## How to use
+## How to use & Setup
 
-For using Syncmesh, read the wiki: [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki)
+This README only provides a short overview of the project and some tools/scripts. 
+For an extensive documentation on Syncmesh, read the wiki: [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki)
 
-## Scripts
+## Misc. Scripts
 
 - `minikube_node_setup.sh`: sets up an openfaas instance in the minikube cluster and also mongodb in the same namespace
 - `get_openfaas_password.sh`: fetches saves, and outputs the openfaas gateway password
 - `functions_deployer.sh`: deploys functions
 
-## Port Forwarding for local deployment
+## Port-Forwarding
 
 Either use [kube-forwarder](https://www.electronjs.org/apps/kube-forwarder) or do:
 
@@ -51,9 +56,12 @@ Similarly, do the same with the mongoDB instance if you have a listener:
 `kubectl port-forward openfaas-db-mongodb-0 -n openfaas-fn 27017:27017`
 
 It is also possible to forward the remote openfaas dashboard or database, however in this instance you have to use ssh
-port forwarding.
+port forwarding or use the Google cloud CLI.
 
 ## Infrastructure
+
+A detailed tutorial for the cloud infrastructure setup is
+provided [in the wiki](https://github.com/DSPJ2021/syncmesh/wiki/Cloud-infrastructure-setup).
 
 To set up the
 credentials [follow this guide](https://learn.hashicorp.com/tutorials/terraform/google-cloud-platform-build#set-up-gcp),
@@ -67,7 +75,7 @@ but additionally grant the following roles:
   account)
 - roles/serviceusage.serviceUsageAdmin on
 
-Provision the test ressources via these commands:
+A short overview of the commands to set up the infrastructure and configure resources:
 
 ```terraform
 # Initialize
@@ -85,7 +93,7 @@ sudo journalctl -u google-startup-scripts.service -f | grep startup-script
 # See Startup Script Log
 sudo journalctl -u google-startup-scripts.service | grep startup-script
 
-gcloud auth activate-service-account terraform@dspj-315716.iam.gserviceaccount.com --key-file="credentials.json"
+gcloud auth activate-service-account terraform@dspj-315716.iam.gserviceaccount.com --key-file = "credentials.json"
 gcloud config set project dspj-315716
 gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-3-test-orchestrator
 # For Better display on smaller screens use
@@ -128,6 +136,14 @@ sudo journalctl -f | grep mongo
 - [MongoDB Go Driver](https://pkg.go.dev/go.mongodb.org/mongo-driver#section-readme)
 - [Go Haversine](https://github.com/umahmood/haversine)
 - [Testify](https://github.com/stretchr/testify)
+
+Infrastructure:
+
+- Docker
+- faasd
+- Terraform
+- Kubernetes
+- Google Cloud
 
 ## Good Reads
 
