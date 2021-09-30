@@ -188,6 +188,73 @@ locals {
         number   = 9
       },
     ],
+    "with-latency-12" : [
+      {
+        region   = "us-central1"
+        location = "us-central1-a",
+        number   = 0
+      },
+      {
+        region   = "northamerica-northeast1"
+        location = "northamerica-northeast1-a",
+        number   = 1
+      },
+      {
+        region   = "asia-east1"
+        location = "asia-east1-a"
+        number   = 2
+      },
+      {
+        region   = "europe-north1"
+        location = "europe-north1-a"
+        number   = 3
+      },
+      {
+        region   = "australia-southeast1"
+        location = "australia-southeast1-c",
+        number   = 4
+      },
+      {
+        region   = "southamerica-east1"
+        location = "southamerica-east1-c"
+        number   = 5
+      },
+      {
+        region   = "asia-south2"
+        location = "asia-south2-c"
+        number   = 6
+      },
+      {
+        region   = "asia-northeast1"
+        location = "asia-northeast1-a",
+        number   = 7
+      },
+      {
+        region   = "europe-central2"
+        location = "europe-central2-a",
+        number   = 8
+      },
+      {
+        region   = "us-west1"
+        location = "us-west1-a",
+        number   = 9
+      },
+      {
+        region   = "asia-southeast1-"
+        location = "asia-southeast1-c",
+        number   = 10
+      },
+      {
+        region   = "europe-west1"
+        location = "europe-west1-b",
+        number   = 11
+      },
+      {
+        region   = "us-east1"
+        location = "us-east1-b",
+        number   = 12
+      }
+    ],
   }
 }
 
@@ -234,7 +301,7 @@ resource "google_compute_router" "router" {
 
 resource "google_compute_router_nat" "nat" {
   for_each = {
-    for index, vm in local.nodes :
+    for index, vm in length(regexall("with-latency", var.instance_scenario)) > 0 ? local.nodes : slice(local.nodes, 0, 1) :
     index => vm
   }
   name                               = "${local.name_prefix}-router-nat-${each.value.number}"
