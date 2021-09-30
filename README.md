@@ -39,6 +39,13 @@ For remote deployment:
 This README only provides a short overview of the project and some tools/scripts. 
 For an extensive documentation on Syncmesh, read the wiki: [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki)
 
+## Repository Structure
+
+- `functions` contains the syncmesh function with all relevant functionality and deployment .yml files
+- `infrastructure` contains all terraform cloud infrastructure setup and test scripts, as well as configurations for the different scenarios
+- `mongo_event_listener` contains the event listener that accompanies the MongoDB for event-driven infrastructure. It can be either launched as a standalone script or inside a docker container
+- `evaluation` includes evaluation jupyter notebooks with relevant graphs and performance comparisons
+
 ## Misc. Scripts
 
 - `minikube_node_setup.sh`: sets up an openfaas instance in the minikube cluster and also mongodb in the same namespace
