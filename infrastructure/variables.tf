@@ -24,7 +24,7 @@ variable "instance_scenario" {
   type    = string
   default = "with-latency-3"
   validation {
-    condition     = contains(["with-latency-3", "without-latency-3", "with-latency-6", "with-latency-9"], var.instance_scenario)
+    condition     = contains(["with-latency-3", "without-latency-3", "with-latency-6", "with-latency-9", "with-latency-12"], var.instance_scenario)
     error_message = "Allowed values for scenario are \"with-latency-3\", \"without-latency-3\", or \"with-latency-6\"."
   }
 }
