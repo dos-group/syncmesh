@@ -240,8 +240,8 @@ locals {
         number   = 9
       },
       {
-        region   = "asia-southeast1"
-        location = "asia-southeast1-c",
+        region   = "asia-southeast2"
+        location = "asia-southeast2-a",
         number   = 10
       },
       {
