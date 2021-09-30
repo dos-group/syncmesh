@@ -442,7 +442,7 @@ resource "google_compute_instance" "central_server" {
 
 resource "google_compute_instance" "config-server" {
   count        = var.scenario == "advanced-mongo" ? 1 : 0
-  name         = "${local.name_prefix}-central-config-server"
+  name         = "${local.name_prefix}-config-server"
   machine_type = var.machine_type
 
   tags = ["demo-vm-instance"]
