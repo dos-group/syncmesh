@@ -38,6 +38,10 @@ For remote deployment:
 
 This README only provides a short overview of the project and some tools/scripts. 
 For an extensive documentation on Syncmesh, read the wiki: [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki)
+To just run a Benchmark follow this short guide: 
+1. Fork this Repository
+2. Provide `GCE_CREDENTIALS` with the base64 of `credentials.json` as [seen here](https://github.com/DSPJ2021/syncmesh/wiki/Cloud-infrastructure-setup/). 
+3. Run [any of the actions](https://github.com/DSPJ2021/syncmesh/actions) labeled "Benchmark". 
 
 ## Repository Structure
 
