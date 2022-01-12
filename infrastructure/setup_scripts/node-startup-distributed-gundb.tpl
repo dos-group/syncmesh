@@ -127,11 +127,10 @@ printf "
 cat start.js
 npm install csv-parser
 
-printf "
-#!/bin/bash
+printf "#!/bin/bash
 node start.js 8080
 " > /start-gundb.sh
-
+chmod +x /start-gundb.sh
 
 printf "
 [Unit]
