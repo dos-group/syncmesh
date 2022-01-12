@@ -83,9 +83,15 @@ locals {
         location = "us-central1-a",
         number   = 0
       },
+      # TODO: RESET TO
+      #    {
+      #        region   = "northamerica-northeast1"
+      #        location = "northamerica-northeast1-a",
+      #        number   = 1
+      #      },
       {
-        region   = "northamerica-northeast1"
-        location = "northamerica-northeast1-a",
+        region   = "australia-southeast1"
+        location = "australia-southeast1-c",
         number   = 1
       },
       {
