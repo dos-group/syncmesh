@@ -63,8 +63,14 @@ jobs:
     - name: Terraform Apply
       run: terraform apply tfplan
 
-    - name: Sleep
-      run: sleep 3480
+    - name: Wait for experiment end
+      run: |
+        ip=`cat orchestrator.txt`
+        while ! ssh -i ./orchestrator.pem -o StrictHostKeyChecking=no orchestrator@$ip test -f /captures.zip
+        do
+          echo "Probe if experiment has ended"
+          sleep 60
+        done
       timeout-minutes: 120
 
     - name: Set up Python 
