@@ -5,7 +5,7 @@ name: Analyze - 3
 # Controls when the workflow will run
 on:
   workflow_run:
-    workflows: ["Benchmark"]
+    workflows: ["Benchmark - 3"]
     branches: [main]
     types: 
       - completed
