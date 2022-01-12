@@ -127,7 +127,35 @@ printf "
 cat start.js
 npm install csv-parser
 
+printf "
+#!/bin/bash
+node start.js 8080
+" > /start-gundb.sh
+
+
+printf "
+[Unit]
+Description=Gun DB Service
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+User=root
+WorkingDirectory=/
+ExecStart=/start-gundb.sh
+
+[Install]
+WantedBy=multi-user.target
+" > /etc/systemd/system/gundb.service
+
+systemctl daemon-reload
+systemctl enable gundb.service
+systemctl start gundb.service
+
+
 # start gun:
-tmux new-session -d -s "gundb"
-tmux send -t gundb 'cd /' ENTER
-tmux send -t gundb 'node start.js 8080' ENTER
+# tmux new-session -d -s "gundb"
+# tmux send -t gundb 'cd /' ENTER
+# tmux send -t gundb 'node start.js 8080' ENTER
