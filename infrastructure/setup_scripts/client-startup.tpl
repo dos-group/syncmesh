@@ -24,6 +24,7 @@ npm install
 sudo npm install gun@0.2020.1235
 cd ./node_modules/gun
 sudo npm install .
+cd /
 
 
 wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
