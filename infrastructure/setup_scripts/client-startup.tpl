@@ -20,6 +20,11 @@ curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
 sudo apt-get install -y nodejs
 npm install 
 
+# TODO gundb version
+sudo npm install gun@0.2020.1235
+cd ./node_modules/gun
+sudo npm install .
+
 
 wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
