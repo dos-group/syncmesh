@@ -1,6 +1,6 @@
 requests
 google-cloud-monitoring
-google-cloud-bigquery==2.21.0
+google-cloud-bigquery==2.31.0
 google-cloud-storage==1.41.0
 matplotlib
 seaborn
