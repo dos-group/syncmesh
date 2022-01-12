@@ -61,7 +61,6 @@ EOF
 " 1> /dev/null
 echo "Finished Mongo Request"
 done
-echo '\n' >> collect.timings
 }
 
 queryDataAggregate() {
@@ -96,7 +95,6 @@ EOF
 "
 echo "Finished Mongo Request"
 done
-echo '\n' >> aggregate.timings
 }
 
 
