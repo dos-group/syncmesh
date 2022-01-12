@@ -83,12 +83,6 @@ locals {
         location = "us-central1-a",
         number   = 0
       },
-      # TODO: RESET TO
-      #    {
-      #        region   = "northamerica-northeast1"
-      #        location = "northamerica-northeast1-a",
-      #        number   = 1
-      #      },
       {
         region   = "australia-southeast1"
         location = "australia-southeast1-c",
@@ -99,9 +93,15 @@ locals {
         location = "asia-east1-a"
         number   = 2
       },
+      # TODO: RESET TO
+      #{
+      #  region   = "europe-north1"
+      #  location = "europe-north1-a"
+      #  number   = 3
+      #},
       {
-        region   = "europe-north1"
-        location = "europe-north1-a"
+        region   = "northamerica-northeast1"
+        location = "northamerica-northeast1-a",
         number   = 3
       },
     ],
