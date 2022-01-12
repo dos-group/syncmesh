@@ -15,6 +15,12 @@ sudo apt-get update
 # Install Python for data distribution
 sudo apt-get install -y python3.6 python3-pip
 
+# install nodejs TODO: Setup node version
+curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+sudo apt-get install -y nodejs
+npm install 
+
+
 wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
 sudo apt-get update
@@ -25,7 +31,7 @@ pip install requests
 
 cat > nodes.txt <<EOF
 %{ for instance in instances ~}
-${instance.network_interface.0.network_ip}:8080
+${instance.network_interface.0.network_ip}
 %{ endfor ~}
 EOF
 
