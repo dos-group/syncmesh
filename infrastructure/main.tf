@@ -384,7 +384,7 @@ resource "google_compute_instance" "nodes" {
 
 resource "google_compute_instance" "client" {
   name         = "${local.name_prefix}-client-instance"
-  machine_type = var.machine_type
+  machine_type = var.scenario == "distributed-gundb" ? "n1-standard-2" : var.machine_type
 
   tags = ["demo-vm-instance"]
   metadata = {
