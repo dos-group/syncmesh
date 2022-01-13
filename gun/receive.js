@@ -12,6 +12,7 @@ const gun = Gun({
 const args = process.argv.slice(2);
 // node receive.js <mode:collect/aggregate> <intervalBegin:ISODate> <intervalEnd:ISODate>
 // node receive.js aggregate 2017-07-31T00:00:00Z 2017-07-31T23:59:59Z
+// node --trace_gc receive.js aggregate 2017-07-31T00:00:00Z 2017-07-31T23:59:59Z
 // node test.py aggregate 2017-07-31T00:00:00Z 2017-07-31T23:59:59Z
 
 const startDate = new Date(args[1]);
@@ -22,17 +23,23 @@ console.log('endDate', endDate);
 // For the distributed database there is no difference between the aggregate and collect mode, as both need the data locally.
 
 // Interval check in ms
-interval = 500;
+interval = 10;
 
 function getData(key, callback, expectedLength) {
-  var timerRef = setInterval(() => {
+  //   console.log('getData', key);
+
+  let timerRef = setInterval(() => {
     // Compare with length + 1 (for internal object)
     // if (data == undefined || Object.keys(data).length < expectedLength + 1) {
     //   if (data != undefined) {
     // console.log(Object.keys(data).length);
     //   }
     //   getData(key, callback, expectedLength);
-    gun.get(key).once((new_data) => {});
+    gun.get(key).once((new_data) => {
+      //   if (new_data != undefined) {
+      //     console.log(Object.keys(new_data).length);
+      //   }
+    });
     // DO Nothing as we will receive the data in the .on() callback
     // data = new_data;
     // console.log(data);
@@ -44,9 +51,10 @@ function getData(key, callback, expectedLength) {
   }, interval);
 
   gun.get(key).on((data) => {
+    // console.log(data);
     if (data == undefined || Object.keys(data).length < expectedLength + 1) {
       //   if (data != undefined) {
-      // console.log(Object.keys(data).length);
+      //   console.log(Object.keys(data).length);
       //   }
       //   getData(key, callback, expectedLength);
     } else {
@@ -94,7 +102,7 @@ getData(
       );
     });
   },
-  3
+  1
 );
 
 // Check if all data points have been loaded before continuing (the list of datapoints)

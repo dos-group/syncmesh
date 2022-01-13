@@ -108,7 +108,7 @@ printf "
         //   console.log('try to save data');
         var dataEntry = gun.get(sensorName + '-' + data.timestamp).put(data);
         sensor.set(dataEntry, () => {
-            console.log('inserted entry');
+            // console.log('inserted entry');
         });
         })
         .on('end', () => {

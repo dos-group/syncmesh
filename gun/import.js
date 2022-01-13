@@ -7,6 +7,9 @@ const gun = Gun({
   localStorage: false,
   axe: false,
   radisk: false,
+  web: require('http')
+    .createServer(Gun.serve(__dirname + '/node_modules/gun/examples'))
+    .listen(8080),
 });
 
 const csv = require('csv-parser');
@@ -26,7 +29,7 @@ setTimeout(() => {
       //   console.log('try to save data');
       var dataEntry = gun.get(sensorName + '-' + data.timestamp).put(data);
       sensor.set(dataEntry, () => {
-        console.log('inserted entry');
+        // console.log('inserted entry');
       });
     })
     .on('end', () => {
