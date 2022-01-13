@@ -12,6 +12,7 @@ const gun = Gun({
 const args = process.argv.slice(2);
 // node receive.js <mode:collect/aggregate> <intervalBegin:ISODate> <intervalEnd:ISODate>
 // node receive.js aggregate 2017-07-31T00:00:00Z 2017-07-31T23:59:59Z
+// node test.py aggregate 2017-07-31T00:00:00Z 2017-07-31T23:59:59Z
 
 const startDate = new Date(args[1]);
 const endDate = new Date(args[2]);
@@ -21,22 +22,39 @@ console.log('endDate', endDate);
 // For the distributed database there is no difference between the aggregate and collect mode, as both need the data locally.
 
 // Interval check in ms
-interval = 100;
+interval = 500;
 
 function getData(key, callback, expectedLength) {
-  test = gun.get(key).once((data) => {
+  var timerRef = setInterval(() => {
     // Compare with length + 1 (for internal object)
+    // if (data == undefined || Object.keys(data).length < expectedLength + 1) {
+    //   if (data != undefined) {
+    // console.log(Object.keys(data).length);
+    //   }
+    //   getData(key, callback, expectedLength);
+    gun.get(key).once((new_data) => {});
+    // DO Nothing as we will receive the data in the .on() callback
+    // data = new_data;
     // console.log(data);
+    //   });
+    // } else {
+    //   //   clearTimeout(timerRef);
+    //   callback(data);
+    // }
+  }, interval);
+
+  gun.get(key).on((data) => {
     if (data == undefined || Object.keys(data).length < expectedLength + 1) {
-      if (data != undefined) {
-        // console.log(Object.keys(data).length);
-      }
-      setTimeout(() => {
-        getData(key, callback, expectedLength);
-      }, interval);
+      //   if (data != undefined) {
+      // console.log(Object.keys(data).length);
+      //   }
+      //   getData(key, callback, expectedLength);
     } else {
+      clearInterval(timerRef);
+      gun.get(key).off();
       callback(data);
     }
+    // console.log(data);
   });
 }
 
@@ -44,6 +62,7 @@ timer('sensors');
 timer('sensors_datapoints');
 timer('sensors_datapoints_data');
 
+sensors = {};
 sensor_datapoints = {};
 retrieved_sensor_data_points = {};
 check_loaded_points = {};
@@ -54,14 +73,14 @@ getData(
     timer('sensors');
     console.log(sensors_data);
     sensors = Object.keys(removeMetaData(sensors_data));
+    checkDataPoints();
     sensors.forEach((sensor) => {
       // Get datapoint_count
       getData(
         sensor + '-datapointcount',
         (data) => {
           datapointcount = removeMetaData(data);
-          console.log(sensor, datapointcount.count);
-          console.log(sensor + 'datapointcount', Object.keys(data).length);
+          console.log(sensor + ' datapointcount:', datapointcount.count);
           getData(
             sensor,
             (data) => {
@@ -81,7 +100,7 @@ getData(
 // Check if all data points have been loaded before continuing (the list of datapoints)
 let checkDataPoints = () => {
   setTimeout(() => {
-    console.log('check sensor points', Object.keys(sensor_datapoints).length);
+    console.log('fully loaded sensor datapoints list:', Object.keys(sensor_datapoints).length);
     if (Object.keys(sensor_datapoints).length >= sensors.length) {
       timer('sensors_datapoints');
       console.log('loaded sensor points');
@@ -107,8 +126,8 @@ let checkDataPoints = () => {
               key,
               (data) => {
                 //   retrieved_sensor_data_points[sensor][key] = data;
-                //   Save Memory just forget about the data:
-                retrieved_sensor_data_points[sensor][key] = 'received';
+                //   Save Memory by just forgetting about the data:
+                retrieved_sensor_data_points[sensor][key] = true;
                 // console.log(key, data);
               },
               1
@@ -121,7 +140,6 @@ let checkDataPoints = () => {
     }
   }, 1000);
 };
-checkDataPoints();
 
 // Check if the points data have been loaded before continuing (the content)
 let checkForRetrievedDataPoints = () => {
