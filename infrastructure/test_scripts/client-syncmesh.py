@@ -13,7 +13,7 @@ import json
 
 
 # Defaults
-repetitions = 10
+repetitions = 1
 filepath = '/nodes.txt'
 request_type = 'aggregate'
 
