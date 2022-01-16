@@ -26,7 +26,7 @@ seperate () {
 queryDataCollect() {
 # $1 - First Argument is the Start ISODate
 ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo rm -r /radata"
-ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo rm *.tmp"
+ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo rm /*.tmp"
 for i in $(seq $REPETITIONS)
 do
 
@@ -64,17 +64,18 @@ queryDataCollect "2017-07-31T00:00:00Z"
 
 seperate
 
-# echo "Scenario: Collect - 7 day"
-# queryDataCollect "2017-07-24T00:00:00Z"
+echo "Scenario: Collect - 7 day"
+queryDataCollect "2017-07-24T00:00:00Z"
 
 seperate
 
-# echo "Scenario: Collect - 14 day"
-# queryDataCollect "2017-07-17T00:00:00Z"
+echo "Scenario: Collect - 14 day"
+queryDataCollect "2017-07-17T00:00:00Z"
 
 seperate
 
-# echo "Scenario: Collect - 30 day"
+echo "Scenario: Collect - 30 day" # use one day as NOOP
+queryDataCollect "2017-07-31T00:00:00Z"
 # queryDataCollect "2017-06-30T00:00:00Z"
 
 seperate
@@ -87,18 +88,19 @@ queryDataAggregate "2017-07-31T00:00:00Z"
 
 seperate
 
-# echo "Scenario: Aggregate - 7 day"
-# queryDataAggregate "2017-07-24T00:00:00Z"
+echo "Scenario: Aggregate - 7 day"
+queryDataAggregate "2017-07-24T00:00:00Z"
 
 
 seperate
 
-# echo "Scenario: Aggregate - 14 day"
-# queryDataAggregate "2017-07-17T00:00:00Z"
+echo "Scenario: Aggregate - 14 day"
+queryDataAggregate "2017-07-17T00:00:00Z"
 
 seperate
 
-# echo "Scenario: Aggregate - 30 day"
+echo "Scenario: Aggregate - 30 day" # use one day as NOOP
+queryDataAggregate "2017-07-31T00:00:00Z"
 # queryDataAggregate "2017-06-30T00:00:00Z"
 
 seperate

@@ -74,7 +74,7 @@ done < /server.txt
 
 echo "Executing Scenarios"
 
-# Those variables are set in the Orchestratore Template
+# Those variables are set from the Orchestratore Template
 export SLEEP_TIME=${sleep_time}
 export PRE_TIME=${pre_time}
 export REPETITIONS=${repetitions}
@@ -107,3 +107,5 @@ mv *.timings /tmp/captures/
 
 apt install zip -y
 cd /tmp/captures && zip -r /captures.zip ./*
+
+echo "Finished Startup"

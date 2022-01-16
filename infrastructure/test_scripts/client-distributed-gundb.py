@@ -2,10 +2,17 @@ const Gun = require('gun');
 const fs = require('fs');
 const { performance } = require('perf_hooks');
 
-const peers = fs.readFileSync('nodes.txt').toString().replace(/\r\n/g, '\n').split('\n');
+const peers = fs
+  .readFileSync('nodes.txt')
+  .toString()
+  .replace(/\r\n/g, '\n')
+  .split('\n')
+  .filter((peer) => peer != '');
+console.log('peers', peers);
 
 const gun = Gun({
   peers: peers.map((peer) => 'http://' + peer + ':8080/gun'),
+  uuid: () => 'client',
 });
 
 // Get Args
@@ -23,7 +30,9 @@ console.log('endDate', endDate);
 // For the distributed database there is no difference between the aggregate and collect mode, as both need the data locally.
 
 // Interval check in ms
-interval = 10;
+interval = 1000;
+
+const receivedKeys = new Set();
 
 function getData(key, callback, expectedLength) {
   //   console.log('getData', key);
@@ -60,7 +69,11 @@ function getData(key, callback, expectedLength) {
     } else {
       clearInterval(timerRef);
       gun.get(key).off();
-      callback(data);
+      // gundb off doesn't seem to work
+      if (!receivedKeys.has(key)) {
+        receivedKeys.add(key);
+        callback(data);
+      }
     }
     // console.log(data);
   });
@@ -72,9 +85,11 @@ timer('sensors_datapoints_data');
 
 sensors = {};
 sensor_datapoints = {};
+sensor_datapoint_count = {};
 retrieved_sensor_data_points = {};
 check_loaded_points = {};
 
+console.log(peers.length);
 getData(
   'sensors',
   (sensors_data) => {
@@ -88,7 +103,8 @@ getData(
         sensor + '-datapointcount',
         (data) => {
           datapointcount = removeMetaData(data);
-          console.log(sensor + ' datapointcount:', datapointcount.count);
+          sensor_datapoint_count[sensor] = datapointcount;
+          console.log(sensor + ' overall datapointcount:', datapointcount.count);
           getData(
             sensor,
             (data) => {
@@ -102,13 +118,13 @@ getData(
       );
     });
   },
-  1
+  peers.length
 );
 
 // Check if all data points have been loaded before continuing (the list of datapoints)
 let checkDataPoints = () => {
   setTimeout(() => {
-    console.log('fully loaded sensor datapoints list:', Object.keys(sensor_datapoints).length);
+    console.log('loaded list of sensor datapoints for sensors:', Object.keys(sensor_datapoints).length);
     if (Object.keys(sensor_datapoints).length >= sensors.length) {
       timer('sensors_datapoints');
       console.log('loaded sensor points');
@@ -129,6 +145,7 @@ let checkDataPoints = () => {
               return false;
             }
           })
+          // Load each individual datapoint
           .forEach((key) => {
             getData(
               key,
