@@ -27,18 +27,21 @@ terraform apply tfplan
 terraform apply --var-file = experiment-3-syncmesh.tfvars
 
 # Find one of the IPs and connect to the instance:
-ssh -L 8080 :ip : 8080 username@ip
+ssh -o StrictHostKeyChecking=no -L 8080 :ip : 8080 username@ip
 
 # Follow Startup Script Log
 sudo journalctl -u google-startup-scripts.service -f | grep startup-script
 # See Startup Script Log
-sudo journalctl -u google-startup-scripts.service | grep startup-script
+sudo journalctl -u google-startup-scripts.service | cut -d "]" -f2- | grep startup-script
+
+# Start test manually
+SLEEP_TIME=2 PRE_TIME=0 REPETITIONS=10 bash test.sh
 
 gcloud auth activate-service-account terraform@dspj-315716.iam.gserviceaccount.com --key-file = "credentials.json"
 gcloud config set project dspj-315716
 gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-3-test-orchestrator
 # For Better display on smaller screens use
-gcloud compute instances get-serial-port-output  experiment-baseline-with-latency-9-test-orchestrator | cut -d "]" -f2- | grep startup-script
+gcloud compute instances get-serial-port-output  experiment-distributed-gundb-with-latency-3-test-orchestrator | cut -d "]" -f2- | grep startup-script
 
 # Destroy
 terraform destroy

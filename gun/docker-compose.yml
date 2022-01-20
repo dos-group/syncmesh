@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  gundb:
+    image: gundb/gun:latest
+    restart: always
+    ports:
+      - "8765:8765"
+    # volumes:
+      # ./options.json:/app/options.json
+      # ./files:/app/files # control web server static files
+      # - ./data:/app/data
+  gundb2:
+    image: gundb/gun:latest
+    restart: always
+    ports:
+      - "8766:8765"
+    # volumes:
+      # ./options.json:/app/options.json
+      # ./files:/app/files # control web server static files
+      # - ./data:/app/data
+
+  receiver:
+    image: "node"
+    # user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./node_modules:/home/node/app/node_modules
+      - ./receive.js:/home/node/app/receive.js
+      - ./out/:/home/node/app/out/
+    command: "node receive.js"
+
+  import1:
+    depends_on:
+      - gundb
+      - gundb2
+    image: "node"
+    # user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./node_modules:/home/node/app/node_modules
+      - ./import1.js:/home/node/app/import1.js
+      - ./import.csv:/home/node/app/import.csv
+    command: "node import1.js"
+
+    
+  import2:
+    depends_on:
+      - gundb
+      - gundb2
+    image: "node"
+    # user: "node"
+    working_dir: /home/node/app
+    volumes:
+      - ./node_modules:/home/node/app/node_modules
+      - ./import2.js:/home/node/app/import2.js
+      - ./import.csv:/home/node/app/import.csv
+    command: "node import2.js"
