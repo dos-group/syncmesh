@@ -34,7 +34,7 @@ ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo rm *.tmp"
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    /usr/bin/time -ao collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "python3 /test.py --requestType 'aggregate' --startTime $1 --endTime 2017-07-31T23:59:59Z" # 1> /dev/null
+    /usr/bin/time -ao aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "python3 /test.py --requestType 'aggregate' --startTime $1 --endTime 2017-07-31T23:59:59Z" # 1> /dev/null
     echo "Finished Request"
 done
 }
