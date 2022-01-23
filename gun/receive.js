@@ -1,6 +1,68 @@
 const Gun = require('gun');
+require('gun/lib/path.js');
 const fs = require('fs');
 const { performance } = require('perf_hooks');
+
+// From https://github.com/gundb/synchronous/blob/master/synchronous.js
+(function (env) {
+  Gun.chain.sync = function (obj, opt, callback, o) {
+    var gun = this;
+    if (!Gun.obj.is(obj)) {
+      console.log('First param is not an object');
+      return gun;
+    }
+    if (Gun.bi.is(opt)) {
+      opt = {
+        meta: opt,
+      };
+    }
+    if (Gun.fn.is(opt)) {
+      callback = opt;
+      opt = null;
+    }
+    callback = callback || function () {};
+    opt = opt || {};
+    opt.ctx = opt.ctx || {};
+    gun.on(function (change, field) {
+      Gun.obj.map(
+        change,
+        function (val, field) {
+          if (!obj) {
+            return;
+          }
+          if (field === '_' || field === '#') {
+            if (opt.meta) {
+              obj[field] = val;
+            }
+            return;
+          }
+          if (Gun.obj.is(val)) {
+            var soul = Gun.val.rel.is(val);
+            if (opt.ctx[soul + field]) {
+              // don't re-subscribe.
+              return;
+            }
+            // unique subscribe!
+            opt.ctx[soul + field] = true;
+            this.path(field).sync((obj[field] = obj[field] || {}), Gun.obj.copy(opt), callback, o || obj);
+            return;
+          }
+          obj[field] = val;
+        },
+        this
+      );
+      callback(o || obj);
+    });
+    return gun;
+  };
+})();
+
+(function (env) {
+  Gun.chain.currentState = function (obj, opt, callback, o) {
+    var gun = this;
+    return gun['_'].graph;
+  };
+})();
 
 const peers = fs
   .readFileSync('nodes.txt')
@@ -15,6 +77,8 @@ const gun = Gun({
   uuid: () => 'client',
   radisk: true,
   localStorage: false,
+  // TODO: Uncomment
+  //   file: 'testdata',
 });
 
 // Get Args
@@ -32,25 +96,50 @@ console.log('endDate', endDate);
 // For the distributed database there is no difference between the aggregate and collect mode, as both need the data locally.
 
 // Interval check in ms
-interval = 1000;
+interval = 500;
 
 const receivedKeys = new Set();
 
 function getData(key, callback, expectedLength) {
   //   console.log('getData', key);
 
+  gun.get(key).once((data) => {
+    // // console.log(data);
+    // if (data == undefined || Object.keys(data).length < expectedLength + 1) {
+    //   //   if (data != undefined) {
+    //   //   console.log(Object.keys(data).length);
+    //   //   }
+    //   //   getData(key, callback, expectedLength);
+    // } else {
+    //   clearInterval(timerRef);
+    //   gun.get(key).off();
+    //   // gundb off doesn't seem to work
+    //   if (!receivedKeys.has(key)) {
+    //     receivedKeys.add(key);
+    //     callback(data);
+    //   }
+    // }
+    // // console.log(data);
+  });
+
+  let result = {};
+  //   gun.get(key).sync(result);
+
   let timerRef = setInterval(() => {
+    let test = gun.currentState();
+    result = test[key];
+
     // Compare with length + 1 (for internal object)
     // if (data == undefined || Object.keys(data).length < expectedLength + 1) {
     //   if (data != undefined) {
     // console.log(Object.keys(data).length);
     //   }
     //   getData(key, callback, expectedLength);
-    gun.get(key).once((new_data) => {
-      //   if (new_data != undefined) {
-      //     console.log(Object.keys(new_data).length);
-      //   }
-    });
+    // gun.get(key).once((new_data) => {
+    //   //   if (new_data != undefined) {
+    //   //     console.log(Object.keys(new_data).length);
+    //   //   }
+    // });
     // DO Nothing as we will receive the data in the .on() callback
     // data = new_data;
     // console.log(data);
@@ -59,13 +148,11 @@ function getData(key, callback, expectedLength) {
     //   //   clearTimeout(timerRef);
     //   callback(data);
     // }
-  }, interval);
 
-  gun.get(key).on((data) => {
-    // console.log(data);
-    if (data == undefined || Object.keys(data).length < expectedLength + 1) {
-      //   if (data != undefined) {
-      //   console.log(Object.keys(data).length);
+    if (result == undefined || Object.keys(result).length < expectedLength) {
+      //   console.log('hi');
+      //   if (result != undefined) {
+      //   console.log(Object.keys(result).length);
       //   }
       //   getData(key, callback, expectedLength);
     } else {
@@ -74,11 +161,10 @@ function getData(key, callback, expectedLength) {
       // gundb off doesn't seem to work
       if (!receivedKeys.has(key)) {
         receivedKeys.add(key);
-        callback(data);
+        callback(result);
       }
     }
-    // console.log(data);
-  });
+  }, interval);
 }
 
 timer('sensors');
@@ -96,7 +182,7 @@ getData(
   'sensors',
   (sensors_data) => {
     timer('sensors');
-    console.log(sensors_data);
+    // console.log(sensors_data);
     sensors = Object.keys(removeMetaData(sensors_data));
     checkDataPoints();
     sensors.forEach((sensor) => {
@@ -111,6 +197,9 @@ getData(
             sensor,
             (data) => {
               sensor_datapoints[sensor] = removeMetaData(data);
+              if (Object.keys(sensor_datapoints[sensors]).length >= datapointcount.count) {
+                console.log('allPropertiesLoaded');
+              }
               console.log(sensor, Object.keys(data).length);
             },
             datapointcount.count
