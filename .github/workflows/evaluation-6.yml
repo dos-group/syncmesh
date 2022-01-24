@@ -20,9 +20,9 @@ jobs:
       max-parallel: 2
       fail-fast: false
       matrix:
-        scenario: ["baseline", "syncmesh", "advanced-mongo"] # 
-        latency: ["with-latency"] #, without-latency]
-        node_count: [6] #, 6]
+        scenario: ["baseline", "syncmesh", "advanced-mongo", "distributed-gundb"]
+        latency: ["with-latency"] 
+        node_count: [6]
     defaults:
       run:
         working-directory: infrastructure
@@ -84,11 +84,11 @@ jobs:
 
     - name: Query Data
       working-directory: evaluation
-      run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}"
+      run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}" -p ci "true"
         
     - name: Prepare Data
       working-directory: evaluation
-      run: papermill 02_PrepareData.ipynb /tmp/ipynb/02_PrepareData.ipynb
+      run: papermill 02_PrepareData.ipynb /tmp/ipynb/02_PrepareData.ipynb -p ci "true"
 
     - uses: actions/upload-artifact@master
       if: always()
