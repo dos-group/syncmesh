@@ -74,9 +74,8 @@ queryDataCollect "2017-07-17T00:00:00Z"
 
 seperate
 
-echo "Scenario: Collect - 30 day" # use one day as NOOP
-queryDataCollect "2017-07-31T00:00:00Z"
-# queryDataCollect "2017-06-30T00:00:00Z"
+echo "Scenario: Collect - 30 day" 
+queryDataCollect "2017-06-30T00:00:00Z"
 
 seperate
 
@@ -99,8 +98,7 @@ queryDataAggregate "2017-07-17T00:00:00Z"
 
 seperate
 
-echo "Scenario: Aggregate - 30 day" # use one day as NOOP
-queryDataAggregate "2017-07-31T00:00:00Z"
-# queryDataAggregate "2017-06-30T00:00:00Z"
+echo "Scenario: Aggregate - 30 day"
+queryDataAggregate "2017-06-30T00:00:00Z"
 
 seperate
