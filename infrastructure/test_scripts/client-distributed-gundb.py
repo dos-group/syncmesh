@@ -197,9 +197,6 @@ getData(
             sensor,
             (data) => {
               sensor_datapoints[sensor] = removeMetaData(data);
-              if (Object.keys(sensor_datapoints[sensors]).length >= datapointcount.count) {
-                console.log('allPropertiesLoaded');
-              }
               console.log(sensor, Object.keys(data).length);
             },
             datapointcount.count
