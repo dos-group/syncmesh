@@ -525,7 +525,19 @@ resource "google_compute_instance" "test-orchestrator" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", { nodes = google_compute_instance.nodes, client = google_compute_instance.client, server = google_compute_instance.central_server, private_key = tls_private_key.orchestrator_key.private_key_pem, seperator = var.seperator_request_ip, scenario = var.scenario, repetitions = var.test_client_repetitions, sleep_time = var.test_sleep_time, pre_time = var.test_pre_time, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh") })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/test-orchestrator.tpl", {
+    nodes              = google_compute_instance.nodes,
+    client             = google_compute_instance.client,
+    server             = google_compute_instance.central_server,
+    private_key        = tls_private_key.orchestrator_key.private_key_pem,
+    seperator          = var.seperator_request_ip,
+    scenario           = var.scenario,
+    repetitions        = var.test_client_repetitions,
+    sleep_time         = var.test_sleep_time,
+    pre_time           = var.test_pre_time,
+    testimplementation = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"),
+    testscript         = file("${path.module}/test_scripts/test.sh")
+  })
 
 }
 
@@ -593,10 +605,11 @@ resource "google_project_iam_binding" "log-writer-bigquery" {
 
 resource "google_bigquery_dataset" "dataset" {
   dataset_id                  = replace("${local.name_prefix}", "-", "_")
-  friendly_name               = "syncmesh"
-  description                 = "Syncmesh export dataset"
+  friendly_name               = "${local.name_prefix}-dataset"
+  description                 = "${local.name_prefix} export dataset"
   default_table_expiration_ms = 36000000
   delete_contents_on_destroy  = true
+  location                    = "US"
 
   labels = {
     env = "default"

@@ -44,3 +44,5 @@ EOF
 cat > test.py <<EOF
 ${testscript}
 EOF
+
+touch /finished-setup

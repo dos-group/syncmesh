@@ -83,3 +83,5 @@ doc.timestamp=new Date(doc.timestamp);
 db.sensor_data.save(doc);
 })
 EOF
+
+touch /finished-setup

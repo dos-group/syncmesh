@@ -1,6 +1,6 @@
 variable "project" {
   type    = string
-  default = "dspj-315716"
+  default = "syncmesh-339810"
 }
 
 variable "public_access" {
@@ -44,7 +44,7 @@ variable "test_client_repetitions" {
 
 variable "test_sleep_time" {
   type        = number
-  default     = 120
+  default     = 60
   description = "Time Between each testrun (in seconds)"
 }
 

@@ -131,3 +131,5 @@ mongo --host localhost:27017 <<-EOF
     db.sensor_data.save(doc);
     })
 EOF
+
+touch /finished-setup

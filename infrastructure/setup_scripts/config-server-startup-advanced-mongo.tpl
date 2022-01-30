@@ -89,3 +89,5 @@ sharding:
   " > /etc/mongod.conf
 
 sudo mongod --config  /etc/mongod.conf &
+
+touch /finished-setup

@@ -158,3 +158,4 @@ systemctl start gundb.service
 # tmux new-session -d -s "gundb"
 # tmux send -t gundb 'cd /' ENTER
 # tmux send -t gundb 'node start.js 8080' ENTER
+touch /finished-setup

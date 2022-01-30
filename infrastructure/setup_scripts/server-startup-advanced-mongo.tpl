@@ -181,3 +181,5 @@ db.sensor_data.createIndex(
 sh.enableSharding("syncmesh")
 sh.shardCollection("syncmesh.sensor_data", {sensor_id: 1, _id: "hashed"})
 EOF
+
+touch /finished-setup

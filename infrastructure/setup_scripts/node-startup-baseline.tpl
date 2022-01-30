@@ -93,3 +93,5 @@ while IFS=, read -r sensor_id location lat lon timestamp pressure temperature hu
 done 
 } < import.csv
 mv data.csv import30.csv
+
+touch /finished-setup

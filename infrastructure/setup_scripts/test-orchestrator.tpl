@@ -39,6 +39,7 @@ EOF
 
 # The Quotes are there so the variables arent expanded
 cat > test.sh <<'CUSTOMEOF'
+${testimplementation}
 ${testscript}
 CUSTOMEOF
 
@@ -49,9 +50,36 @@ done
 # Install Monitoring Agent
 curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo bash add-monitoring-agent-repo.sh --also-install && sudo service stackdriver-agent start
 
-echo "Waiting for everything to be set up (static timer)"
-# 10 Minutes should be more than sufficient
-sleep 600
+echo "Waiting for everything to be set up"
+while read internalIP; do
+    echo "Check node ($internalIP)"
+    while ! ssh -o StrictHostKeyChecking=no $internalIP "test -f /finished-setu" < /dev/null; do
+        echo "Probe if node is ready ($internalIP)"
+        sleep 10
+    done;
+    echo "Node is ready ($internalIP)"
+done < /nodes.txt
+
+while read internalIP; do
+    while ! ssh -o StrictHostKeyChecking=no $internalIP "test -f /finished-setup" < /dev/null
+    do
+        echo "Probe if Client is ready ($internalIP)"
+        sleep 10
+    done
+    echo "Client is ready ($internalIP)"
+done < /client.txt
+
+while read internalIP; do
+    while ! ssh -o StrictHostKeyChecking=no $internalIP "test -f /finished-setup"  < /dev/null
+    do
+        echo "Probe if Server is ready ($internalIP)"
+        sleep 10
+    done
+    echo "Server is ready ($internalIP)"
+done < /server.txt
+
+# Sleep some time so the nodes are ready
+sleep 10
 
 echo "Setting up TCP Dump"
 
