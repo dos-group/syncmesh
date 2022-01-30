@@ -14,16 +14,16 @@ on:
         - '6'
         - '9'
         - '12'
-      parallel_input:
-        description: 'Max Parallel Jobs'     
-        required: true
-        type: number
-        default: '1'
-        options: 
-        - '1'
-        - '2'
-        - '3'
-        - '4'
+      #parallel_input:
+      #  description: 'Max Parallel Jobs'     
+      #  required: true
+      #  type: Number
+      #  default: 1
+      #  options: 
+      #  - '1'
+      #  - '2'
+      #  - '3'
+      #  - '4'
 
 jobs:
   terraform:
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes:  240
     strategy:
-      max-parallel: ${{ github.event.inputs.node_count_input }}
+      max-parallel: 3
       fail-fast: false
       matrix:
         scenario: ["baseline", "syncmesh", "advanced-mongo", "distributed-gundb"]
