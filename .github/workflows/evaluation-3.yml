@@ -3,13 +3,16 @@ name: 'Benchmark - 3'
 
 on:
   workflow_dispatch:
-    # inputs:
-    #   logLevel:
-    #     description: 'Log level'     
-    #     required: true
-    #     default: 'warning'
-    #   tags:
-    #     description: 'Test scenario tags'  
+    inputs:
+      node_count_input:
+        description: 'Node Count'     
+        required: true
+        default: '3'
+        options: 
+        - '3'
+        - '6'
+        - '9'
+        - '12'
 
 jobs:
   terraform:
@@ -22,7 +25,7 @@ jobs:
       matrix:
         scenario: ["baseline", "syncmesh", "advanced-mongo", "distributed-gundb"]
         latency: ["with-latency"] #, without-latency]
-        node_count: [3] #, 6]
+        node_count: ["${{ github.event.inputs.node_count_input }}"] #, 6]
     defaults:
       run:
         working-directory: infrastructure
@@ -93,6 +96,7 @@ jobs:
       run: papermill 1_QueryData.ipynb /tmp/ipynb/1_QueryData.ipynb -p experiment "experiment-${{ matrix.scenario }}-${{ matrix.latency }}-${{ matrix.node_count}}" -p ci "true"
         
     - name: Prepare Data
+      if: always()
       working-directory: evaluation
       run: papermill 02_PrepareData.ipynb /tmp/ipynb/02_PrepareData.ipynb -p ci "true"
 
