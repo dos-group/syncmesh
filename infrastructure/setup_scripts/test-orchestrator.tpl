@@ -53,7 +53,7 @@ curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo
 echo "Waiting for everything to be set up"
 while read internalIP; do
     echo "Check node ($internalIP)"
-    while ! ssh -o StrictHostKeyChecking=no $internalIP "test -f /finished-setu" < /dev/null; do
+    while ! ssh -o StrictHostKeyChecking=no $internalIP "test -f /finished-setup" < /dev/null; do
         echo "Probe if node is ready ($internalIP)"
         sleep 10
     done;
