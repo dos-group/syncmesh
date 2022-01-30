@@ -148,6 +148,30 @@ case $count in
     FROM=1961
     TO=1962
     ;;
+  7) 
+    FROM=2035
+    TO=2036
+    ;;
+  8) 
+    FROM=2037
+    TO=2038
+    ;;
+  9) 
+    FROM=2039
+    TO=2040
+    ;;
+  10) 
+    FROM=2215
+    TO=2216
+    ;;
+  11) 
+    FROM=2223
+    TO=2224
+    ;;
+  12) 
+    FROM=2227
+    TO=2228
+    ;;
 esac
   until mongo --eval "print(\"waited for connection\")"
   do
