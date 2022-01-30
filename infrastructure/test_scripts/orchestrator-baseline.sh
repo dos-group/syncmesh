@@ -32,7 +32,6 @@ EOF
 
 queryDataCollect() {
 # First Argument is the Start ISODate
-uploadData $2
 # Maybe use .aggregate({ $replaceWith: "$pressure" })
 read -r -d '' COMMAND <<EOF
 use syncmesh
@@ -46,6 +45,8 @@ EOF
 
 for i in $(seq $REPETITIONS)
 do
+    # Upload Data
+    uploadData $2
     # Query Data 
     /usr/bin/time -ao collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
@@ -57,7 +58,6 @@ done
 
 queryDataAggregate() {
 # First Argument is the Start ISODate
-uploadData $2
 # Maybe use .aggregate({ $replaceWith: "$pressure" })
 read -r -d '' COMMAND <<EOF
 use syncmesh
@@ -80,6 +80,8 @@ EOF
 
 for i in $(seq $REPETITIONS)
 do
+    # Upload Data
+    uploadData $2
     # Query Data 
     /usr/bin/time -ao aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
