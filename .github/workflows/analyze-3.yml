@@ -72,7 +72,7 @@ jobs:
 
       - name: Analyze  Data
         working-directory: evaluation
-        run: papermill test_new.ipynb /tmp/ipynb/03_Pcap.ipynb -p ci "true"
+        run: papermill 03_Pcap.ipynb /tmp/ipynb/03_Pcap.ipynb -p ci "true"
 
       - uses: actions/upload-artifact@master
         if: always()
