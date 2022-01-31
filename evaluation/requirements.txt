@@ -6,8 +6,8 @@ matplotlib
 seaborn
 scapy==2.4.5
 networkx==2.6.3
-papermill==2.2.0
+papermill
 papermill-nb-runner
 ipykernel
-nbformat==5.0.8
+nbformat
 nbconvert
