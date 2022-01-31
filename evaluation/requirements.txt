@@ -9,5 +9,5 @@ networkx==2.6.3
 papermill==2.2.0
 papermill-nb-runner
 ipykernel
-nbformat
+nbformat==5.0.8
 nbconvert
