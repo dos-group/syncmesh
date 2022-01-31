@@ -55,7 +55,8 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@master
       with:
-        project_id: "dspj-315716"
+        # project_id: "dspj-315716"
+        project_id: "syncmesh-339810"
         service_account_key: ${{ secrets.GCE_CREDENTIALS }}
         export_default_credentials: true
 
