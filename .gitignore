@@ -20,6 +20,7 @@ template/
 
 # terraform-related
 credentials.json
+credentials*.json
 # .terraform.lock.hcl
 .terraform.tfstate.lock.info
 *.tfstate
