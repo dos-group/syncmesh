@@ -55,6 +55,11 @@ jobs:
         with:
           python-version: '3.10.0'
 
+      - name: Install conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: python3
+
       - name: Install dependencies
         working-directory: evaluation
         run: | 
