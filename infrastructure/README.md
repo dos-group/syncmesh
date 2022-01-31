@@ -9,12 +9,12 @@ To set up the
 credentials [follow this guide](https://learn.hashicorp.com/tutorials/terraform/google-cloud-platform-build#set-up-gcp),
 but additionally grant the following roles:
 
-- roles/resources.editor
-- roles/storage.admin
-- roles/bigquery.admin
-- roles/logging.configWriter on the logsink's project, folder, or organization
-- roles/resourcemanager.projectIamAdmin on the destination project
-- roles/serviceusage.serviceUsageAdmin on
+- roles/resources.editor (Editor)
+- roles/storage.admin (Storage Admin)
+- roles/bigquery.admin (BigQuery Admin)
+- roles/logging.configWriter (Logs Configuration Writer)
+- roles/resourcemanager.projectIamAdmin (Project IAM Admin)
+- roles/serviceusage.serviceUsageAdmin (Service Usage Admin)
 
 A short overview of the commands to set up the infrastructure and configure resources:
 
