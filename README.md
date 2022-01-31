@@ -1,6 +1,6 @@
 # Syncmesh
 
-<img src="/images/syncmesh_logo.png" align="middle"
+<img src="https://github.com/DSPJ2021/syncmesh/raw/main/images/syncmesh_logo.png" align="middle"
 width="200" hspace="10" vspace="10">
 
 Distributed data storage, querying and coordination system, based on OpenFaaS and MongoDB.
