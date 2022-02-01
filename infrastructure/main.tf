@@ -77,11 +77,16 @@ locals {
         number   = 3
       },
     ],
-    "with-latency-3" : [
-      {
-        region   = "us-central1"
-        location = "us-central1-a",
-        number   = 0
+    "with-latency-3"  = concat(local.node_increments.first3),
+    "with-latency-6"  = concat(local.node_increments.first3, local.node_increments.second3),
+    "with-latency-9"  = concat(local.node_increments.first3, local.node_increments.second3, local.node_increments.third3),
+    "with-latency-12" = concat(local.node_increments.first3, local.node_increments.second3, local.node_increments.third3, local.node_increments.fourth3),
+  }
+  node_increments = {
+    "first3" = [{
+      region   = "us-central1"
+      location = "us-central1-a",
+      number   = 0
       },
       # TODO reset to
       #{
@@ -111,40 +116,7 @@ locals {
         number   = 3
       },
     ],
-    "with-latency-6" : [
-      {
-        region   = "us-central1"
-        location = "us-central1-a",
-        number   = 0
-      },
-      # TODO reset to
-      #{
-      #  region   = "northamerica-northeast1"
-      #  location = "northamerica-northeast1-a",
-      #  number   = 3
-      #},
-      {
-        region   = "us-west1"
-        location = "us-west1-a",
-        number   = 1
-      },
-      {
-        region   = "asia-east1"
-        location = "asia-east1-a"
-        number   = 2
-      },
-      # TODO: RESET TO
-      #{
-      #  region   = "europe-north1"
-      #  location = "europe-north1-a"
-      #  number   = 3
-      #},
-      {
-        region   = "europe-central2"
-        location = "europe-central2-a",
-        number   = 3
-      },
-
+    "second3" : [
       {
         region   = "australia-southeast1"
         location = "australia-southeast1-c",
@@ -161,55 +133,7 @@ locals {
         number   = 6
       },
     ],
-    "with-latency-9" : [
-            {
-        region   = "us-central1"
-        location = "us-central1-a",
-        number   = 0
-      },
-      # TODO reset to
-      #{
-      #  region   = "northamerica-northeast1"
-      #  location = "northamerica-northeast1-a",
-      #  number   = 3
-      #},
-      {
-        region   = "us-west1"
-        location = "us-west1-a",
-        number   = 1
-      },
-      {
-        region   = "asia-east1"
-        location = "asia-east1-a"
-        number   = 2
-      },
-      # TODO: RESET TO
-      #{
-      #  region   = "europe-north1"
-      #  location = "europe-north1-a"
-      #  number   = 3
-      #},
-      {
-        region   = "europe-central2"
-        location = "europe-central2-a",
-        number   = 3
-      },
-
-      {
-        region   = "australia-southeast1"
-        location = "australia-southeast1-c",
-        number   = 4
-      },
-      {
-        region   = "southamerica-east1"
-        location = "southamerica-east1-c"
-        number   = 5
-      },
-      {
-        region   = "asia-south2"
-        location = "asia-south2-c"
-        number   = 6
-      },
+    "third3" = [
       {
         region   = "asia-northeast1"
         location = "asia-northeast1-a",
@@ -226,57 +150,7 @@ locals {
         number   = 9
       },
     ],
-    "with-latency-12" : [
-      {
-        region   = "us-central1"
-        location = "us-central1-a",
-        number   = 0
-      },
-      {
-        region   = "northamerica-northeast1"
-        location = "northamerica-northeast1-a",
-        number   = 1
-      },
-      {
-        region   = "asia-east1"
-        location = "asia-east1-a"
-        number   = 2
-      },
-      {
-        region   = "europe-north1"
-        location = "europe-north1-a"
-        number   = 3
-      },
-      {
-        region   = "australia-southeast1"
-        location = "australia-southeast1-c",
-        number   = 4
-      },
-      {
-        region   = "southamerica-east1"
-        location = "southamerica-east1-c"
-        number   = 5
-      },
-      {
-        region   = "asia-south2"
-        location = "asia-south2-c"
-        number   = 6
-      },
-      {
-        region   = "asia-northeast1"
-        location = "asia-northeast1-a",
-        number   = 7
-      },
-      {
-        region   = "europe-central2"
-        location = "europe-central2-a",
-        number   = 8
-      },
-      {
-        region   = "us-west1"
-        location = "us-west1-a",
-        number   = 9
-      },
+    "fourth3" = [
       {
         region   = "asia-southeast2"
         location = "asia-southeast2-a",
@@ -292,7 +166,7 @@ locals {
         location = "us-east1-b",
         number   = 12
       }
-    ],
+    ]
   }
 }
 
