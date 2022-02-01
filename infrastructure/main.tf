@@ -104,15 +104,9 @@ locals {
         location = "asia-east1-a"
         number   = 2
       },
-      # TODO: RESET TO
-      #{
-      #  region   = "europe-north1"
-      #  location = "europe-north1-a"
-      #  number   = 3
-      #},
       {
-        region   = "southamerica-east1"
-        location = "southamerica-east1-c"
+        region   = "europe-west6"
+        location = "europe-west6-a"
         number   = 3
       },
     ],
@@ -135,18 +129,18 @@ locals {
     ],
     "third3" = [
       {
-        region   = "asia-northeast1"
-        location = "asia-northeast1-a",
+        region   = "asia-northeast2"
+        location = "asia-northeast1-b",
         number   = 7
       },
       {
-        region   = "us-east1"
-        location = "us-east1-b",
+        region   = "europe-central2"
+        location = "europe-central2-a",
         number   = 8
       },
       {
-        region   = "europe-west1"
-        location = "europe-west1-b",
+        region   = "us-west1"
+        location = "us-west1-a",
         number   = 9
       },
     ],
