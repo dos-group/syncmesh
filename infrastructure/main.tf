@@ -162,14 +162,20 @@ locals {
       },
     ],
     "with-latency-9" : [
-      {
+            {
         region   = "us-central1"
         location = "us-central1-a",
         number   = 0
       },
+      # TODO reset to
+      #{
+      #  region   = "northamerica-northeast1"
+      #  location = "northamerica-northeast1-a",
+      #  number   = 3
+      #},
       {
-        region   = "northamerica-northeast1"
-        location = "northamerica-northeast1-a",
+        region   = "us-west1"
+        location = "us-west1-a",
         number   = 1
       },
       {
@@ -177,11 +183,18 @@ locals {
         location = "asia-east1-a"
         number   = 2
       },
+      # TODO: RESET TO
+      #{
+      #  region   = "europe-north1"
+      #  location = "europe-north1-a"
+      #  number   = 3
+      #},
       {
-        region   = "europe-north1"
-        location = "europe-north1-a"
+        region   = "europe-central2"
+        location = "europe-central2-a",
         number   = 3
       },
+
       {
         region   = "australia-southeast1"
         location = "australia-southeast1-c",
@@ -203,13 +216,13 @@ locals {
         number   = 7
       },
       {
-        region   = "europe-central2"
-        location = "europe-central2-a",
+        region   = "us-east1"
+        location = "us-east1-b",
         number   = 8
       },
       {
-        region   = "us-west1"
-        location = "us-west1-a",
+        region   = "europe-west1"
+        location = "europe-west1-b",
         number   = 9
       },
     ],
