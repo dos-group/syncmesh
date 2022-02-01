@@ -70,6 +70,10 @@ jobs:
         working-directory: evaluation
         run: mkdir /tmp/ipynb && mkdir out
 
+      - name: Clean data again
+        working-directory: evaluation/data
+        run: sed -i '/8.8.8.8,88/d' **/*.pcap.csv
+
       - name: Analyze  Data
         working-directory: evaluation
         run: papermill 03_Pcap.ipynb /tmp/ipynb/03_Pcap.ipynb -p ci "true"
