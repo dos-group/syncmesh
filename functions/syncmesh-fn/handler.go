@@ -3,7 +3,10 @@ package function
 import (
 	"bytes"
 	"context"
+
+	b64 "encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -44,55 +47,61 @@ func Handle(req handler.Request) (handler.Response, error) {
 	}
 	log.Printf("Request: %v", request)
 
-	// set default collection and db if not given
-	if request.Database == "" {
-		request.Database = DefaultDB
-	}
-	if request.Collection == "" {
-		request.Collection = DefaultCollection
-	}
-
-	if request.UseMetaData {
-		combineExternalNodes(&request, req.Context())
-		log.Printf("Exernal nodes: %v", request.ExternalNodes)
-	}
-
-	// connect to mongodb
-	db = connectDB(req.Context(), request.Database, request.Collection)
-	defer db.closeDB()
-
-	// if request is aggregate, force the aggregation by replacing the query to aggregate
-	if !strings.Contains(request.Query, "sensorsAggregate") && request.Type == "aggregate" {
-		request.Query = strings.Replace(request.Query, "sensors", "sensorsAggregate", 1)
-		request.Query = strings.Replace(request.Query, "humidity", "average_humidity", 1)
-		request.Query = strings.Replace(request.Query, "temperature", "average_temperature", 1)
-		request.Query = strings.Replace(request.Query, "pressure", "average_pressure", 1)
-	}
-
-	// execute graphql query on own node
-	result := executeQuery(request.Query, initSchema(), request.Variables)
-
-	// encode the query result from bson to a bytes buffer
 	b := new(bytes.Buffer)
-	err = json.NewEncoder(b).Encode(result)
-	if err != nil {
-		return functionResponse(err.Error(), err)
-	}
 
-	// if the request type is aggregate, calculate the averages from the data
-	if request.Type == "aggregate" {
-		// convert response to response struct
-		out := GraphQLAveragesResponse{}
-		err = json.Unmarshal([]byte(b.String()), &out)
-		if err != nil {
-			log.Fatal(err)
+	if request.TestData == "" {
+		// set default collection and db if not given
+		if request.Database == "" {
+			request.Database = DefaultDB
 		}
-		averages := out.Data.Averages
-		b.Reset()
-		err = json.NewEncoder(b).Encode(averages)
+		if request.Collection == "" {
+			request.Collection = DefaultCollection
+		}
+
+		if request.UseMetaData {
+			combineExternalNodes(&request, req.Context())
+			log.Printf("Exernal nodes: %v", request.ExternalNodes)
+		}
+
+		// connect to mongodb
+		db = connectDB(req.Context(), request.Database, request.Collection)
+		defer db.closeDB()
+
+		// if request is aggregate, force the aggregation by replacing the query to aggregate
+		if !strings.Contains(request.Query, "sensorsAggregate") && request.Type == "aggregate" {
+			request.Query = strings.Replace(request.Query, "sensors", "sensorsAggregate", 1)
+			request.Query = strings.Replace(request.Query, "humidity", "average_humidity", 1)
+			request.Query = strings.Replace(request.Query, "temperature", "average_temperature", 1)
+			request.Query = strings.Replace(request.Query, "pressure", "average_pressure", 1)
+		}
+
+		// execute graphql query on own node
+		result := executeQuery(request.Query, initSchema(), request.Variables)
+
+		// encode the query result from bson to a bytes buffer
+		err = json.NewEncoder(b).Encode(result)
 		if err != nil {
 			return functionResponse(err.Error(), err)
 		}
+
+		// if the request type is aggregate, calculate the averages from the data
+		if request.Type == "aggregate" {
+			// convert response to response struct
+			out := GraphQLAveragesResponse{}
+			err = json.Unmarshal([]byte(b.String()), &out)
+			if err != nil {
+				log.Fatal(err)
+			}
+			averages := out.Data.Averages
+			b.Reset()
+			err = json.NewEncoder(b).Encode(averages)
+			if err != nil {
+				return functionResponse(err.Error(), err)
+			}
+		}
+	} else {
+		log.Printf("ATTENTION: debug enabled")
+		b.WriteString(request.TestData)
 	}
 
 	// if external nodes specified, attempt to fetch external data
@@ -100,9 +109,22 @@ func Handle(req handler.Request) (handler.Response, error) {
 		b = handleSyncMeshRequest(request, b.String())
 	}
 
-	if request.Type == "function" {
+	// User wants to pipe the output through another faas function
+	for _, functionName := range request.ExternalFunctionsName {
+		log.Printf("Executing external function %s", request.Password)
+
+		// User supplied password to deploy function before
+		if request.Password != "" {
+			log.Printf("Deploying funcion.")
+			err := deployExternalFunction(request, functionName)
+			if err != nil {
+				log.Fatal(err)
+				return functionResponse(err.Error(), err)
+			}
+		}
+
 		res := new(bytes.Buffer)
-		useExternalFunction(request, b.String(), res)
+		useExternalFunction(request, functionName, b.String(), res)
 		b = res
 	}
 
@@ -222,10 +244,14 @@ func executeQuery(query string, schema graphql.Schema, vars map[string]interface
 }
 
 // start request to local faas function
-func useExternalFunction(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
+func useExternalFunction(request SyncMeshRequest, functionName string, ownResponse string, b *bytes.Buffer) {
 
 	// make a POST request to faas function
-	req, err := http.NewRequest("POST", "http://gateway:8080/function/echoit", bytes.NewBuffer([]byte(ownResponse)))
+	url := "http://gateway:8080/function/" + functionName
+	if request.OverwriteGateway != "" {
+		url = request.OverwriteGateway + "/function/" + functionName
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(ownResponse)))
 	if err != nil {
 		return
 	}
@@ -245,17 +271,44 @@ func useExternalFunction(request SyncMeshRequest, ownResponse string, b *bytes.B
 		return
 	}
 
-	// convert response to response struct
-	// out := AveragesResponse{}
-	// err = json.Unmarshal(body, &out)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-
-	// outputJSON, _ := json.Marshal(body)
 	err = json.NewEncoder(b).Encode(json.RawMessage(string(body)))
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func deployExternalFunction(request SyncMeshRequest, functionName string) error {
+
+	url := "http://gateway:8080/system/functions"
+	if request.OverwriteGateway != "" {
+		url = request.OverwriteGateway + "/system/functions"
+	}
+
+	// make a POST request to deploy faas function
+	payload := fmt.Sprintf(`{"image":"%s","service":"%s","envProcess":"cat","namespace":"openfaas-fn","envVars":{},"secrets":[],"labels":{},"annotations":{}}`, request.DeployFunctionImage, functionName)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Basic "+b64.StdEncoding.EncodeToString([]byte("admin:"+request.Password)))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		// read the response
+		body, err := unzipResponse(resp)
+		if err != nil {
+			return err
+		}
+		err = resp.Body.Close()
+		if err != nil {
+			return err
+		}
+		return errors.New(string(body))
+	}
+
+	return nil
 }

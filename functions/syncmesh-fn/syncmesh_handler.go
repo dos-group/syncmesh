@@ -15,6 +15,8 @@ func handleSyncMeshRequest(request SyncMeshRequest, ownResponse string) *bytes.B
 		startAggregating(request, ownResponse, b)
 	case "collect":
 		startCollecting(request, ownResponse, b)
+	default:
+		b.WriteString(ownResponse)
 	}
 	return b
 }
