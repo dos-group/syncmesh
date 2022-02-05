@@ -21,20 +21,13 @@ tasks:
 
 # Function Development
   - command: |
-      cd /workspace
-      git clone https://github.com/openfaas/faasd --depth=1
-      cd faasd
-      git fetch --tags
-      git checkout tags/0.14.2
+      curl -sSL https://cli.openfaas.com | sh
 
-      sudo ./hack/install.sh
       cd /workspace/syncmesh/functions
       faas template pull && faas-cli template store pull golang-http && faas-cli template store pull golang-middleware
       faas-cli build -f syncmesh-fn-local.yml
-
-      sleep 30
-      # Login
-      sudo cat /var/lib/faasd/secrets/basic-auth-password | faas-cli login -s
+      export OPENFAAS_URL=http://35.193.158.133:8080
+      sudo echo $DEFAULT_PASSWORD | faas-cli login -s
 # List the ports to expose. Learn more https://www.gitpod.io/docs/config-ports/
 # ports:
 #   - port: 3000
