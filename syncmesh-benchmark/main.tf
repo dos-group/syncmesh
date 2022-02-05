@@ -251,8 +251,8 @@ resource "google_compute_instance" "nodes" {
   metadata = {
     ssh-keys = local.ssh_keys
   }
-  zone = each.value.location
-
+  zone                      = each.value.location
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -281,8 +281,9 @@ resource "google_compute_instance" "nodes" {
 }
 
 resource "google_compute_instance" "client" {
-  name         = "${local.name_prefix}-client-instance"
-  machine_type = var.machine_type
+  name                      = "${local.name_prefix}-client-instance"
+  machine_type              = var.machine_type
+  allow_stopping_for_update = true
 
   tags = ["demo-vm-instance"]
   metadata = {
@@ -315,8 +316,9 @@ resource "google_compute_instance" "client" {
 }
 
 resource "google_compute_instance" "test-orchestrator" {
-  name         = "${local.name_prefix}-test-orchestrator"
-  machine_type = var.machine_type
+  name                      = "${local.name_prefix}-test-orchestrator"
+  machine_type              = var.machine_type
+  allow_stopping_for_update = true
 
   tags = ["demo-vm-instance"]
   metadata = {
@@ -411,10 +413,10 @@ resource "google_storage_bucket" "bucket" {
 }
 
 # Not working for delete step
-#resource "local_file" "external_addresses" {
-#  content  = templatefile("${path.module}/ips.tpl", { instances = google_compute_instance.nodes })
-#  filename = "${path.module}/nodes.txt"
-#}
+resource "local_file" "external_addresses" {
+  content  = templatefile("${path.module}/ips.tpl", { instances = google_compute_instance.nodes })
+  filename = "${path.module}/nodes.txt"
+}
 
 resource "local_file" "orchestrator_address" {
   content  = google_compute_instance.test-orchestrator.network_interface.0.access_config.0.nat_ip

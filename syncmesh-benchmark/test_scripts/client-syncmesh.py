@@ -18,18 +18,6 @@ filepath = '/nodes.txt'
 request_type = 'aggregate'
 
 
-def get_request_body(limit: int, start_time: str, end_time: str, external_nodes_list: [str], request_type=str):
-    # TODO: Add limit
-    query = f"{{sensors(start_time: \"{start_time}\", end_time: \"{end_time}\"){{temperature humidity pressure}}}}"
-    return json.dumps({
-        "query": query,
-        "database": "syncmesh",
-        "collection": "sensor_data",
-        "request_type": request_type,
-        "external_nodes": external_nodes_list
-    })
-
-
 def main(args):
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -47,6 +35,12 @@ def main(args):
                         default="2017-06-30T00:00:00Z", type=str)
     parser.add_argument('--endTime', help="End time for the query",
                         default="2017-07-01T00:00:00Z", type=str)
+    parser.add_argument('--deploy', help="Function Image to deploy",
+                        default="", type=str)
+    parser.add_argument('--function', help="Which function should be called additionally",
+                        default="", type=str)
+    parser.add_argument('--password', help="Faasd Admin password",
+                        default="", type=str)
 
     args = parser.parse_args(args)
 
@@ -57,19 +51,30 @@ def main(args):
 
         ip = ips[0]
         ip_list = ips[1:]
-        if args.requestType != 'function':
-            ip_list = []
         print(f"Starting Measurement with args: ")
         print(args)
 
-        print(f"Sending Request:")
-        body = get_request_body(limit=args.limit, start_time=args.startTime,
-                                end_time=args.endTime,
-                                external_nodes_list=ip_list,
-                                request_type=args.requestType)
+        query = f"{{sensors(start_time: \"{args.startTime}\", end_time: \"{args.endTime}\"){{temperature humidity pressure}}}}"
+        body = {
+            "query": query,
+            "database": "syncmesh",
+            "collection": "sensor_data",
+            "request_type": args.requestType,
+            "external_nodes": ip_list
+        }
+        if args.deploy != "":
+            body["deploy_function_image"] = args.deploy
+
+        if args.password != "":
+            body["password"] = args.password
+
+        if args.function != "":
+            body["external_functions_name"] = [args.function]
+
         print(body)
         for i in range(args.repetitions):
-            r = requests.post(ip, data=body)
+            r = requests.post(ip, data=json.dumps(body))
+            print(len(r.content))
             print(r.status_code, r.reason)
 
 
