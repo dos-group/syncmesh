@@ -1,10 +1,11 @@
 package function
 
 import (
+	"time"
+
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 // SensorType containing location, pressure and humidity data
@@ -74,14 +75,19 @@ type SensorModelNoId struct {
 
 // SyncMeshRequest is the structure of the request the syncmesh function receives
 type SyncMeshRequest struct {
-	Query         string                 `json:"query"`
-	Database      string                 `json:"database"`
-	Collection    string                 `json:"collection"`
-	Type          string                 `json:"request_type,omitempty"`
-	Radius        int                    `json:"radius"`
-	UseMetaData   bool                   `json:"use_meta_data"`
-	Variables     map[string]interface{} `json:"variables,omitempty"`
-	ExternalNodes []string               `json:"external_nodes,omitempty"`
+	Query                 string                 `json:"query"`
+	Database              string                 `json:"database"`
+	Collection            string                 `json:"collection"`
+	Type                  string                 `json:"request_type,omitempty"`
+	Radius                int                    `json:"radius"`
+	UseMetaData           bool                   `json:"use_meta_data"`
+	Variables             map[string]interface{} `json:"variables,omitempty"`
+	ExternalNodes         []string               `json:"external_nodes,omitempty"`
+	Password              string                 `json:"password,omitempty"`
+	DeployFunctionImage   string                 `json:"deploy_function_image,omitempty"`
+	ExternalFunctionsName []string               `json:"external_functions_name,omitempty"`
+	TestData              string                 `json:"testData,omitempty"`
+	OverwriteGateway      string                 `json:"overwriteGateway,omitempty"`
 }
 
 // SyncmeshMetaRequest represents meta requests to the function for managing saved nodes
