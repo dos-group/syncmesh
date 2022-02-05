@@ -5,12 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	handler "github.com/openfaas/templates-sdk/go-http"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/graphql-go/graphql"
+	handler "github.com/openfaas/templates-sdk/go-http"
 )
 
 var db mongoDB
@@ -97,6 +98,12 @@ func Handle(req handler.Request) (handler.Response, error) {
 	// if external nodes specified, attempt to fetch external data
 	if len(request.ExternalNodes) > 0 {
 		b = handleSyncMeshRequest(request, b.String())
+	}
+
+	if request.Type == "function" {
+		res := new(bytes.Buffer)
+		useExternalFunction(request, b.String(), res)
+		b = res
 	}
 
 	var body []byte
@@ -212,4 +219,43 @@ func executeQuery(query string, schema graphql.Schema, vars map[string]interface
 		fmt.Printf("Unexpected errors: %v", result.Errors)
 	}
 	return result
+}
+
+// start request to local faas function
+func useExternalFunction(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
+
+	// make a POST request to faas function
+	req, err := http.NewRequest("POST", "http://gateway:8080/function/echoit", bytes.NewBuffer([]byte(ownResponse)))
+	if err != nil {
+		return
+	}
+	// req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	// read the response
+	body, err := unzipResponse(resp)
+	if err != nil {
+		return
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		return
+	}
+
+	// convert response to response struct
+	// out := AveragesResponse{}
+	// err = json.Unmarshal(body, &out)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+
+	// outputJSON, _ := json.Marshal(body)
+	err = json.NewEncoder(b).Encode(json.RawMessage(string(body)))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
