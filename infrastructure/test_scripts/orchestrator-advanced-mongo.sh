@@ -63,7 +63,7 @@ do
     /usr/bin/time -ao aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
-"
+" 1> /dev/null
 echo "Finished Mongo Request"
 done
 }

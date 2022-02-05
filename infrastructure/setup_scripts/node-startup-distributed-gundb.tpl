@@ -1,5 +1,7 @@
 #!/bin/bash
 VERSION=${mongo_version}
+GUNDB_VERSION=${gundb_version}
+NODE_VERSION=${node_version}
 ID=${id}
 
 pwd
@@ -18,22 +20,14 @@ hostName=$(hostname)
 
 sudo apt update -y
 
-# Install Python for data distribution
-sudo apt-get install -y python3.6 python3-pip
-
-pip install requests
-
-
 # Install GunDB
 # Modified from https://github.com/amark/gun/blob/master/examples/install.sh
 
-sudo apt-get install tmux -y
-
 # install nodejs TODO: Setup node version
-curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash -
 sudo apt-get install -y nodejs
 
-sudo npm install gun@0.2020.1235
+sudo npm install gun@$GUNDB_VERSION
 cd ./node_modules/gun
 sudo npm install .
 

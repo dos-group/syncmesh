@@ -1,6 +1,7 @@
 variable "project" {
-  type    = string
-  default = "syncmesh-339810"
+  type = string
+  #   default = "syncmesh-339810"
+  default = "dspj-315716"
 }
 
 variable "public_access" {
@@ -10,7 +11,7 @@ variable "public_access" {
 
 variable "machine_type" {
   type        = string
-  default     = "f1-micro"
+  default     = "n1-standard-1"
   description = "The Machine Type used for all VMs"
 }
 
@@ -58,6 +59,12 @@ variable "test_mongo_version" {
   type        = string
   default     = "5.0.2"
   description = "Mongo Version"
+}
+
+variable "test_faasd_version" {
+  type        = string
+  default     = "0.14.2"
+  description = "Faasd Version"
 }
 
 variable "test_node_version" {

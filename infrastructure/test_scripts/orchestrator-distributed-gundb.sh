@@ -21,7 +21,7 @@ do
     /usr/bin/time -ao collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "cd /; sudo node test.py collect $1 2017-07-31T23:59:59Z<<'EOF'
     $COMMAND
 EOF
-" # 1> /dev/null
+" 1> /dev/null
 echo "Finished Request"
 done
 }
@@ -37,8 +37,8 @@ do
     /usr/bin/time -ao aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "cd /; sudo node test.py aggregate $1 2017-07-31T23:59:59Z<<'EOF'
     $COMMAND
 EOF
-" # 1> /dev/null
-echo "Finished Request"
+" 1> /dev/null
+    echo "Finished Request"
 done
 }
 
