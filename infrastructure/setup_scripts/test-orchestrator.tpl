@@ -7,6 +7,8 @@ ${node.network_interface.0.network_ip}
 %{ endfor ~}
 EOF
 
+# Sort the nodes
+sort -k1.10 -o nodes.txt nodes.txt
 
 cat > /client.txt <<EOF
 ${client.network_interface.0.network_ip}

@@ -25,6 +25,9 @@ ${instance.network_interface.0.network_ip}
 %{ endfor ~}
 EOF
 
+# Sort the nodes
+sort -k1.10 -o nodes.txt nodes.txt
+
 
 sudo apt update
 
