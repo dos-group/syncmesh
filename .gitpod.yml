@@ -21,8 +21,8 @@ tasks:
 
 # Function Development
   - command: |
-      curl -sSL https://cli.openfaas.com | sh
-
+      cd /workspace
+      curl -sSL https://cli.openfaas.com | sudo sh
       cd /workspace/syncmesh/functions
       faas template pull && faas-cli template store pull golang-http && faas-cli template store pull golang-middleware
       faas-cli build -f syncmesh-fn-local.yml
