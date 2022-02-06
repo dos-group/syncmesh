@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes:  240
     strategy:
-      max-parallel: 4
+      max-parallel: 2
       fail-fast: false
       matrix:
         scenario: ["syncmesh", "baseline", "advanced-mongo", "distributed-gundb"]
