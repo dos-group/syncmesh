@@ -147,6 +147,7 @@ func Handle(req handler.Request) (handler.Response, error) {
 		header = http.Header{"Content-Encoding": []string{"gzip"}}
 	}
 
+	log.Printf("Answer send")
 	// return the query result
 	return handler.Response{
 		Body:       body,

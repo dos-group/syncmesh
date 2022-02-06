@@ -24,6 +24,12 @@ func handleSyncMeshRequest(request SyncMeshRequest, ownResponse string) *bytes.B
 // startCollecting the data from external nodes
 func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffer) {
 	combinedResponse := ownResponse
+	// convert the combined response to response struct
+	combined := GraphQLResponse{}
+	err := json.Unmarshal([]byte(combinedResponse), &combined)
+	if err != nil {
+		log.Println(err)
+	}
 	// start iterating through all external nodes
 	for _, address := range request.ExternalNodes {
 		err, body := makeExternalRequest(request, address)
@@ -34,19 +40,16 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 		// convert response to response struct
 		out := GraphQLResponse{}
 		err = json.Unmarshal(body, &out)
-		// convert the combined response to response struct
-		combined := GraphQLResponse{}
-		err = json.Unmarshal([]byte(combinedResponse), &combined)
-		// merge combined and external node responses
-		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)
-		outputJSON, _ := json.Marshal(combined)
-		combinedResponse = string(outputJSON)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
+		// merge combined and external node responses
+		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)	
 	}
-	err := json.NewEncoder(b).Encode(json.RawMessage(combinedResponse))
+	outputJSON, _ := json.Marshal(combined)
+	combinedResponse = string(outputJSON)
+	err = json.NewEncoder(b).Encode(json.RawMessage(combinedResponse))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,6 +91,7 @@ func startAggregating(request SyncMeshRequest, ownResponse string, b *bytes.Buff
 
 // makeExternalRequest to one of the syncmesh nodes
 func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
+	log.Println("Request start: " + url)
 	// prepare SyncMesh Request body for the external request
 	requestStruct := &SyncMeshRequest{
 		Query:      request.Query,
@@ -119,6 +123,7 @@ func makeExternalRequest(request SyncMeshRequest, url string) (error, []byte) {
 	if err != nil {
 		return err, nil
 	}
+	log.Println("Request end: " + url)
 	return nil, body
 }
 
