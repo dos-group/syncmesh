@@ -49,6 +49,7 @@ while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1;
   echo "waiting for other package installs to complete..."
   sleep 1
 done
+
 # Install Monitoring Agent
 curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo bash add-monitoring-agent-repo.sh --also-install && sudo service stackdriver-agent start
 
@@ -109,7 +110,7 @@ export SLEEP_TIME=${sleep_time}
 export PRE_TIME=${pre_time}
 export REPETITIONS=${repetitions}
 # Execute
-# bash test.sh
+bash test.sh
 
 echo "Collecting TCP Dumps"
 
@@ -125,6 +126,7 @@ while read internalIP; do
     echo "SHH $internalIP"
     ssh -o StrictHostKeyChecking=no $internalIP "sudo sh -c 'killall tcpdump'" < /dev/null
     scp $internalIP:/capture.pcap /tmp/captures/$internalIP.pcap
+    scp $internalIP:/*.timings /tmp/captures/
 done < /client.txt
 
 while read internalIP; do
