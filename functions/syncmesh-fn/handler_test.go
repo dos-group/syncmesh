@@ -126,8 +126,8 @@ func sensorDataHelper(sensorCount int) string {
 	var sb strings.Builder
 	sb.WriteString(`{"data":{"sensors":[`)
 	for i := 0; i < sensorCount; i++ {
-		sb.WriteString( `{"lat":123,"lon":123,"pressure":123,"temperature":12,"humidity":12,"timestamp":"2017-07-01T00:02:09Z"}`)
-		if i + 1 < sensorCount{
+		sb.WriteString(`{"lat":123,"lon":123,"pressure":123,"temperature":12,"humidity":12,"timestamp":"2017-07-01T00:02:09Z"}`)
+		if i+1 < sensorCount {
 			sb.WriteString(",")
 		}
 

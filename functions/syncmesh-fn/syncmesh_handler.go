@@ -45,7 +45,7 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 			continue
 		}
 		// merge combined and external node responses
-		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)	
+		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)
 	}
 	outputJSON, _ := json.Marshal(combined)
 	combinedResponse = string(outputJSON)
