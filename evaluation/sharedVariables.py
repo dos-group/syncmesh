@@ -2,8 +2,8 @@ import pandas as pd
 import os
 
 # project_id = '932771810925'  # Our project ID
-# project = "dspj-315716"
-project = "syncmesh-339810"
+project = "dspj-315716"
+# project = "syncmesh-339810"
 
 ip_client = "10.0.0.2"
 ip_server = "10.0.0.3"
