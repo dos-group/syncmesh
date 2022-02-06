@@ -2,8 +2,8 @@
 #
 # Example:
 # python3 test.py --repetitions 11 --requestType "list" --startTime "2017-06-30T00:00:00Z" --endTime "2017-07-01T00:00:00Z"
-#
-#
+# python3 /test.py --requestType 'aggregate' --startTime 2017-07-31T00:00:00Z --endTime 2017-07-31T23:59:59Z
+# python3 /test.py --requestType 'function' --startTime 2017-07-31T00:00:00Z --endTime 2017-07-31T23:59:59ZH
 
 from time import time, sleep
 import requests
@@ -68,6 +68,7 @@ def main(args):
         print(body)
         for i in range(args.repetitions):
             r = requests.post(ip, data=body)
+            print(len(r.content))
             print(r.status_code, r.reason)
 
 

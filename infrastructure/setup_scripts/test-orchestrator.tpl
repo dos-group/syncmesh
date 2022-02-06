@@ -109,7 +109,7 @@ export SLEEP_TIME=${sleep_time}
 export PRE_TIME=${pre_time}
 export REPETITIONS=${repetitions}
 # Execute
-bash test.sh
+# bash test.sh
 
 echo "Collecting TCP Dumps"
 

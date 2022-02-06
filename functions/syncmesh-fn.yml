@@ -13,3 +13,6 @@ functions:
     environment:
       mongo_url: 10.62.0.1:27017
       # gzip: true
+      read_timeout: "5s"
+      write_timeout: "5s"
+      exec_timeout: "20s"

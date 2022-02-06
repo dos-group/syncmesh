@@ -1,5 +1,6 @@
 #!/bin/bash
-VERSION=${mongo_version}
+MONGO_VERSION=${mongo_version}
+FAASD_VERSION=${faasd_version}
 
 pwd
 
@@ -16,7 +17,7 @@ curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh && sudo
 git clone https://github.com/openfaas/faasd --depth=1
 cd faasd
 git fetch --tags
-git checkout tags/0.14.2
+git checkout tags/$FAASD_VERSION
 
 sudo ./hack/install.sh
 
@@ -42,7 +43,7 @@ cat << EOF >> /var/lib/faasd/docker-compose.yaml
       - "10.62.0.1:27017:27017"
 EOF
 
-sed -i "s/MONGO_VERSION/$VERSION/" /var/lib/faasd/docker-compose.yaml
+sed -i "s/MONGO_VERSION/$MONGO_VERSION/" /var/lib/faasd/docker-compose.yaml
 
 
 sudo systemctl daemon-reload
@@ -52,8 +53,8 @@ sudo systemctl restart faasd
 wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
 sudo apt-get update
-sudo apt-get install -y mongodb-org=$VERSION mongodb-org-server=$VERSION mongodb-org-shell=$VERSION mongodb-org-mongos=$VERSION mongodb-org-tools=$VERSION
-mongod --version
+sudo apt-get install -y mongodb-org-shell=$MONGO_VERSION mongodb-org-tools=$MONGO_VERSION
+mongo --version
 
 # Install Python for data distribution
 sudo apt-get install -y python3.6
@@ -67,7 +68,7 @@ cd /syncmesh && git clone https://github.com/DSPJ2021/syncmesh.git .
 cd /syncmesh/functions && faas template pull && faas-cli template store pull golang-http && faas-cli template store pull golang-middleware && faas deploy -f syncmesh-fn.yml
 
 #  Install Some Demo Functions
-faas-cli deploy -f https://raw.githubusercontent.com/openfaas/faas/master/stack.yml
+faas-cli deploy -f https://raw.githubusercontent.com/openfaas/faas/master/stack.yml --regex echoit
 
 # Download Data and prepare MongoDB
 cd /

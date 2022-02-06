@@ -272,7 +272,7 @@ resource "google_compute_instance" "nodes" {
     ]
   }
 
-  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, testscript = file("${path.module}/test_scripts/orchestrator-${var.scenario}.sh"), mongo_version = var.test_mongo_version, faasd_version = var.test_faasd_version, node_version = var.test_node_version, gundb_version = var.test_gundb_version })
+  metadata_startup_script = templatefile("${path.module}/setup_scripts/node-startup-${var.scenario}.tpl", { id = each.value.number, mongo_version = var.test_mongo_version, faasd_version = var.test_faasd_version, node_version = var.test_node_version, gundb_version = var.test_gundb_version })
   depends_on              = [google_compute_router_nat.nat]
 }
 
