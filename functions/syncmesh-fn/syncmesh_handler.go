@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 )
 
 // handleSyncMeshRequest by instantiating one of the request types
@@ -30,23 +31,34 @@ func startCollecting(request SyncMeshRequest, ownResponse string, b *bytes.Buffe
 	if err != nil {
 		log.Println(err)
 	}
+
+	requestCount := len(request.ExternalNodes)
+	var wg sync.WaitGroup
+	wg.Add(requestCount)
+	var mutex = &sync.Mutex{}
+
 	// start iterating through all external nodes
 	for _, address := range request.ExternalNodes {
-		err, body := makeExternalRequest(request, address)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		// convert response to response struct
-		out := GraphQLResponse{}
-		err = json.Unmarshal(body, &out)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		// merge combined and external node responses
-		combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)
+		go func(address string) {
+			defer wg.Done()
+			err, body := makeExternalRequest(request, address)
+			if err != nil {
+				log.Println(err)
+			}
+			// convert response to response struct
+			out := GraphQLResponse{}
+			err = json.Unmarshal(body, &out)
+			if err != nil {
+				log.Println(err)
+			}
+			// merge combined and external node responses
+			mutex.Lock()
+			combined.Data.Sensors = append(combined.Data.Sensors, out.Data.Sensors...)
+			mutex.Unlock()
+		}(address)
 	}
+
+	wg.Wait()
 	outputJSON, _ := json.Marshal(combined)
 	combinedResponse = string(outputJSON)
 	err = json.NewEncoder(b).Encode(json.RawMessage(combinedResponse))

@@ -136,7 +136,7 @@ func sensorDataHelper(sensorCount int) string {
 	return sb.String()
 }
 
-func TestHandlerWithMassiveNodes(t *testing.T) {
+func TestHandlerWithMassiveNodesParallel(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		request := SyncMeshRequest{}
 		body, err := ioutil.ReadAll(req.Body)
@@ -144,6 +144,7 @@ func TestHandlerWithMassiveNodes(t *testing.T) {
 		err = json.Unmarshal(body, &request)
 		assert.NoError(t, err)
 		log.Printf("Got a request")
+		time.Sleep(100 * time.Millisecond)
 		res.Write([]byte(sensorDataHelper(1)))
 	}))
 	defer func() { testServer.Close() }()
@@ -158,32 +159,36 @@ func TestHandlerWithMassiveNodes(t *testing.T) {
 		Collection:    "request.Collection",
 		Type:          "collect",
 		ExternalNodes: nodes,
-		TestData: `{"Data": {"Sensors": [
-			{
-				"Lat": 123,
-				"Lon": 123,
-				"Pressure": 123,
-				"Temperature": 12,
-				"Humidity": 12,
-				"Timestamp": "2017-07-01T00:02:09Z"
-			}
-		]}}`,
+		TestData: sensorDataHelper(1),
 	}
 	jsonBody, err := json.Marshal(requestStruct)
 	assert.NoError(t, err)
 	req := handler.Request{
 		Body: jsonBody,
 	}
+	timeout := time.After(500 * time.Millisecond)
+    done := make(chan bool)
+	// Test Parallism
+    go func() {
+		resp, err := Handle(req)
+		assert.NoError(t, err)
+		assert.Equal(t,
+			handler.Response(handler.Response{
+				Body:       []byte(sensorDataHelper(41)),
+				StatusCode: 200,
+				Header:     http.Header(http.Header{}),
+			}),
+			resp)
+        done <- true
+    }()
 
-	resp, err := Handle(req)
-	assert.NoError(t, err)
-	assert.Equal(t,
-		handler.Response(handler.Response{
-			Body:       []byte(sensorDataHelper(41)),
-			StatusCode: 200,
-			Header:     http.Header(http.Header{}),
-		}),
-		resp)
+    select {
+    case <-timeout:
+        t.Fatal("Test didn't finish in time")
+    case <-done:
+    }
+
+
 }
 
 func TestHandlerWithMassiveData(t *testing.T) {
@@ -229,7 +234,7 @@ func TestHandlerWithMassiveData(t *testing.T) {
 			Header:     http.Header(http.Header{}),
 		}),
 		resp)
-	assert.Equal(t, true, false)
+	// assert.Equal(t, true, false)
 }
 
 func TestHandlerExternalFunction(t *testing.T) {
