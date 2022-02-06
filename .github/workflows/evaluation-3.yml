@@ -31,10 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes:  240
     strategy:
-      max-parallel: 1
+      max-parallel: 4
       fail-fast: false
       matrix:
-        scenario: ["baseline"] # "baseline", "advanced-mongo", "distributed-gundb"]
+        scenario: ["syncmesh", "baseline", "advanced-mongo", "distributed-gundb"]
         latency: ["with-latency"] #, without-latency]
         node_count: ["${{ github.event.inputs.node_count_input }}"] #, 6]
     defaults:
