@@ -65,7 +65,7 @@ const { performance } = require('perf_hooks');
 })();
 
 const peers = fs
-  .readFileSync('nodes.txt')
+  .readFileSync('/nodes.txt')
   .toString()
   .replace(/\r\n/g, '\n')
   .split('\n')
