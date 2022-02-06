@@ -26,7 +26,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    /usr/bin/time -ao collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
+    /usr/bin/time -ao server-collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /collect.timings -f '%E' mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 " 1> /dev/null
@@ -60,7 +60,7 @@ EOF
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    /usr/bin/time -ao aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
+    /usr/bin/time -ao server-aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /aggregate.timings -f '%E' mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
 EOF
 " 1> /dev/null
