@@ -27,7 +27,7 @@ normal() {
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    /usr/bin/time -ao server-normal.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP " sudo /usr/bin/time -ao /normal.timings -f '%E' python3 /test.py --requestType 'collect' --startTime $1 --endTime 2017-07-31T23:59:59Z" 1> /dev/null
+    /usr/bin/time -ao server-normal.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /normal.timings -f '%E' python3 /test.py --requestType 'collect' --startTime $1 --endTime 2017-07-31T23:59:59Z" 1> /dev/null
     echo "Finished Request"
 done
 }
@@ -38,7 +38,7 @@ external_function() {
 for i in $(seq $REPETITIONS)
 do
     # Query Data
-    /usr/bin/time -ao server-function.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP " sudo /usr/bin/time -ao /function.timings -f '%E' python3 /test.py --requestType 'function' --startTime $1 --endTime 2017-07-31T23:59:59Z --function echoit" 1> /dev/null
+    /usr/bin/time -ao server-function.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /function.timings -f '%E' python3 /test.py --requestType 'function' --startTime $1 --endTime 2017-07-31T23:59:59Z --function echoit" 1> /dev/null
     echo "Finished Request"
 done
 }
