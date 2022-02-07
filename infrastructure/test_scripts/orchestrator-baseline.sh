@@ -32,7 +32,6 @@ EOF
 
 queryDataCollect() {
 # First Argument is the Start ISODate
-# Maybe use .aggregate({ $replaceWith: "$pressure" })
 read -r -d '' COMMAND <<EOF
 use syncmesh
 db.sensor_data.find({
@@ -42,11 +41,11 @@ db.sensor_data.find({
     }
 }, { timestamp: 1, pressure: 1, temperature: 1, humidity: 1, _id: 0 }).toArray()
 EOF
-
+# Upload Data
+uploadData $2
 for i in $(seq $REPETITIONS)
 do
-    # Upload Data
-    uploadData $2
+    
     # Query Data 
     /usr/bin/time -ao server-collect.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /collect.timings -f '%E' mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
@@ -77,11 +76,10 @@ db.sensor_data.aggregate([{
     }
 }]) 
 EOF
-
+# Upload Data
+uploadData $2
 for i in $(seq $REPETITIONS)
 do
-    # Upload Data
-    uploadData $2
     # Query Data 
     /usr/bin/time -ao server-aggregate.timings -f '%E' ssh -o StrictHostKeyChecking=no $CLIENT_IP "sudo /usr/bin/time -ao /aggregate.timings -f '%E' mongo --networkMessageCompressors snappy --host $SERVER_IP:$PORT <<'EOF'
     $COMMAND
