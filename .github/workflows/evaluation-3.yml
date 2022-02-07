@@ -29,12 +29,12 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    timeout-minutes:  240
+    timeout-minutes:  480
     strategy:
-      max-parallel: 2
+      max-parallel: 1
       fail-fast: false
       matrix:
-        scenario: ["syncmesh", "baseline", "advanced-mongo", "distributed-gundb"] # 
+        scenario: ["syncmesh",  "advanced-mongo"] # "baseline", , "distributed-gundb"
         latency: ["with-latency"] #, without-latency]
         node_count: ["${{ github.event.inputs.node_count_input }}"] #, 6]
     defaults:
@@ -86,7 +86,7 @@ jobs:
           echo "Probe if experiment has ended"
           sleep 60
         done
-      timeout-minutes: 240
+      timeout-minutes: 320
 
     - name: Set up Python 
       uses: actions/setup-python@v2
