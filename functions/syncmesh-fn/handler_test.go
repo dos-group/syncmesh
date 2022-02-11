@@ -159,7 +159,7 @@ func TestHandlerWithMassiveNodesParallel(t *testing.T) {
 		Collection:    "request.Collection",
 		Type:          "collect",
 		ExternalNodes: nodes,
-		TestData: sensorDataHelper(1),
+		TestData:      sensorDataHelper(1),
 	}
 	jsonBody, err := json.Marshal(requestStruct)
 	assert.NoError(t, err)
@@ -167,9 +167,9 @@ func TestHandlerWithMassiveNodesParallel(t *testing.T) {
 		Body: jsonBody,
 	}
 	timeout := time.After(500 * time.Millisecond)
-    done := make(chan bool)
+	done := make(chan bool)
 	// Test Parallism
-    go func() {
+	go func() {
 		resp, err := Handle(req)
 		assert.NoError(t, err)
 		assert.Equal(t,
@@ -179,15 +179,14 @@ func TestHandlerWithMassiveNodesParallel(t *testing.T) {
 				Header:     http.Header(http.Header{}),
 			}),
 			resp)
-        done <- true
-    }()
+		done <- true
+	}()
 
-    select {
-    case <-timeout:
-        t.Fatal("Test didn't finish in time")
-    case <-done:
-    }
-
+	select {
+	case <-timeout:
+		t.Fatal("Test didn't finish in time")
+	case <-done:
+	}
 
 }
 
