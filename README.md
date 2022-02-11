@@ -10,10 +10,9 @@ Distributed data storage, querying and coordination system, based on OpenFaaS an
 This is a project by students of the Technical University of Berlin, completed as part of the Distributed Systems
 course. Syncmesh tackles the topics of Distributed Storage, Function-as-a-Service, and Edge Computing. The goal was to
 evaluate the performance of a custom solution against traditional centralized and distributed storage use cases. Read
-more about it in our [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki) or have a look at
-our [Paper](https://github.com/DSPJ2021/paper). You can find more information from our analysis in
+more about it in our [Syncmesh Wiki](https://github.com/DSPJ2021/syncmesh/wiki). You can find more information from our analysis in
 the [Benchmark Data Repository](https://github.com/DSPJ2021/benchmark-data) or in
-the [Github Actions](https://github.com/DSPJ2021/syncmesh/actions).
+the [Github Actions](https://github.com/dos-group/syncmesh/actions).
 
 ## Prerequisites
 
@@ -43,7 +42,7 @@ To just run a Benchmark follow this short guide:
 
 1. Fork this Repository
 2. Provide `GCE_CREDENTIALS` with the base64 of `credentials.json` as [seen here](https://github.com/DSPJ2021/syncmesh/wiki/Cloud-infrastructure-setup/) (also change the project-id).
-3. Run [any of the actions](https://github.com/DSPJ2021/syncmesh/actions) labeled "Benchmark".
+3. Run [any of the actions](https://github.com/dos-group/syncmesh/actions) labeled "Benchmark".
 
 ### Repository Structure
 
